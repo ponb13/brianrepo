@@ -1,0 +1,17 @@
+
+CHIP NotIf16 {
+
+    IN  // 16-bit inputs:
+        in[16], sel;
+     
+
+    OUT // 16-bit output
+        out[16];
+
+    PARTS:
+    DMux16(in=in, sel=sel, a=dMux16A,b=dMux16B);
+    
+    Not16(in=dMux16B, out=noted);
+    
+    Mux16(a=dMux16A, b=noted, sel=sel, out=out);
+}

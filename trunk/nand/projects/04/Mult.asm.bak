@@ -1,0 +1,38 @@
+//set i = 1
+@i
+M=0
+//set sum = 0
+@sum 
+M=0
+
+(LOOP)
+
+	//D = i
+	@i
+	D=M
+
+	//D = i - 100
+	@100
+	D=D-A
+
+	// if D > 0 JMP end of loop
+	@END
+	D;JGT
+	// else add i to sum
+	@i // copy i into D
+	D=M 
+	@sum // add i to @sum 
+	M=M+D
+	@i
+	M=M+1
+	@LOOP
+	0;JMP
+	
+(END)//infinite loop to close
+	@END
+	0;JMP
+	
+	
+
+
+

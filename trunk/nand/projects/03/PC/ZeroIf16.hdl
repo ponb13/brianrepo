@@ -1,0 +1,17 @@
+
+CHIP ZeroIf16 {
+
+    IN  // 16-bit inputs:
+        in[16], sel;
+     
+
+    OUT // 16-bit output
+        out[16];
+
+    PARTS:
+    DMux16(in=in, sel=sel, a=dMux16A,b=dMux16B);
+    
+    Zero16(in=dMux16B, out=zeroed);
+    
+    Mux16(a=dMux16A, b=zeroed, sel=sel, out=out);
+}
