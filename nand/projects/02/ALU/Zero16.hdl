@@ -1,0 +1,16 @@
+
+
+CHIP Zero16 {
+
+    IN  // 16-bit inputs:
+        in[16];
+     
+
+    OUT // 16-bit output
+        out[16];
+
+    PARTS:
+    Not16(in=in,out=notIn);
+    
+    And16(a=in, b=notIn, out=out);
+}

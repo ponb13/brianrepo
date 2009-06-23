@@ -1,0 +1,12 @@
+
+CHIP DoNothing{
+
+    IN  // 16-bit inputs:
+        in[16];
+	
+	OUT out[16];
+	
+	PARTS:
+	Not16(in=in, out=output);
+	Not16(in=output, out=out);
+}

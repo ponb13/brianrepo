@@ -1,0 +1,68 @@
+  CHIP JumpCal 
+  {
+	IN  isCinstruction,j1,j2,j3,ng,zr;
+	OUT out;
+
+	PARTS:
+	Not(in=j1,out=notj1);
+	Not(in=j2,out=notj2);
+	Not(in=j3,out=notj3);
+	
+	Not(in=ng,out=notng);
+	Not(in=zr,out=notzr);
+	
+	
+	And(a=notj1, b=notj2,out=notj1AndNotj2);
+	And(a=j3,b=notj1AndNotj2,out=jbit1);
+
+	And(a=notj1, b=j2, out=notj1Andj2);
+	And(a=notj3, b=notj1Andj2, out=jbit2);
+
+	And(a=notj1Andj2, b=j3, out=jbit3);
+
+	And(a=j1, b=notj2, out=j1notj2);
+	And(a=j1notj2, b=notj3, out=jbit4);
+
+	And(a=j1notj2, b=j3, out=jbit5);
+
+	And(a=j1, b=j2, out=j1andj2);
+	And(a=j1andj2, b=notj3, out=jbit6);
+	
+	And(a=j1andj2,b=j3,out=jbit7);
+
+
+
+	And(a=notzr, b=notng, out=GTH);
+	And(a=zr, b=notng, out=JEQ);
+	Not(in=ng, out=JGE);
+	And(a=notzr, b=ng, out=JLT);
+	Not(in=zr, out=JNE);
+	And(a=ng,b=notzr, out=ngNotZr);
+	Or(a=ngNotZr,b=zr, out=JLE);
+
+	And(a=jbit1,b=GTH,out=GTH1);
+	And(a=jbit2,b=JEQ,out=JEQ2);
+	And(a=jbit3,b=JGE,out=JGE3);
+	And(a=jbit4,b=JLT,out=JLT4);
+	And(a=jbit5,b=JNE,out=JNE5);
+	And(a=jbit6,b=JLE,out=JLE6);
+
+	And(a=jbit7,b=true,out=JMP7);
+
+	Or(a=GTH1,b=JEQ2,out=GTH1orJEQ2);
+	Or(a=JGE3,b=JLT4,out=JGE3orJLT4);
+	Or(a=JNE5,b=JLE6,out=JNE5orJLE6);
+
+	Or(a=GTH1orJEQ2,b=JGE3orJLT4,out=bigOr1);
+	Or(a=JNE5orJLE6,b=JMP7,out=bigOr2);
+	Or(a=bigOr1,b=bigOr2,out=finalOr);
+
+	And(a=finalOr,b=isCinstruction,out=out);
+
+	//
+
+
+	
+
+
+	}

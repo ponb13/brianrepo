@@ -1,0 +1,11 @@
+
+CHIP NGcheck{
+
+    IN  // 16-bit inputs:
+        in[16];
+	
+	OUT out;
+	
+	PARTS:
+	And(a=in[15], b=true, out=out);
+}

@@ -1,0 +1,64 @@
+  CHIP JumpCal 
+  {
+	IN  isCinstruction,j1,j2,j3,ng, zr;
+	OUT out;
+
+	PARTS:
+	Not(in=j1,out=notj1);
+	Not(in=j2,out=notj2);
+	Not(in=j3,out=notj3);
+	
+	Not(in=ng,out=notng);
+	Not(in=zr,out=notzr);
+	
+	And(a=zr,b=ng,out=ZRandNG);
+	And(a=zr,b=notng,out=ZRandNotNG);
+	And(a=notzr,b=ng,out=notZRandNG);
+
+	//one
+	And(a=notj1, b=notj2,out=notj1AndNotj2);
+	And(a=j3,b=notj1AndNotj2,out=j3andnotj1AndNotj2);
+	And(a=ZRandNG,b=j3andnotj1AndNotj2,out=one);
+	
+	
+	//two
+	And(a=notj1,b=j2,out=notj1andj2);
+	And(a=notj3,b=notj1andj2,out=notj3notj1andj2);
+	And(a=notj3notj1andj2,b=ZRandNotNG,out=two);
+	
+	//three
+	And(a=notj1andj2,b=j3,out=notj1andj2andj3);
+	And(a=notj1andj2andj3,b=ZRandNotNG,out=three);
+	
+	//four
+	And(a=j1,b=notj2,out=j1notj2);
+	And(a=notj3,b=j1notj2,out=j1notj2notj3);
+	And(a=j1notj2notj3,b=notZRandNG,out=four);
+	
+	//five
+	And(a=j1notj2,b=j3,out=j1notj2andj3);
+	And(a=j1notj2andj3,b=notzr,out=five);
+	
+	
+	//six
+	And(a=j1,b=j2,out=j1andj2);
+	And(a=notj3,b=j1andj2,out=notj3andj1andj2);
+	And(a=ZRandNG,b=notj3andj1andj2,out=six);
+	
+	//seven
+	And(a=j1andj2,b=j3,out=seven);
+	
+	
+	Or(a=one,b=two,out=onetwo);
+	Or(a=three,b=four,out=threefour);
+	Or(a=five,b=six,out=fivesix);
+	Or(a=six,b=seven,out=sixseven);
+	
+	Or(a=onetwo,b=threefour,out=onetwothreefour);
+	Or(a=fivesix,b=sixseven,out=fivesixseven);
+	
+	Or(a=onetwothreefour,b=onetwothreefour,out=final);
+	And(a=isCinstruction, b=final, out=out);
+	
+
+	}
