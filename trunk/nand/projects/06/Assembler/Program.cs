@@ -13,12 +13,16 @@ namespace Assembler
 
             using (Parser parser = new Parser(inputFilePath))
             {
-                while (parser.HasMoreCommands())
-                { 
-                    parser.Advance();
-                    Console.WriteLine(parser.CurrentCommand);
-                }
+                JunkRemover junkRemover = new JunkRemover(inputFilePath);
+                
+                //while (parser.HasMoreCommands())
+                //{ 
+                //    parser.Advance();
+                //    Console.WriteLine(parser.currentTxtCommand+" "+ parser.CommandType.ToString());
+                //}
             }
+
+            Console.ReadKey();
         }
     }
 }

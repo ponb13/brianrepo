@@ -9,13 +9,10 @@ namespace Assembler
     public class Parser: IDisposable
     {
         private StreamReader streamReader;
-        
 
-        public string CurrentCommand
-        {
-            get;
-            set;
-        }
+        public enum Command { A_COMMAND, C_COMMAND, L_COMMAND, ERROR };
+
+        public string currentTxtCommand;
         
         public Parser(string filePath)
         {
@@ -31,10 +28,36 @@ namespace Assembler
         {
             if (this.HasMoreCommands())
             {
-                this.CurrentCommand = streamReader.ReadLine();
-                
+                this.currentTxtCommand = streamReader.ReadLine();
             }
         }
+
+        public Command CommandType
+        {
+            get 
+            {
+                return GetCommandType();
+            }
+        }
+
+        private Command GetCommandType()
+        {
+            // currently doesn't handle symbols (L commands see p110)
+            Command commandType = Command.ERROR;
+            
+            if (this.currentTxtCommand.StartsWith("@")) // if it starts with @
+            {
+                commandType = Command.A_COMMAND;
+            }
+            else if(!this.currentTxtCommand.Contains('/') // if not start with comnment and is not empty
+                && !String.IsNullOrEmpty(this.currentTxtCommand))
+            {
+                commandType = Command.C_COMMAND;
+            }                                
+
+            return commandType;
+        }
+
 
         #region IDisposable Members
 
