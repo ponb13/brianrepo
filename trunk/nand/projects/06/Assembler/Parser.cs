@@ -8,27 +8,28 @@ namespace Assembler
 {
     public class Parser: IDisposable
     {
-        private StreamReader streamReader;
 
         public enum Command { A_COMMAND, C_COMMAND, L_COMMAND, ERROR };
+        
+        private StreamReader reader;
 
         public string currentTxtCommand;
         
-        public Parser(string filePath)
+        public Parser(Stream inputStream)
         {
-            streamReader = new StreamReader(filePath);
+            reader = new StreamReader(inputStream);
         }
 
         public bool HasMoreCommands()
         {
-            return !streamReader.EndOfStream;
+            return !reader.EndOfStream;
         }
 
         public void Advance()
         {
             if (this.HasMoreCommands())
             {
-                this.currentTxtCommand = streamReader.ReadLine();
+                this.currentTxtCommand = reader.ReadLine();
             }
         }
 
@@ -63,9 +64,9 @@ namespace Assembler
 
         public void Dispose()
         {
-            if (streamReader != null)
+            if (reader != null)
             {
-                streamReader.Close();
+                reader.Close();
             }
         }
 
