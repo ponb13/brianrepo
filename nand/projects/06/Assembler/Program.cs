@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Assembler
 {
@@ -11,18 +12,27 @@ namespace Assembler
         {
             string inputFilePath = args[0];
 
-            using (Parser parser = new Parser(inputFilePath))
+            using (FileStream fileStream = new FileStream(inputFilePath, FileMode.Open))
+            using (MemoryStream outputStream = new MemoryStream())
             {
-                JunkRemover junkRemover = new JunkRemover(inputFilePath);
-                
-                //while (parser.HasMoreCommands())
-                //{ 
-                //    parser.Advance();
-                //    Console.WriteLine(parser.currentTxtCommand+" "+ parser.CommandType.ToString());
-                //}
+                JunkRemover junkRemover = new JunkRemover(fileStream, outputStream);
+
+                using (Parser parser = new Parser(outputStream))
+                {
+                    File.WriteAllBytes("C:/out2.txt", outputStream.ToArray());
+                }
             }
+
+            //while (parser.HasMoreCommands())
+            //{ 
+            //    parser.Advance();
+            //    Console.WriteLine(parser.currentTxtCommand+" "+ parser.CommandType.ToString());
+            //}
+            
 
             Console.ReadKey();
         }
+
+       
     }
 }
