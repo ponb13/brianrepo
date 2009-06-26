@@ -19,6 +19,11 @@ namespace Assembler
 
                 using (Parser parser = new Parser(outputStream))
                 {
+                    while (parser.HasMoreCommands())
+                    {
+                        parser.Advance();
+                        Console.WriteLine(parser.CommandType);
+                    }
                     File.WriteAllBytes("C:/out2.txt", outputStream.ToArray());
                 }
             }
