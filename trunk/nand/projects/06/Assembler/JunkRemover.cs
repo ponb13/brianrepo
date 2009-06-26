@@ -33,7 +33,7 @@ namespace Assembler
                 line = regex.Replace(line, "");
 
                 // ignore empty lines
-                if (!String.IsNullOrEmpty(line))
+                if (!String.IsNullOrEmpty(line.Trim()))
                 {
                     writer.WriteLine(line);
                 }
