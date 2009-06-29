@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Assembler
 {
     public class Parser: IDisposable
     {
-
-        public enum Command { A_COMMAND, C_COMMAND, L_COMMAND, ERROR };
-        
         private StreamReader reader;
 
         public string currentTxtCommand;
@@ -50,13 +48,31 @@ namespace Assembler
             {
                 commandType = Command.A_COMMAND;
             }
-            else if(!this.currentTxtCommand.Contains('/') // if not start with comnment and is not empty
-                && !String.IsNullOrEmpty(this.currentTxtCommand))
+            else if(this.currentTxtCommand.StartsWith("("))
+            {
+                commandType = Command.L_COMMAND;
+            }
+            else
             {
                 commandType = Command.C_COMMAND;
             }                                
 
             return commandType;
+        }
+
+        /// <summary>
+        /// Returns the destination mnemonic of the current command
+        /// Should only be called if the current command is a c command.
+        /// </summary>
+        /// <returns></returns>
+        public string Dest()
+        {
+            //Regex regex = new Regex(@"([A-Z^\=]{1,3})=");
+
+            //regex.
+
+            return "";
+            
         }
 
 
