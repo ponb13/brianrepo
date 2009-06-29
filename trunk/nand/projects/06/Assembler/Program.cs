@@ -17,24 +17,24 @@ namespace Assembler
             {
                 JunkRemover junkRemover = new JunkRemover(fileStream, outputStream);
 
-                using (Parser parser = new Parser(outputStream))
+                // Problem with streams - you can't reuse them so need to create a new memory stream
+                MemoryStream outputStreamCopy = new MemoryStream(outputStream.ToArray());
+
+                using (Parser parser = new Parser(outputStreamCopy))
                 {
                     while (parser.HasMoreCommands())
                     {
                         parser.Advance();
-                        Console.WriteLine(parser.CommandType);
+                        
+                        Console.WriteLine(parser.currentTxtCommand +"   "+ parser.CommandType);
+
+                        if (parser.CommandType == Command.C_COMMAND)
+                        {
+                            //Console.WriteLine(parser.
+                        }
                     }
-                    File.WriteAllBytes("C:/out2.txt", outputStream.ToArray());
                 }
             }
-
-            //while (parser.HasMoreCommands())
-            //{ 
-            //    parser.Advance();
-            //    Console.WriteLine(parser.currentTxtCommand+" "+ parser.CommandType.ToString());
-            //}
-            
-
             Console.ReadKey();
         }
 
