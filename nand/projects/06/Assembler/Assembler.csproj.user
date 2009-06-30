@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>"C:\Experiments\svn-repo\nand\projects\04\Fill.asm"</StartArguments>
+    <StartArguments>"C:\Documents and Settings\brian\My Documents\dev\brianrepo\nand\projects\04\Fill2.asm"</StartArguments>
   </PropertyGroup>
 </Project>

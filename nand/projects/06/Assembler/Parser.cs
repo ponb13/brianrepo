@@ -67,12 +67,18 @@ namespace Assembler
         /// <returns></returns>
         public string Dest()
         {
-            //Regex regex = new Regex(@"([A-Z^\=]{1,3})=");
+            string result = string.Empty;
 
-            //regex.
+            Regex regex = new Regex(@"([A-Z]{1,3})(?==)");
 
-            return "";
-            
+            Match match = regex.Match(currentTxtCommand);
+
+            if (match.Success)
+            {
+                result = match.Groups[1].Value; 
+            }
+
+            return result;
         }
 
 
