@@ -26,7 +26,7 @@ namespace Assembler
                     {
                         parser.Advance();
                         
-                        if (parser.CommandType == Command.C_COMMAND)
+                        if (parser.CommandType() == Command.C_COMMAND)
                         {
                             Console.WriteLine(parser.Dest());
                         }

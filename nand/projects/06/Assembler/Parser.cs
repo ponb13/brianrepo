@@ -42,10 +42,14 @@ namespace Assembler
             }
             else if(this.currentTxtCommand.StartsWith("("))
             {
+                // TODO
+                // this is wrong !! see label symbols spec !
                 commandType = Command.L_COMMAND;
             }
-            else
+            else if(this.currentTxtCommand.Contains('='))
             {
+                // TODO
+                // should work needs checked
                 commandType = Command.C_COMMAND;
             }  
             
@@ -59,10 +63,10 @@ namespace Assembler
         /// <returns></returns>
         public string Dest()
         {
-            if (this.CommandType != Command.C_COMMAND)
+            if (this.CommandType() != Command.C_COMMAND)
             {
                 throw new Exception("Dest should only be called when CommandType is C_Command " + Environment.NewLine
-                    + "Current Command Type: " + this.CommandType + Environment.NewLine
+                    + "Current Command Type: " + this.CommandType() + Environment.NewLine
                     + "Current current text command: " + this.currentTxtCommand);
 
             }
@@ -119,7 +123,9 @@ namespace Assembler
                 default:
                     {
                         // dest will be null on a c instruction if its a jmp instruction
+                        // jmp instruction won't have a '='
                         // so if nothing is matched default to null see p110.
+                        // see page 109
                         binary = "000";
                         break;
                     }
