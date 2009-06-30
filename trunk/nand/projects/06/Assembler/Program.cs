@@ -26,11 +26,11 @@ namespace Assembler
                     {
                         parser.Advance();
                         
-                        Console.WriteLine(parser.currentTxtCommand +"   "+ parser.CommandType);
+                        // Console.WriteLine(parser.currentTxtCommand +"   "+ parser.CommandType);
 
                         if (parser.CommandType == Command.C_COMMAND)
                         {
-                            //Console.WriteLine(parser.
+                            Console.WriteLine("Dest: "+parser.Dest());
                         }
                     }
                 }
