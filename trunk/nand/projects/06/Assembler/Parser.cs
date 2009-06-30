@@ -67,18 +67,73 @@ namespace Assembler
         /// <returns></returns>
         public string Dest()
         {
-            string result = string.Empty;
+            if (this.CommandType != Command.C_COMMAND)
+            {
+                throw new Exception("Dest should only be called when CommandType is C_Command " + Environment.NewLine
+                    + "Current Command Type: " + this.CommandType + Environment.NewLine
+                    + "Current current text command: " + this.currentTxtCommand);
 
+            }
+
+            // the binary that will be calculated in this method
+            string binary = null;
+
+            // matches and 3 uppercase letters before '=' sign
             Regex regex = new Regex(@"([A-Z]{1,3})(?==)");
 
             Match match = regex.Match(currentTxtCommand);
 
-            if (match.Success)
-            {
-                result = match.Groups[1].Value; 
-            }
+            string theDestinationNnemonic = match.Groups[1].Value;
 
-            return result;
+            // don't bother checking for success
+            // if 
+            switch (theDestinationNnemonic)
+            {
+                case "M":
+                    {
+                        binary = "001";
+                        break;
+                    }
+                case "D":
+                    {
+                        binary = "010";
+                        break;
+                    }
+                case "MD":
+                    {
+                        binary = "011";
+                        break;
+                    }
+                case "A":
+                    {
+                        binary = "100";
+                        break;
+                    }
+                case "AM":
+                    {
+                        binary = "101";
+                        break;
+                    }
+                case "AD":
+                    {
+                        binary = "110";
+                        break;
+                    }
+                case "AMD":
+                    {
+                        binary = "111";
+                        break;
+                    }
+                default:
+                    {
+                        // dest will be null on a c instruction if its a jmp instruction
+                        // so if nothing is matched default to null see p110.
+                        binary = "000";
+                        break;
+                    }
+                }
+
+            return binary;
         }
 
 
