@@ -26,11 +26,9 @@ namespace Assembler
                     {
                         parser.Advance();
                         
-                        // Console.WriteLine(parser.currentTxtCommand +"   "+ parser.CommandType);
-
                         if (parser.CommandType == Command.C_COMMAND)
                         {
-                            Console.WriteLine("Dest: "+parser.Dest());
+                            Console.WriteLine(parser.Dest());
                         }
                     }
                 }

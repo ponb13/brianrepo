@@ -31,15 +31,7 @@ namespace Assembler
             }
         }
 
-        public Command CommandType
-        {
-            get 
-            {
-                return GetCommandType();
-            }
-        }
-
-        private Command GetCommandType()
+        public Command CommandType()
         {
             // currently doesn't handle symbols (L commands see p110)
             Command commandType = Command.ERROR;
@@ -55,8 +47,8 @@ namespace Assembler
             else
             {
                 commandType = Command.C_COMMAND;
-            }                                
-
+            }  
+            
             return commandType;
         }
 
@@ -85,8 +77,8 @@ namespace Assembler
 
             string theDestinationNnemonic = match.Groups[1].Value;
 
-            // don't bother checking for success
-            // if 
+            // note we don't check for success, could be jump command which will give null
+            // see default case
             switch (theDestinationNnemonic)
             {
                 case "M":
@@ -135,6 +127,8 @@ namespace Assembler
 
             return binary;
         }
+
+
 
 
         #region IDisposable Members

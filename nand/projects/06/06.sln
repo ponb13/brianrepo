@@ -3,6 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembler", "Assembler\Assembler.csproj", "{778DBF64-4419-41BD-82F8-722845C19D9E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{4AB263BD-59A4-482F-906E-AD7EFA98C9C0}"
+	ProjectSection(SolutionItems) = preProject
+		TestFiles\MaxL.asm = TestFiles\MaxL.asm
+		TestFiles\PongL.asm = TestFiles\PongL.asm
+		TestFiles\RectL.asm = TestFiles\RectL.asm
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
