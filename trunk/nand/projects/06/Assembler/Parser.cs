@@ -7,12 +7,12 @@ using System.Text.RegularExpressions;
 
 namespace Assembler
 {
-    public class Parser: IDisposable
+    public class Parser : IDisposable
     {
         private StreamReader reader;
 
         public string currentTxtCommand;
-        
+
         public Parser(Stream inputStream)
         {
             reader = new StreamReader(inputStream);
@@ -35,24 +35,23 @@ namespace Assembler
         {
             // currently doesn't handle symbols (L commands see p110)
             Command commandType = Command.ERROR;
-            
+
             if (this.currentTxtCommand.StartsWith("@")) // if it starts with @
             {
                 commandType = Command.A_COMMAND;
             }
-            else if(this.currentTxtCommand.StartsWith("("))
+            else if (this.currentTxtCommand.StartsWith("("))
             {
-                // TODO
-                // this is wrong !! see label symbols spec !
+                // TODO check this
                 commandType = Command.L_COMMAND;
             }
-            else if(this.currentTxtCommand.Contains('='))
+            else if (this.currentTxtCommand.Contains('=')
+                || this.currentTxtCommand.Contains(";"))
             {
-                // TODO
-                // should work needs checked
+                // TODO - should probably use regex - see P.109 for spec of c command
                 commandType = Command.C_COMMAND;
-            }  
-            
+            }
+
             return commandType;
         }
 
@@ -63,6 +62,8 @@ namespace Assembler
         /// <returns></returns>
         public string Dest()
         {
+            string theDestinationNnemonic;
+            
             if (this.CommandType() != Command.C_COMMAND)
             {
                 throw new Exception("Dest should only be called when CommandType is C_Command " + Environment.NewLine
@@ -71,71 +72,24 @@ namespace Assembler
 
             }
 
-            // the binary that will be calculated in this method
-            string binary = null;
-
-            // matches and 3 uppercase letters before '=' sign
+            // matches 3 uppercase letters before '=' sign
             Regex regex = new Regex(@"([A-Z]{1,3})(?==)");
 
             Match match = regex.Match(currentTxtCommand);
 
-            string theDestinationNnemonic = match.Groups[1].Value;
+            theDestinationNnemonic = match.Groups[1].Value;
 
-            // note we don't check for success, could be jump command which will give null
-            // see default case
-            switch (theDestinationNnemonic)
-            {
-                case "M":
-                    {
-                        binary = "001";
-                        break;
-                    }
-                case "D":
-                    {
-                        binary = "010";
-                        break;
-                    }
-                case "MD":
-                    {
-                        binary = "011";
-                        break;
-                    }
-                case "A":
-                    {
-                        binary = "100";
-                        break;
-                    }
-                case "AM":
-                    {
-                        binary = "101";
-                        break;
-                    }
-                case "AD":
-                    {
-                        binary = "110";
-                        break;
-                    }
-                case "AMD":
-                    {
-                        binary = "111";
-                        break;
-                    }
-                default:
-                    {
-                        // dest will be null on a c instruction if its a jmp instruction
-                        // jmp instruction won't have a '='
-                        // so if nothing is matched default to null see p110.
-                        // see page 109
-                        binary = "000";
-                        break;
-                    }
-                }
-
-            return binary;
+            return theDestinationNnemonic;
         }
 
+        public string Symbol()
+        {
+            string result;
 
+            // "\([\w]{1,}\)";
 
+            //"(@[\w]*)";
+        }
 
         #region IDisposable Members
 
