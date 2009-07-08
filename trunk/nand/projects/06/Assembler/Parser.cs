@@ -75,7 +75,7 @@ namespace Assembler
             // matches 3 uppercase letters before '=' sign
             Regex regex = new Regex(@"([A-Z]{1,3})(?==)");
 
-            Match match = regex.Match(currentTxtCommand);
+            Match match = regex.Match(this.currentTxtCommand);
 
             theDestinationNnemonic = match.Groups[1].Value;
 
@@ -84,11 +84,25 @@ namespace Assembler
 
         public string Symbol()
         {
-            string result;
+            string symbol;
 
             // "\([\w]{1,}\)";
 
             //"(@[\w]*)";
+
+            return symbol;
+        }
+
+        public string Comp()
+        {
+            string comp;
+
+            Regex regex = new Regex("");
+            Match match = regex.Match(this.currentTxtCommand);
+
+            comp = match.Groups[0].Value;
+            
+            return comp;
         }
 
         #region IDisposable Members
