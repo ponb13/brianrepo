@@ -13,6 +13,11 @@ namespace Assembler
 
         public string currentTxtCommand;
 
+        public Parser()
+        {
+            // useful for testing
+        }
+
         public Parser(Stream inputStream)
         {
             reader = new StreamReader(inputStream);
@@ -45,6 +50,7 @@ namespace Assembler
                 // TODO check this
                 commandType = Command.L_COMMAND;
             }
+            // this if must be last
             else if (this.currentTxtCommand.Contains('=')
                 || this.currentTxtCommand.Contains(";"))
             {
@@ -56,7 +62,7 @@ namespace Assembler
         }
 
         /// <summary>
-        /// Returns the destination mnemonic of the current command
+        /// Returns the destination mnemonic of a c instruction
         /// Should only be called if the current command is a c command.
         /// </summary>
         /// <returns></returns>
@@ -84,23 +90,49 @@ namespace Assembler
 
         public string Symbol()
         {
-            string symbol;
+            //string symbol;
 
             // "\([\w]{1,}\)";
 
             //"(@[\w]*)";
 
-            return symbol;
+            return "";
         }
 
+        /// <summary>
+        /// Returns the comp part of a C instruction, see page 109.
+        /// </summary>
+        /// <returns></returns>
         public string Comp()
         {
-            string comp;
+            if (this.CommandType() != Command.C_COMMAND)
+            {
+                throw new Exception("Comp should only be called when CommandType is C_Command " + Environment.NewLine
+                    + "Current Command Type: " + this.CommandType() + Environment.NewLine
+                    + "Current current text command: " + this.currentTxtCommand);
 
-            Regex regex = new Regex("");
+            }
+            
+            string comp = String.Empty;
+
+            //comp is either after the '=' sign (comp is part of desintation command)
+            //or before the ';' (comp is part of jmp command)
+
+            // matches after '='
+            Regex regex = new Regex("(=)([^\r\n]*)");
             Match match = regex.Match(this.currentTxtCommand);
+            if (match.Success)
+            {
+                comp = match.Groups[2].Value;
+            }
 
-            comp = match.Groups[0].Value;
+            //matches before ';'
+            regex = new Regex(@"([^\r\n]*)(;)");
+            match = regex.Match(this.currentTxtCommand);
+            if (match.Success)
+            {
+                comp = match.Groups[1].Value;
+            }
             
             return comp;
         }
