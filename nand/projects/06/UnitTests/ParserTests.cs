@@ -148,6 +148,28 @@ namespace UnitTests
 
             parser.currentTxtCommand = "(foo)";
             Assert.IsTrue(parser.Symbol() == "foo");
+
+            bool exceptionThrown = false;
+            try
+            {
+                parser.currentTxtCommand = "M=D+M";
+                parser.Symbol();
+            }
+            catch
+            {
+                exceptionThrown = true;
+            }
+            Assert.IsTrue(exceptionThrown);
+        }
+
+        [TestMethod]
+        public void JumpTest()
+        {
+            Parser parser = new Parser();
+
+            parser.currentTxtCommand = "0;JMP";
+            Assert.IsTrue(parser.Jump() == "JMP");
+
         }
     }
 }
