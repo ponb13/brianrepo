@@ -22,15 +22,15 @@ namespace Assembler
 
                 using (Parser parser = new Parser(outputStreamCopy))
                 {
-                    string binaryLine = "";
+                    //string binaryLine = "";
                     while (parser.HasMoreCommands())
                     {
                         
                         parser.Advance();
-                        if (parser.CommandType == Command.A_COMMAND)
-                        {
-                            //binaryLine = binaryLine+ CodeGenerator. parser.Symbol
-                        }
+                        //if (parser.CommandType == Command.A_COMMAND)
+                        //{
+                        //    //binaryLine = binaryLine+ CodeGenerator. parser.Symbol
+                        //}
                        
                     }
                 }
