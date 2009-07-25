@@ -38,7 +38,6 @@ namespace Assembler
 
         public Command CommandType()
         {
-            // currently doesn't handle symbols (L commands see p110)
             Command commandType = Command.ERROR;
 
             if (this.currentTxtCommand.StartsWith("@")) // if it starts with @
@@ -78,15 +77,7 @@ namespace Assembler
 
             }
 
-            // matches 3 uppercase letters before '=' sign
-            Regex regex = new Regex(@"([A-Z]{1,3})(?==)");
-
-            Match match = regex.Match(this.currentTxtCommand);
-
-            if (match.Success)
-            {
-                destination = match.Groups[1].Value;
-            }
+            destination = this.ExtractMnemonic(@"([A-Z]{1,3})(?==)", 1);
 
             return destination;
         }
@@ -109,21 +100,12 @@ namespace Assembler
             string symbol = string.Empty;
 
             // match after an @
-            Regex regex = new Regex(@"(@)([^\r\n]*)");
-            Match match = regex.Match(this.currentTxtCommand);
+            symbol = this.ExtractMnemonic(@"(@)([^\r\n]*)", 2);
 
-            if (match.Success)
+            if (String.IsNullOrEmpty(symbol))
             {
-                symbol = match.Groups[2].Value;
-            }
-            else // try matching between brackets
-            {
-                regex = new Regex(@"(\()([^\r\n]*)(\))");
-                match = regex.Match(this.currentTxtCommand);
-                if (match.Success)
-                {
-                    symbol = match.Groups[2].Value;
-                }
+                // extracts between brackets
+                symbol = this.ExtractMnemonic(@"(\()([^\r\n]*)(\))", 2);
             }
 
             return symbol;
@@ -145,35 +127,52 @@ namespace Assembler
             
             string comp = String.Empty;
 
-            //comp is either after the '=' sign (comp is part of desintation command)
-            //or before the ';' (comp is part of jmp command)
-
             // matches after '='
-            Regex regex = new Regex(@"(=)([^\r\n]*)");
-            Match match = regex.Match(this.currentTxtCommand);
-            if (match.Success)
+            comp = this.ExtractMnemonic(@"(=)([^\r\n]*)", 2);
+
+            if (String.IsNullOrEmpty(comp))
             {
-                comp = match.Groups[2].Value;
+                // matches before ';'
+                comp = this.ExtractMnemonic(@"([^\r\n]*)(;)", 1);
             }
-            else //try other pattern
-            {
-                //matches before ';'
-                regex = new Regex(@"([^\r\n]*)(;)");
-                match = regex.Match(this.currentTxtCommand);
-                if (match.Success)
-                {
-                    comp = match.Groups[1].Value;
-                }
-            }
-            
+           
             return comp;
         }
 
-        private string ExtractMnemonic(String pattern, int groupNumber)
+        public string Jump()
+        {
+            if (this.CommandType() != Command.C_COMMAND)
+            {
+                throw new Exception("Dest should only be called when CommandType is C_Command " + Environment.NewLine
+                    + "Current Command Type: " + this.CommandType() + Environment.NewLine
+                    + "Current current text command: " + this.currentTxtCommand);
+
+            }
+            
+            string jump = String.Empty;
+
+            jump = this.ExtractMnemonic(@"(;)([^\r\n]*)",2);
+
+            return jump;
+        }
+
+        /// <summary>
+        /// Extracts the Mnemonic from the current line (currentTxtCommand)
+        /// </summary>
+        /// <param name="regexPattern"></param>
+        /// <param name="groupNumber"></param>
+        /// <returns></returns>
+        private string ExtractMnemonic(String regexPattern, int groupNumber)
         {
             string result = String.Empty;
 
-            Regex regex = new Regex(pattern);
+            Regex regex = new Regex(regexPattern);
+            Match match = regex.Match(this.currentTxtCommand);
+
+            if (match.Success)
+            {
+                result = match.Groups[groupNumber].Value;
+            }
 
             return result;
         }
