@@ -63,7 +63,7 @@ namespace UnitTests
         #endregion
 
         /// <summary>
-        /// Tests that comp 
+        /// Test
         /// </summary>
         [TestMethod]
         public void CompTest()
@@ -71,11 +71,9 @@ namespace UnitTests
             Parser parser = new Parser();
 
             parser.currentTxtCommand = "D=A";
-            parser.Comp();
             Assert.IsTrue(parser.Comp() == "A");
  
             parser.currentTxtCommand = "M=D";
-            parser.Comp();
             Assert.IsTrue(parser.Comp() == "D");
 
             parser.currentTxtCommand = ";JMP";
@@ -83,19 +81,15 @@ namespace UnitTests
             Assert.IsTrue(parser.Comp() == String.Empty);
 
             parser.currentTxtCommand = "0;JMP";
-            parser.Comp();
             Assert.IsTrue(parser.Comp() == "0");
 
             parser.currentTxtCommand = "M=D+M";
-            parser.Comp();
             Assert.IsTrue(parser.Comp() == "D+M");
 
             parser.currentTxtCommand = "MD=M+1";
-            parser.Comp();
             Assert.IsTrue(parser.Comp() == "M+1");
 
             parser.currentTxtCommand = "D;JNE";
-            parser.Comp();
             Assert.IsTrue(parser.Comp() == "D");
 
             bool exceptionThrown = false;
@@ -109,6 +103,51 @@ namespace UnitTests
                 exceptionThrown = true;
             }
             Assert.IsTrue(exceptionThrown);
+        }
+
+        [TestMethod]
+        public void DestTest()
+        {
+            Parser parser = new Parser();
+
+            parser.currentTxtCommand = "D=A";
+            Assert.IsTrue(parser.Dest() == "D");
+
+            parser.currentTxtCommand = "M=D+M";
+            Assert.IsTrue(parser.Dest() == "M");
+
+            parser.currentTxtCommand = "MD=D+1";
+            Assert.IsTrue(parser.Dest() == "MD");
+
+            parser.currentTxtCommand = "0;JMP";
+            Assert.IsTrue(parser.Dest() == String.Empty);
+
+            bool exceptionThrown = false;
+            try
+            {
+                parser.currentTxtCommand = "@0";
+                parser.Dest();
+            }
+            catch
+            {
+                exceptionThrown = true;
+            }
+            Assert.IsTrue(exceptionThrown);
+        }
+
+        [TestMethod]
+        public void SymbolTest()
+        {
+            Parser parser = new Parser();
+
+            parser.currentTxtCommand = "@0";
+            Assert.IsTrue(parser.Symbol() == "0");
+
+            parser.currentTxtCommand = "@Something";
+            Assert.IsTrue(parser.Symbol() == "Something");
+
+            parser.currentTxtCommand = "(foo)";
+            Assert.IsTrue(parser.Symbol() == "foo");
         }
     }
 }

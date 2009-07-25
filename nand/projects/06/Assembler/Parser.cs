@@ -68,7 +68,7 @@ namespace Assembler
         /// <returns></returns>
         public string Dest()
         {
-            string theDestinationNnemonic;
+            string destination = string.Empty;
             
             if (this.CommandType() != Command.C_COMMAND)
             {
@@ -83,20 +83,50 @@ namespace Assembler
 
             Match match = regex.Match(this.currentTxtCommand);
 
-            theDestinationNnemonic = match.Groups[1].Value;
+            if (match.Success)
+            {
+                destination = match.Groups[1].Value;
+            }
 
-            return theDestinationNnemonic;
+            return destination;
         }
 
+        /// <summary>
+        /// Returns the symbol in an A_Command or L_Command
+        /// </summary>
+        /// <returns></returns>
         public string Symbol()
         {
-            //string symbol;
+            // if not a L_Command or a C_command
+            if (this.CommandType() == Command.C_COMMAND ) 
+            {
+                throw new Exception("Symbol should only be called when CommandType is L_Command or A_command " + Environment.NewLine
+                    + "Current Command Type: " + this.CommandType() + Environment.NewLine
+                    + "Current current text command: " + this.currentTxtCommand);
 
-            // "\([\w]{1,}\)";
+            }
+            
+            string symbol = string.Empty;
 
-            //"(@[\w]*)";
+            // match after an @
+            Regex regex = new Regex(@"(@)([^\r\n]*)");
+            Match match = regex.Match(this.currentTxtCommand);
 
-            return "";
+            if (match.Success)
+            {
+                symbol = match.Groups[2].Value;
+            }
+            else // try matching between brackets
+            {
+                regex = new Regex(@"(\()([^\r\n]*)(\))");
+                match = regex.Match(this.currentTxtCommand);
+                if (match.Success)
+                {
+                    symbol = match.Groups[2].Value;
+                }
+            }
+
+            return symbol;
         }
 
         /// <summary>
@@ -119,22 +149,33 @@ namespace Assembler
             //or before the ';' (comp is part of jmp command)
 
             // matches after '='
-            Regex regex = new Regex("(=)([^\r\n]*)");
+            Regex regex = new Regex(@"(=)([^\r\n]*)");
             Match match = regex.Match(this.currentTxtCommand);
             if (match.Success)
             {
                 comp = match.Groups[2].Value;
             }
-
-            //matches before ';'
-            regex = new Regex(@"([^\r\n]*)(;)");
-            match = regex.Match(this.currentTxtCommand);
-            if (match.Success)
+            else //try other pattern
             {
-                comp = match.Groups[1].Value;
+                //matches before ';'
+                regex = new Regex(@"([^\r\n]*)(;)");
+                match = regex.Match(this.currentTxtCommand);
+                if (match.Success)
+                {
+                    comp = match.Groups[1].Value;
+                }
             }
             
             return comp;
+        }
+
+        private string ExtractMnemonic(String pattern, int groupNumber)
+        {
+            string result = String.Empty;
+
+            Regex regex = new Regex(pattern);
+
+            return result;
         }
 
         #region IDisposable Members
