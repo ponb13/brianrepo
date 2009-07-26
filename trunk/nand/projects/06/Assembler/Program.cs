@@ -18,26 +18,43 @@ namespace Assembler
                 JunkRemover junkRemover = new JunkRemover(fileStream, outputStream);
 
                 // Problem with streams - you can't reuse them so need to create a new memory stream
-                MemoryStream outputStreamCopy = new MemoryStream(outputStream.ToArray());
+                MemoryStream junkRemovedStream = new MemoryStream(outputStream.ToArray());
 
-                using (Parser parser = new Parser(outputStreamCopy))
+                using (Parser parser = new Parser(junkRemovedStream))
                 {
-                    //string binaryLine = "";
+                    StringBuilder fullBinaryListing = new StringBuilder();
+
                     while (parser.HasMoreCommands())
                     {
-                        
-                        parser.Advance();
-                        //if (parser.CommandType == Command.A_COMMAND)
-                        //{
-                        //    //binaryLine = binaryLine+ CodeGenerator. parser.Symbol
-                        //}
-                       
+                       String binaryLine = String.Empty;
+                       parser.Advance();
+                       if (parser.CommandType() == Command.C_COMMAND)
+                       {
+                           binaryLine = CodeGenerator.GetFullCInstruction(parser.Dest(), parser.Comp(), parser.Jump())+ Environment.NewLine;
+                           fullBinaryListing.Append(binaryLine);
+                       }
+                       else if (parser.CommandType() == Command.A_COMMAND)
+                       {
+                           binaryLine = "A or L  instruction here";
+                           fullBinaryListing.Append(binaryLine + Environment.NewLine);
+                       }
                     }
+
+                    Program.WriteToFile(@"C:\fullBinaryListing.txt", fullBinaryListing.ToString());
                 }
             }
-            Console.ReadKey();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="content"></param>
+        private static void WriteToFile(string filePath, string content)
+        {
+            File.Delete(filePath);
+            File.AppendAllText(filePath, content);
+        }
        
     }
 }
