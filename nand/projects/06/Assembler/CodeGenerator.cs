@@ -7,6 +7,20 @@ namespace Assembler
 {
     public static class CodeGenerator
     {
+        /// <summary>
+        /// Just a simpler way of building a c instruction, one method that just calls all the required methods.
+        /// </summary>
+        /// <param name="destNmemonic"></param>
+        /// <param name="compNmemonic"></param>
+        /// <param name="jmpNmemonic"></param>
+        /// <returns></returns>
+        public static string GetFullCInstruction(string destNmemonic, string compNmemonic, string jmpNmemonic)
+        {
+            // see page 109 for spec of c instruction, note we just hard code the first 3 bits as
+            // all c instructions first 3 are 111
+            return "111"+Dest(destNmemonic) + Comp(compNmemonic) + Jump(jmpNmemonic);
+        }
+        
         public static string Dest(string mnemonic)
         {
             string binary = String.Empty;
@@ -258,6 +272,13 @@ namespace Assembler
                     }
             }
             return binary;
+        }
+
+        public static string ConvertDecimalToBinary()
+        {
+            //decimal dec = 22434;
+            return "";
+            
         }
         
     }
