@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CodeGenerator.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="DecimalToBinaryConverter.cs" />
     <Compile Include="JunkRemover.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />

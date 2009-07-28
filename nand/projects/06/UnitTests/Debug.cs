@@ -3,18 +3,17 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Assembler;
 
 namespace UnitTests
 {
     /// <summary>
-    /// Summary description for CodeGeneratorTests
+    /// Summary description for Debug
     /// </summary>
     [TestClass]
-    public class CodeGeneratorTests
+    public class Debug
     {
-        public CodeGeneratorTests()
+        public Debug()
         {
             //
             // TODO: Add constructor logic here
@@ -62,22 +61,25 @@ namespace UnitTests
         #endregion
 
         [TestMethod]
-        public void CodeGenDest()
+        public void SomeTest()
         {
-            Assert.IsTrue(CodeGenerator.Dest("") == "000");
-            Assert.IsTrue(CodeGenerator.Dest("M") == "001");
-            Assert.IsTrue(CodeGenerator.Dest("D") == "010");
-            Assert.IsTrue(CodeGenerator.Dest("MD") == "011");
-            Assert.IsTrue(CodeGenerator.Dest("A") == "100");
-            Assert.IsTrue(CodeGenerator.Dest("AM") == "101");
-            Assert.IsTrue(CodeGenerator.Dest("AD") == "110");
-            Assert.IsTrue(CodeGenerator.Dest("AMD") == "111");
-        }
+            Parser parser = new Parser();
+            parser.currentTxtCommand = "D=A";
 
-        [TestMethod]
-        public void BinaryConvertTest()
-        {
-            string  stringRep = DecimalToBinaryConverter.GetStringRep(2400);
+            String destMnemonic = parser.Dest();
+            Assert.IsTrue(destMnemonic == "D", "parser failed");
+
+            String compMnemonic = parser.Comp();
+            Assert.IsTrue(compMnemonic == "A", "parser failed");
+
+            string destBin = CodeGenerator.Dest(destMnemonic);
+            Assert.IsTrue(destBin == "010");
+
+            string compbin = CodeGenerator.Comp(compMnemonic);
+            Assert.IsTrue(compbin == "0110000");
+
+
+
         }
     }
 }

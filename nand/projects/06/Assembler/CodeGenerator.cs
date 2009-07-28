@@ -14,11 +14,11 @@ namespace Assembler
         /// <param name="compNmemonic"></param>
         /// <param name="jmpNmemonic"></param>
         /// <returns></returns>
-        public static string GetFullCInstruction(string destNmemonic, string compNmemonic, string jmpNmemonic)
+        public static string GetFullCInstruction(string compNmemonic, string destNmemonic, string jmpNmemonic)
         {
             // see page 109 for spec of c instruction, note we just hard code the first 3 bits as
             // all c instructions first 3 are 111
-            return "111"+Dest(destNmemonic) + Comp(compNmemonic) + Jump(jmpNmemonic);
+            return "111"+Comp(compNmemonic)+Dest(destNmemonic) + Jump(jmpNmemonic);
         }
         
         public static string Dest(string mnemonic)
@@ -274,11 +274,9 @@ namespace Assembler
             return binary;
         }
 
-        public static string ConvertDecimalToBinary()
+        public static string Get_AInstruction(string val)
         {
-            //decimal dec = 22434;
-            return "";
-            
+            return "0"+DecimalToBinaryConverter.GetStringRep(int.Parse(val));
         }
         
     }
