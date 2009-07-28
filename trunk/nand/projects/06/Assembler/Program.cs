@@ -30,17 +30,17 @@ namespace Assembler
                        parser.Advance();
                        if (parser.CommandType() == Command.C_COMMAND)
                        {
-                           binaryLine = CodeGenerator.GetFullCInstruction(parser.Dest(), parser.Comp(), parser.Jump())+ Environment.NewLine;
+                           binaryLine = CodeGenerator.GetFullCInstruction(parser.Comp(),parser.Dest(), parser.Jump())+ Environment.NewLine;
                            fullBinaryListing.Append(binaryLine);
                        }
                        else if (parser.CommandType() == Command.A_COMMAND)
                        {
-                           binaryLine = "A or L  instruction here";
+                           binaryLine = CodeGenerator.Get_AInstruction(parser.Symbol());
                            fullBinaryListing.Append(binaryLine + Environment.NewLine);
                        }
                     }
 
-                    Program.WriteToFile(@"C:\fullBinaryListing.txt", fullBinaryListing.ToString());
+                    Program.WriteToFile(@"C:\BriPong.hack", fullBinaryListing.ToString());
                 }
             }
         }
