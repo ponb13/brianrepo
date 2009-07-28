@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>"../../../TestFiles/PongL.asm"</StartArguments>
+    <StartArguments>"C:\Documents and Settings\brian\My Documents\dev\brianrepo\nand\projects\06\TestFiles\PongL.asm"</StartArguments>
   </PropertyGroup>
 </Project>
