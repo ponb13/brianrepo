@@ -27,7 +27,7 @@ namespace Assembler
 
         public int GetAddress(string symbol)
         {
-            return this.dictionary["symbol"];
+            return this.dictionary[symbol];
         }
 
         private void SetPredefinedSymbols()

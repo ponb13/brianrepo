@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{
 	ProjectSection(SolutionItems) = preProject
 		TestFiles\MaxL.asm = TestFiles\MaxL.asm
 		TestFiles\PongL.asm = TestFiles\PongL.asm
+		TestFiles\PongWithSymbols.asm = TestFiles\PongWithSymbols.asm
 		TestFiles\RectL.asm = TestFiles\RectL.asm
 	EndProjectSection
 EndProject
