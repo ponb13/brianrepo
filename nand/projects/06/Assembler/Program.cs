@@ -56,7 +56,7 @@ namespace Assembler
                     parser.Advance();
                     if (parser.CommandType() == Command.L_COMMAND)
                     {
-                        // store the lable and next line, check that this should be +1
+                        // store the lable and next line
                         symbolTable.AddEntry(parser.Symbol(), lineCounter);
                     }
                     else if (parser.CommandType() == Command.C_COMMAND
