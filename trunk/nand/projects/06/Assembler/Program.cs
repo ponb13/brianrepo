@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.IO;
 
 namespace Assembler
@@ -11,19 +12,17 @@ namespace Assembler
         static void Main(string[] args)
         {
             string inputFilePath = args[0];
-
-            
             
             byte[] junkRemoved = Program.RemoveJunk(inputFilePath);
 
             SymbolTable symbolTable = new SymbolTable();
+            // fill sysmbol table in first pass
             Program.FirstPass(junkRemoved, symbolTable);
 
-            
+            //replace all label
+            string finalBinaryOutput = Program.SecondPass(junkRemoved,symbolTable);
 
-            string finalBinaryOutput = Program.ThirdPass(junkRemoved);
-
-            Program.WriteToFile(@"C:\BriPong.hack", finalBinaryOutput);
+            Program.WriteToFile(@"C:\Documents and Settings\brian\My Documents\dev\brianrepo\nand\projects\06\TestFiles\BRIANPongWithSymbols.asm", finalBinaryOutput);
         }
 
         /// <summary>
@@ -46,7 +45,7 @@ namespace Assembler
         }
 
         // build the symbol table
-        private static SymbolTable FirstPass(byte[] inputBytes, SymbolTable symbolTable)
+        private static void FirstPass(byte[] inputBytes, SymbolTable symbolTable)
         {
             using (MemoryStream inputStream = new MemoryStream(inputBytes))
             using (Parser parser = new Parser(inputStream))
@@ -58,7 +57,7 @@ namespace Assembler
                     if (parser.CommandType() == Command.L_COMMAND)
                     {
                         // store the lable and next line, check that this should be +1
-                        symbolTable.AddEntry(parser.Symbol(), lineCounter + 1);
+                        symbolTable.AddEntry(parser.Symbol(), lineCounter);
                     }
                     else if (parser.CommandType() == Command.C_COMMAND
                         || parser.CommandType() == Command.A_COMMAND)
@@ -67,26 +66,9 @@ namespace Assembler
                     }
                 }
             }
-
-            // explicitly return
-            return symbolTable;
         }
 
-        private static byte[] SecondPass(byte[] inputBytes, SymbolTable symbolTable)
-        {
-            using (MemoryStream inputStream = new MemoryStream(inputBytes))
-            using (Parser parser = new Parser(inputStream))
-            {
-                while (parser.HasMoreCommands())
-                {
-                    parser.Advance();
-                    // todo 
-                    
-                }
-            }
-        }
-
-        private static string ThirdPass(byte[] inputBytes)
+        private static string SecondPass(byte[] inputBytes, SymbolTable symbolTable)
         {
             // Problem with streams - you can't reuse them so need to create a new memory stream
             MemoryStream inputStream = new MemoryStream(inputBytes);
@@ -94,6 +76,7 @@ namespace Assembler
             using (Parser parser = new Parser(inputStream))
             {
                 StringBuilder fullBinaryListing = new StringBuilder();
+                int addressCounter = 16;
 
                 while (parser.HasMoreCommands())
                 {
@@ -106,13 +89,48 @@ namespace Assembler
                     }
                     else if (parser.CommandType() == Command.A_COMMAND)
                     {
-                        binaryLine = CodeGenerator.Get_AInstruction(parser.Symbol());
+                        if (symbolTable.Contains(parser.Symbol()))
+                        {
+                            int address = symbolTable.GetAddress(parser.Symbol());
+                            binaryLine = CodeGenerator.Get_AInstruction(address.ToString());
+                        }
+                        else
+                        {
+                           
+                            int literalVal;
+                            //check if its int literal if it is just add it
+                            if (int.TryParse(parser.Symbol(), out literalVal))
+                            {
+                                binaryLine = CodeGenerator.Get_AInstruction(literalVal.ToString());
+                            }
+                            else
+                            {
+
+                                // add the new address
+                                symbolTable.AddEntry(parser.Symbol(), addressCounter);
+                                binaryLine = CodeGenerator.Get_AInstruction(addressCounter.ToString());
+                                addressCounter++;
+                            }
+                        }
+                        
                         fullBinaryListing.Append(binaryLine + Environment.NewLine);
                     }
                 }
 
                 return fullBinaryListing.ToString();
             }
+        }
+
+        // replace old value with new
+        private static string ReplaceSymbol(string codeLine, SymbolTable symbolTable, string symbolToRelplace)
+        {
+            string result = null;
+            if (symbolTable.Contains(symbolToRelplace))
+            {
+                int intVal = symbolTable.GetAddress(symbolToRelplace);
+                result = codeLine.Replace(symbolToRelplace, intVal.ToString());
+            }
+            return result;
         }
 
         /// <summary>
