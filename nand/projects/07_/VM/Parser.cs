@@ -8,9 +8,15 @@ namespace VM
 {
     public class Parser : IDisposable
     {
-        StreamReader reader;
-        Stream inputStream;
-        string currentLine;
+        private StreamReader reader;
+        private Stream inputStream;
+        public string currentLine;
+
+        public Parser(string line)
+        {
+            // for unit testing single lines at a time
+            this.currentLine = line;
+        }
         
         public Parser(Stream stream)
         {
@@ -30,20 +36,74 @@ namespace VM
 
         public CommandType GetCommandType()
         {
-            // TODO
-            return CommandType.ERROR;
+            // TODO not all command types implemented yet.
+            CommandType commandType = CommandType.ERROR;
+
+            if (this.IsArithmeticCommand())
+            {
+                commandType = CommandType.C_ARITHMETIC;
+            }
+            else if (this.IsGoToCommand())
+            {
+                commandType = CommandType.C_GOTO;
+            }
+            else if (this.IsLabelCommand())
+            {
+                commandType = CommandType.C_LABEL;
+            }
+            else if (this.IsPopCommand())
+            {
+                commandType = CommandType.C_POP;
+            }
+            else if (this.IsPushCommand())
+            {
+                commandType = CommandType.C_PUSH;
+            }
+
+            return commandType;
         }
 
         public string GetArg1()
         {
-            // TODO
-            return "ERROR";
+            string result;
+
+            if(this.IsReturnCommand())
+            {
+                throw new Exception("GetArg1 should not be called when current command is a return command");
+            }
+            else if (this.IsArithmeticCommand())
+            {
+                // just return the command itself e.g. add,sub etc
+                string[] wordArray = this.currentLine.Split(' ');
+                result = wordArray[0];
+            }
+            else
+            {
+                //get the first arg
+                string[] wordArray = this.currentLine.Split(' ');
+                result = wordArray[1];
+
+            }
+            return result;
         }
 
         public string GetArg2()
         {
-            //TODO
-            return "ERROR";
+            string result = string.Empty;
+            if (this.GetCommandType() == CommandType.C_PUSH
+                || this.GetCommandType() == CommandType.C_POP
+                || this.GetCommandType() == CommandType.C_FUNCTION
+                || this.GetCommandType() == CommandType.C_CALL)
+            {
+                string[] wordArray = this.currentLine.Split(' ');
+                result = wordArray[2];
+            }
+            else
+            {
+                throw new Exception("GetArg2 should be called when command type is: " + this.GetCommandType());
+            }
+
+            return result;
         }
 
         #region CommandType Methods
@@ -69,41 +129,37 @@ namespace VM
 
         private bool IsPushCommand()
         {
-            bool result = false;
-
-            if(this.currentLine.StartsWith("push"))
-            {
-                result = true;
-            }
-
-            return result;
+            return this.currentLine.StartsWith("push");
         }
 
         private bool IsPopCommand()
         {
-            bool result = false;
-
-            if(this.currentLine.StartsWith("pop"))
-            {
-                result = true;
-            }
-
-            return result;
+            return this.currentLine.StartsWith("pop");
+        }
+        
+        private bool IsLabelCommand()
+        {
+            return this.currentLine.StartsWith("label");
         }
 
-        private bool 
+        private bool IsGoToCommand()
+        {
+            return this.currentLine.StartsWith("goto");
+        }
+
+        private bool IsReturnCommand()
+        {
+            return this.currentLine.StartsWith("return");
+        }
 
         #endregion
-
-
-
-
 
         #region IDisposable Members
 
         void IDisposable.Dispose()
         {
-            throw new NotImplementedException();
+            inputStream.Flush();
+            this.reader.Close();
         }
 
         #endregion
