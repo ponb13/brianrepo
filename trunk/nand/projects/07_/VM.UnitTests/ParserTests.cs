@@ -63,19 +63,19 @@ namespace VM.UnitTests
         [TestMethod]
         public void GetArg1Test()
         {
-            Parser parser = new Parser("pop this 6");
+            Parser parser = new Parser("pop this 6", true);
             Assert.IsTrue(parser.GetArg1() == "this");
 
-            parser = new Parser("push constant 36");
+            parser = new Parser("push constant 36", true);
             Assert.IsTrue(parser.GetArg1() == "constant");
 
-            parser = new Parser("sub");
+            parser = new Parser("sub", true);
             Assert.IsTrue(parser.GetArg1() == "sub");
 
             bool excpetionThrown = false;
             try
             {
-                parser = new Parser("return");
+                parser = new Parser("return", true);
                 parser.GetArg1();
             }
             catch
@@ -88,16 +88,16 @@ namespace VM.UnitTests
         [TestMethod]
         public void GetArg2Test()
         {
-            Parser parser = new Parser("pop this 6");
+            Parser parser = new Parser("pop this 6", true);
             Assert.IsTrue(parser.GetArg2() == "6");
 
-            parser = new Parser("push constant 36");
+            parser = new Parser("push constant 36", true);
             Assert.IsTrue(parser.GetArg2() == "36");
             
             bool excpetionThrown = false;
             try
             {
-                parser = new Parser("return");
+                parser = new Parser("return", true);
                 parser.GetArg2();
             }
             catch
@@ -110,14 +110,14 @@ namespace VM.UnitTests
         [TestMethod]
         public void ParserInputFromFileTest()
         {
-            using(FileStream fs = new FileStream(@"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.vm", FileMode.Open))
-            using(Parser parser = new Parser(fs))
-            {
-                while (parser.HasMoreCommands())
-                {
-                    parser.Advance();
-                }
-            }
+            //using(FileStream fs = new FileStream(@"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.vm", FileMode.Open))
+            //using (Parser parser = new Parser(fs, true))
+            //{
+            //    while (parser.HasMoreCommands())
+            //    {
+            //        parser.Advance();
+            //    }
+            //}
         }
     }
 }
