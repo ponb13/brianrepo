@@ -28,7 +28,11 @@ namespace VM
                     }
                     if (commandType == CommandType.C_POP)
                     {
-                        codeWriter.WriteArithmetic("");
+                        codeWriter.WritePushPop(commandType, parser.GetArg1(), int.Parse(parser.GetArg2()));
+                    }
+                    if (commandType == CommandType.C_ARITHMETIC)
+                    {
+                        codeWriter.WriteArithmetic(parser.GetArg1());
                     }
 
                 }
