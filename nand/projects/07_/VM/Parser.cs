@@ -12,16 +12,21 @@ namespace VM
         private Stream inputStream;
         public string currentLine;
 
-        public Parser(string line)
+        public Parser(string line, bool test)
         {
-            // for unit testing single lines at a time
-            this.currentLine = line;
+            currentLine = line;
         }
         
         public Parser(Stream stream)
         {
             this.inputStream = stream;
             this.reader = new StreamReader(this.inputStream);
+        }
+
+        public Parser(string filePath)
+        {
+            this.inputStream = new FileStream(filePath, FileMode.Open);
+            this.reader = new StreamReader(inputStream);
         }
 
         public bool HasMoreCommands()
