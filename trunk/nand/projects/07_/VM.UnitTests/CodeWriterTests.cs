@@ -63,10 +63,12 @@ namespace VM.UnitTests
         [TestMethod]
         public void TestMethod1()
         {
-            using (CodeWriter writer = new CodeWriter(@"..\..\..\VM.UnitTests\TestOutput\test.txt"))
+            using (CodeWriter writer = new CodeWriter(@"..\..\..\VM\TestOutput\test.txt"))
             {
-                writer.WriteArithmetic("");
+                writer.WritePushPop(CommandType.C_PUSH, "constant", 9);
             }
         }
+
+       
     }
 }
