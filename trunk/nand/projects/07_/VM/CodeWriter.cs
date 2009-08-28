@@ -163,17 +163,17 @@ namespace VM
 
             streamWriter.WriteLine(@"(NOTEQUAL)");
             streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=0");// push zero onto stack for false
-            this.WritePushSegment("R15", 0);
+            streamWriter.WriteLine(@"M=0");// push zero onto stack for false (we push at end of method
             this.streamWriter.WriteLine("@END");
-            this.streamWriter.WriteLine(";JMP");
+            this.streamWriter.WriteLine("0;JMP");
 
             streamWriter.WriteLine(@"(EQUAL)");
             streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=-1");// push zero onto stack for true
-            this.WritePushSegment("R15", 0);
+            streamWriter.WriteLine(@"M=-1");// push -1 onto stack for true (we push at end of method)
+            
 
             this.streamWriter.WriteLine(@"(END)");
+            this.WritePushSegment("R15", 0);
 
         }
 
