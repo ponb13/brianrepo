@@ -11,7 +11,7 @@ namespace VM
         static void Main(string[] args)
         {
             string filePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.vm";
-            string outPutFilePath = @"..\..\..\Output\output.asm";
+            string outPutFilePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.asm";
 
             using (Parser parser = new Parser(filePath))
             using (CodeWriter codeWriter = new CodeWriter(outPutFilePath))
