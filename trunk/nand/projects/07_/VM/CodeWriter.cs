@@ -279,7 +279,7 @@ namespace VM
 
             streamWriter.WriteLine(@"(LTFALSE)");
             streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=-1");
+            streamWriter.WriteLine(@"M=0");
             streamWriter.WriteLine(@"@ENDLT");
             streamWriter.WriteLine(@"0;JMP");
 
@@ -339,7 +339,7 @@ namespace VM
             streamWriter.WriteLine(@"@" + index);//store segment index in D
             streamWriter.WriteLine(@"D=A");
             streamWriter.WriteLine(@"@" + segment);
-            streamWriter.WriteLine(@"A=A+D");//point to segment[index]
+            streamWriter.WriteLine(@"A=M+D");//point to segment[index]
             streamWriter.WriteLine(@"D=A");//store address in D
             streamWriter.WriteLine(@"@R13");//R13 is a general purpose reg, use it to store pointer to segment[index]
             streamWriter.WriteLine(@"M=D");//save pointer to variable
@@ -360,19 +360,32 @@ namespace VM
         {
             string segment = this.GetSegmentAssemblyLanguageName(seg);
 
-            streamWriter.WriteLine(@"@"+index);//store segment index in D
-            streamWriter.WriteLine(@"D=A");
-            streamWriter.WriteLine(@"@"+segment);
-            streamWriter.WriteLine(@"A=A+D");//point to segment[index]
-            streamWriter.WriteLine(@"D=A");//store address in D
-            streamWriter.WriteLine(@"@R13");//R13 is a general purpose reg, use it to store pointer to segment[index]
-            streamWriter.WriteLine(@"M=D");//save pointer to variable
-            streamWriter.WriteLine(@"@SP");//get value out of stack and store in D
-            streamWriter.WriteLine(@"A=M-1");//notice we -1 from stack pointer because stack pointer points to the next empty space
+            // copy value at top of stack to R13
+            streamWriter.WriteLine(@"@SP");
+            streamWriter.WriteLine(@"A=M-1");
             streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R13");//get get pointer segment[index] from general purchase reg
-            streamWriter.WriteLine(@"A=M"); // goto pointer address (segment[index])
-            streamWriter.WriteLine(@"M=D");// store value from top of stack into segment[index]
+            streamWriter.WriteLine(@"@R13");
+            streamWriter.WriteLine(@"M=D");
+
+            //store index at R14
+            streamWriter.WriteLine(@"@"+index);
+            streamWriter.WriteLine(@"D=A");
+            streamWriter.WriteLine(@"@R14");
+            streamWriter.WriteLine(@"M=D");
+
+            //make R14 =  segment + index
+            streamWriter.WriteLine(@"@LCL");
+            streamWriter.WriteLine(@"D=M");
+            streamWriter.WriteLine(@"@R14");
+            streamWriter.WriteLine(@"M=M+D"); //make R14 = segment + index
+
+            // copy index value you of R13 in segment[index]
+            streamWriter.WriteLine(@"@R13");
+            streamWriter.WriteLine(@"D=M");
+            streamWriter.WriteLine(@"@R14");
+            streamWriter.WriteLine(@"A=M");
+            streamWriter.WriteLine(@"M=D");
+
             streamWriter.WriteLine(@"@SP");//decrement sp
             streamWriter.WriteLine(@"M=M-1");
         }
