@@ -21,9 +21,10 @@ namespace VM
             this.segmentLookUpTable = this.SetUpSegmentLookUpTable();
         }
 
-        public void SetVmFileName(string fileName)
+        public string VmFileName
         {
-            this.vmFileName = fileName;
+            get { return this.vmFileName; }
+            set { this.vmFileName = value; }
         }
 
         public void WriteArithmetic(string command)
@@ -87,14 +88,25 @@ namespace VM
                 {
                     this.WritePushConstant(index);
                 }
-                else
+                else if (segment == "temp" || segment == "pointer")
+                {
+                    this.WritePushTempOrPointer(segment, index);
+                }
+                else 
                 {
                     this.WritePushSegment(segment, index);
                 }
             }
             if(commandType == CommandType.C_POP)
             {
-                this.WritePop(segment, index);
+                if (segment == "temp" || segment == "pointer")
+                {
+                    this.WritePopTempOrPointer(segment, index);
+                }
+                else
+                {
+                    this.WritePop(segment, index);
+                }
             }
         }
 
@@ -105,11 +117,10 @@ namespace VM
         {
             Dictionary<string, string> lookUpTable = new Dictionary<string, string>();
 
-            lookUpTable.Add("temp", "TEMP");
             lookUpTable.Add("this", "THIS");
             lookUpTable.Add("that", "THAT");
             lookUpTable.Add("local", "LCL");
-            lookUpTable.Add("arguement", "ARG");
+            lookUpTable.Add("argument", "ARG");
 
             return lookUpTable;
         }
@@ -292,9 +303,38 @@ namespace VM
             streamWriter.WriteLine(@"M=M+1");
         }
 
+        private void WritePushTempOrPointer(string seg, int index)
+        {
+            int address;
+
+            if (seg == "pointer")
+            {
+                address = 3;
+            }
+            else //temp
+            {
+                address = 5;
+            }
+
+            address = address + index;
+
+            streamWriter.WriteLine(@"@" + address); // copy contents into D
+            streamWriter.WriteLine(@"D=M");
+
+            streamWriter.WriteLine(@"@SP"); // goto top of stack
+            streamWriter.WriteLine(@"A=M");
+
+            streamWriter.WriteLine(@"M=D"); // copy D into top of stack
+
+            streamWriter.WriteLine(@"@SP");//increment sp
+            streamWriter.WriteLine(@"M=M+1");
+        }
+
         private void WritePushSegment(string seg, int index)
         {
             string segment = this.GetSegmentAssemblyLanguageName(seg);
+
+            // pointer and temp are handled differently than the other segments
 
             streamWriter.WriteLine(@"@" + index);//store segment index in D
             streamWriter.WriteLine(@"D=A");
@@ -335,6 +375,29 @@ namespace VM
             streamWriter.WriteLine(@"M=D");// store value from top of stack into segment[index]
             streamWriter.WriteLine(@"@SP");//decrement sp
             streamWriter.WriteLine(@"M=M-1");
+        }
+
+        private void WritePopTempOrPointer(string seg, int index)
+        {
+            int address;
+
+            if (seg == "pointer")
+            {
+                address = 3;
+            }
+            else //temp
+            {
+                address = 5;
+            }
+
+            address = address + index;
+
+            streamWriter.WriteLine("@SP");
+            streamWriter.WriteLine("A=M-1"); //not minus one for top value
+            streamWriter.WriteLine("D=M");//copy contents to D
+
+            streamWriter.WriteLine("@"+address); //this might be the wrong way to do this
+            streamWriter.WriteLine("M=D");
         }
 
         private string GetSegmentAssemblyLanguageName(string seg)

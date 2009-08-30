@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 
 namespace VM
@@ -19,7 +20,7 @@ namespace VM
             using (Parser parser = new Parser(filePath))
             using (CodeWriter codeWriter = new CodeWriter(outPutFilePath))
             {
-                // TODO code writer need SetFilePath set
+                codeWriter.VmFileName = Path.GetFileNameWithoutExtension(filePath);
                 while (parser.HasMoreCommands())
                 {
                     parser.Advance();
