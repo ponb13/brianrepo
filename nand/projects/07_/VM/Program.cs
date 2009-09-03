@@ -14,7 +14,7 @@ namespace VM
             //string filePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.vm";
             //string outPutFilePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.asm";
 
-            string filePath = @"..\..\..\MemoryAccess\BasicTest\BasicTest.vm";
+            string filePath = @"..\..\..\MemoryAccess\BasicTest\_BasicTest.vm";
             string outPutFilePath = @"..\..\..\MemoryAccess\BasicTest\BasicTest.asm";
 
             using (Parser parser = new Parser(filePath))
@@ -26,11 +26,7 @@ namespace VM
                     parser.Advance();
                     CommandType commandType = parser.GetCommandType();
 
-                    if (commandType == CommandType.C_PUSH)
-                    {
-                        codeWriter.WritePushPop(commandType, parser.GetArg1(), int.Parse(parser.GetArg2()));
-                    }
-                    if (commandType == CommandType.C_POP)
+                    if (commandType == CommandType.C_PUSH || commandType == CommandType.C_POP)
                     {
                         codeWriter.WritePushPop(commandType, parser.GetArg1(), int.Parse(parser.GetArg2()));
                     }
@@ -38,7 +34,6 @@ namespace VM
                     {
                         codeWriter.WriteArithmetic(parser.GetArg1());
                     }
-
                 }
             }
         }
