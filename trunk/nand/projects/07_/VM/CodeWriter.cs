@@ -119,7 +119,7 @@ namespace VM
 
             lookUpTable.Add("this", "THIS");
             lookUpTable.Add("that", "THAT");
-            lookUpTable.Add("local", "LCL");
+            lookUpTable.Add("local", "LCL"); 
             lookUpTable.Add("argument", "ARG");
 
             return lookUpTable;
@@ -129,10 +129,12 @@ namespace VM
 
         private void WriteAdd()
         {
+            streamWriter.WriteLine(@"//Write Add");
             // pop the operands into R14 & R15, I would expect them to be at the top of the stack
             this.WritePop("R14", 0);
             this.WritePop("R15", 0);
 
+            streamWriter.WriteLine(@"//still in write add");
             streamWriter.WriteLine(@"@R14"); //Copy R14 to D and add it to R15, result is therefore in R15
             streamWriter.WriteLine(@"D=M");
             streamWriter.WriteLine(@"@R15");
@@ -326,16 +328,17 @@ namespace VM
 
             streamWriter.WriteLine(@"M=D"); // copy D into top of stack
 
-            streamWriter.WriteLine(@"@SP");//increment sp
-            streamWriter.WriteLine(@"M=M+1");
+            this.IncrementStackPointer();
         }
 
         private void WritePushSegment(string seg, int index)
         {
+            
             string segment = this.GetSegmentAssemblyLanguageName(seg);
 
             // pointer and temp are handled differently than the other segments
 
+            streamWriter.WriteLine(@"//Write Push Segment");
             streamWriter.WriteLine(@"@" + index);//store segment index in D
             streamWriter.WriteLine(@"D=A");
             streamWriter.WriteLine(@"@" + segment);
@@ -352,14 +355,16 @@ namespace VM
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"A=M");
             streamWriter.WriteLine(@"M=D");
-            streamWriter.WriteLine(@"@SP");//increment sp
-            streamWriter.WriteLine(@"M=M+1");
+
+            this.IncrementStackPointer();
         }
 
         private void WritePop(string seg, int index)
         {
+            
             string segment = this.GetSegmentAssemblyLanguageName(seg);
 
+            streamWriter.WriteLine(@"//Write Pop");
             // copy value at top of stack to R13
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"A=M-1");
@@ -368,26 +373,25 @@ namespace VM
             streamWriter.WriteLine(@"M=D");
 
             //store index at R14
-            streamWriter.WriteLine(@"@"+index);
+            streamWriter.WriteLine(@"@" + index);
             streamWriter.WriteLine(@"D=A");
             streamWriter.WriteLine(@"@R14");
             streamWriter.WriteLine(@"M=D");
 
             //make R14 =  segment + index
-            streamWriter.WriteLine(@"@LCL");
-            streamWriter.WriteLine(@"D=M");
+            streamWriter.WriteLine(@"@" + segment);
+            streamWriter.WriteLine(@"D=M"); //D=segAddress
             streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"M=M+D"); //make R14 = segment + index
+            streamWriter.WriteLine(@"M=M+D"); //make R14 point segment + index
 
-            // copy index value you of R13 in segment[index]
+            // copy index value  of R13 in segment[index]
             streamWriter.WriteLine(@"@R13");
             streamWriter.WriteLine(@"D=M");
             streamWriter.WriteLine(@"@R14");
             streamWriter.WriteLine(@"A=M");
             streamWriter.WriteLine(@"M=D");
 
-            streamWriter.WriteLine(@"@SP");//decrement sp
-            streamWriter.WriteLine(@"M=M-1");
+            this.DecrementStackPointer();
         }
 
         private void WritePopTempOrPointer(string seg, int index)
@@ -409,8 +413,22 @@ namespace VM
             streamWriter.WriteLine("A=M-1"); //not minus one for top value
             streamWriter.WriteLine("D=M");//copy contents to D
 
-            streamWriter.WriteLine("@"+address); //this might be the wrong way to do this
+            streamWriter.WriteLine("@"+address); 
             streamWriter.WriteLine("M=D");
+
+            this.DecrementStackPointer();
+        }
+
+        private void IncrementStackPointer()
+        {
+            streamWriter.WriteLine(@"@SP");
+            streamWriter.WriteLine(@"M=M+1");
+        }
+
+        private void DecrementStackPointer()
+        {
+            streamWriter.WriteLine(@"@SP");
+            streamWriter.WriteLine(@"M=M-1");
         }
 
         private string GetSegmentAssemblyLanguageName(string seg)
