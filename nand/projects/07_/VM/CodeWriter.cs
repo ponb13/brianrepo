@@ -11,7 +11,7 @@ namespace VM
         private FileStream fileStream = null;
         private StreamWriter streamWriter;
         private string vmFileName;
-        private Dictionary<string, string> segmentLookUpTable = null;
+        private Dictionary<string,int> segmentLookUpTable = null;
 
         public CodeWriter(string outputFilePath)
         {
@@ -27,6 +27,10 @@ namespace VM
             set { this.vmFileName = value; }
         }
 
+        /// <summary>
+        /// Writes the arithmetic.
+        /// </summary>
+        /// <param name="command">The command.</param>
         public void WriteArithmetic(string command)
         {
             switch (command)
@@ -113,15 +117,17 @@ namespace VM
         /// <summary>
         /// Just acts as a translator between local=LCL,this=THIS
         /// </summary>
-        private Dictionary<string, string> SetUpSegmentLookUpTable()
+        private Dictionary<string, int> SetUpSegmentLookUpTable()
         {
-            Dictionary<string, string> lookUpTable = new Dictionary<string, string>();
+            Dictionary<string, int> lookUpTable = new Dictionary<string, int>();
 
-            lookUpTable.Add("this", "THIS");
-            lookUpTable.Add("that", "THAT");
-            lookUpTable.Add("local", "LCL"); 
-            lookUpTable.Add("argument", "ARG");
-
+            lookUpTable.Add("local", 1);
+            lookUpTable.Add("argument", 2);
+            lookUpTable.Add("this", 3);
+            lookUpTable.Add("that", 4);
+            lookUpTable.Add("R13", 13);
+            lookUpTable.Add("R14", 14);
+            lookUpTable.Add("R15", 15);
             return lookUpTable;
         }
 
@@ -162,6 +168,7 @@ namespace VM
 
         private void WriteEquality()
         {
+            streamWriter.WriteLine(@"//Write equality"); 
             this.WritePop("R14", 0);
             this.WritePop("R15", 0);
 
@@ -187,6 +194,8 @@ namespace VM
 
             this.streamWriter.WriteLine(@"(END)");
             this.WritePushSegment("R15", 0);
+
+            streamWriter.WriteLine(@"//End Write equality"); 
 
         }
 
@@ -333,25 +342,13 @@ namespace VM
 
         private void WritePushSegment(string seg, int index)
         {
-            
-            string segment = this.GetSegmentAssemblyLanguageName(seg);
+            int segmentBaseAddress = this.segmentLookUpTable[seg];
+            int segmentIndexAddress = segmentBaseAddress + index;
 
             // pointer and temp are handled differently than the other segments
 
-            streamWriter.WriteLine(@"//Write Push Segment");
-            streamWriter.WriteLine(@"@" + index);//store segment index in D
-            streamWriter.WriteLine(@"D=A");
-            streamWriter.WriteLine(@"@" + segment);
-            streamWriter.WriteLine(@"A=M+D");//point to segment[index]
-            streamWriter.WriteLine(@"D=A");//store address in D
-            streamWriter.WriteLine(@"@R13");//R13 is a general purpose reg, use it to store pointer to segment[index]
-            streamWriter.WriteLine(@"M=D");//save pointer to variable
-            streamWriter.WriteLine(@"@SP");//get value out of stack and store in D
-            streamWriter.WriteLine(@"A=M");
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R13");// get get pointer segment[index] from general purchase reg
-            streamWriter.WriteLine(@"A=M"); // goto pointer address (segment[index])
-            streamWriter.WriteLine(@"D=M"); // store contents of segment[index] in d
+            streamWriter.WriteLine(@"@" + segmentIndexAddress);
+            streamWriter.WriteLine(@"D=M"); 
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"A=M");
             streamWriter.WriteLine(@"M=D");
@@ -361,37 +358,23 @@ namespace VM
 
         private void WritePop(string seg, int index)
         {
-            
-            string segment = this.GetSegmentAssemblyLanguageName(seg);
+            //BRIAN!!!!!!!!!!!!!!
+            //Here it looks like you have to store the seg[index]
+            //e.g temp[10] actually means get address that local points to + 10!!!!
 
-            streamWriter.WriteLine(@"//Write Pop");
-            // copy value at top of stack to R13
+            int segmentBaseAddress = this.segmentLookUpTable[seg];
+            int segmentIndexAddress = segmentBaseAddress + index;
+
+            streamWriter.WriteLine(@"//Write Pop "+seg+" "+index);
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"A=M-1");
             streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R13");
-            streamWriter.WriteLine(@"M=D");
 
-            //store index at R14
-            streamWriter.WriteLine(@"@" + index);
-            streamWriter.WriteLine(@"D=A");
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"M=D");
-
-            //make R14 =  segment + index
-            streamWriter.WriteLine(@"@" + segment);
-            streamWriter.WriteLine(@"D=M"); //D=segAddress
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"M=M+D"); //make R14 point segment + index
-
-            // copy index value  of R13 in segment[index]
-            streamWriter.WriteLine(@"@R13");
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"A=M");
+            streamWriter.WriteLine(@"@" + segmentIndexAddress);
             streamWriter.WriteLine(@"M=D");
 
             this.DecrementStackPointer();
+            streamWriter.WriteLine(@"//End Write Pop " + seg + " " + index);
         }
 
         private void WritePopTempOrPointer(string seg, int index)
@@ -431,22 +414,7 @@ namespace VM
             streamWriter.WriteLine(@"M=M-1");
         }
 
-        private string GetSegmentAssemblyLanguageName(string seg)
-        {
-            string segment = string.Empty;
-
-            if (this.segmentLookUpTable.ContainsKey(seg))
-            {
-                segment = this.segmentLookUpTable[seg];
-            }
-            else
-            {
-                // if its not in look up table just use it literally 
-                segment = seg;
-            }
-
-            return segment;
-        }
+        
 
         #endregion
 
