@@ -11,11 +11,11 @@ namespace VM
     {
         static void Main(string[] args)
         {
-            //string filePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.vm";
-            //string outPutFilePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.asm";
-
             string filePath = @"..\..\..\MemoryAccess\BasicTest\_BasicTest.vm";
             string outPutFilePath = @"..\..\..\MemoryAccess\BasicTest\BasicTest.asm";
+
+            //string filePath = @"..\..\..\StackArithmetic\StackTest\StackTest.vm";
+            //string outPutFilePath = @"..\..\..\StackArithmetic\StackTest\StackTest.asm";
 
             using (Parser parser = new Parser(filePath))
             using (CodeWriter codeWriter = new CodeWriter(outPutFilePath))
