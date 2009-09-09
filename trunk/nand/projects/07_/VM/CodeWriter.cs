@@ -98,7 +98,7 @@ namespace VM
                 }
                 else 
                 {
-                    this.WritePushSegment(segment, index);
+                    this.WritePushSegmentIndex(segment, index);
                 }
             }
             if(commandType == CommandType.C_POP)
@@ -109,7 +109,7 @@ namespace VM
                 }
                 else
                 {
-                    this.WritePop(segment, index);
+                    this.WritePopSegment(segment, index);
                 }
             }
         }
@@ -128,6 +128,8 @@ namespace VM
             lookUpTable.Add("R13", 13);
             lookUpTable.Add("R14", 14);
             lookUpTable.Add("R15", 15);
+            lookUpTable.Add("pointer", 3);
+            lookUpTable.Add("temp", 5);
             return lookUpTable;
         }
 
@@ -137,8 +139,8 @@ namespace VM
         {
             streamWriter.WriteLine(@"//Write Add");
             // pop the operands into R14 & R15, I would expect them to be at the top of the stack
-            this.WritePop("R14", 0);
-            this.WritePop("R15", 0);
+            this.WritePopToR("R14");
+            this.WritePopToR("R15");
 
             streamWriter.WriteLine(@"//still in write add");
             streamWriter.WriteLine(@"@R14"); //Copy R14 to D and add it to R15, result is therefore in R15
@@ -148,14 +150,14 @@ namespace VM
 
             // R15 has the sum result, although I orginally thought that push segment
             // would only be used to push from memory segments, I can push from addresses aswell
-            this.WritePushSegment("R15", 0);
+            this.PushR("R15");
         }
 
         private void WriteSubtract()
         {
             // pop the operands into R14 & R15, I would expect them to be at the top of the stack
-            this.WritePop("R14", 0);
-            this.WritePop("R15", 0);
+            this.WritePopToR("R14");
+            this.WritePopToR("R15");
 
             streamWriter.WriteLine(@"@R14"); //Copy R14 to D and add it to R15, result is therefore in R15
             streamWriter.WriteLine(@"D=M");
@@ -163,14 +165,14 @@ namespace VM
             streamWriter.WriteLine(@"M=M-D");
 
             // R15 has the sub result so push it onto the stack
-            this.WritePushSegment("R15", 0);
+            this.PushR("R15");
         }
 
         private void WriteEquality()
         {
-            streamWriter.WriteLine(@"//Write equality"); 
-            this.WritePop("R14", 0);
-            this.WritePop("R15", 0);
+            streamWriter.WriteLine(@"//Write equality");
+            this.WritePopToR("R14");
+            this.WritePopToR("R15");
 
             // subtract and check for zero - this checks if they are equal
             streamWriter.WriteLine(@"@R14"); 
@@ -193,7 +195,7 @@ namespace VM
             
 
             this.streamWriter.WriteLine(@"(END)");
-            this.WritePushSegment("R15", 0);
+            this.PushR("R15");
 
             streamWriter.WriteLine(@"//End Write equality"); 
 
@@ -201,55 +203,55 @@ namespace VM
 
         private void WriteNegate()
         {
-            this.WritePop("R14", 0);
+            this.WritePopToR("R14");
 
             streamWriter.WriteLine(@"@R14"); 
             streamWriter.WriteLine(@"M=-M");
 
-            this.WritePushSegment("R14", 0);
+            this.PushR("R14");
         }
 
         private void WriteAnd()
         {
-            this.WritePop("R14", 0);
-            this.WritePop("R15", 0);
+            this.WritePopToR("R14");
+            this.WritePopToR("R15");
 
             streamWriter.WriteLine(@"@R14");
             streamWriter.WriteLine(@"D=M");
             streamWriter.WriteLine(@"@R15");
             streamWriter.WriteLine(@"M=D&M");
 
-            this.WritePushSegment("R15", 0);
+            this.PushR("R15");
         }
 
         private void WriteOr()
         {
-            this.WritePop("R14", 0);
-            this.WritePop("R15", 0);
+            this.WritePopToR("R14");
+            this.WritePopToR("R15");
 
             streamWriter.WriteLine(@"@R14");
             streamWriter.WriteLine(@"D=M");
             streamWriter.WriteLine(@"@R15");
             streamWriter.WriteLine(@"M=D|M");
 
-            this.WritePushSegment("R15", 0);
+            this.PushR("R15");
         }
 
         private void WriteNot()
         {
-            this.WritePop("R14", 0);
+            this.WritePopToR("R14");
 
             streamWriter.WriteLine(@"@R14");
             streamWriter.WriteLine(@"M=!M");
 
-            this.WritePushSegment("R14", 0);
+            this.PushR("R14");
         }
 
         // x > y
         private void WriteGreaterThan()
         {
-            this.WritePop("R14", 0); //y
-            this.WritePop("R15", 0); //x
+            this.WritePopToR("R14"); //y
+            this.WritePopToR("R15"); //x
 
             streamWriter.WriteLine(@"@R15");
             streamWriter.WriteLine(@"D=M");
@@ -271,14 +273,14 @@ namespace VM
 
             streamWriter.WriteLine(@"(ENDGT)");
 
-            this.WritePushSegment("R15", 0);
+            this.PushR("R15");
         }
 
         // x < y
         private void WriteLessThan()
         {
-            this.WritePop("R14", 0); //y
-            this.WritePop("R15", 0); //x
+            this.WritePopToR("R14"); //y
+            this.WritePopToR("R15"); //x
 
             streamWriter.WriteLine(@"@R15");
             streamWriter.WriteLine(@"D=M");
@@ -300,7 +302,7 @@ namespace VM
 
             streamWriter.WriteLine(@"(ENDLT)");
 
-            this.WritePushSegment("R15", 0);
+            this.PushR("R15");
         }
 
         private void WritePushConstant(int index)
@@ -340,64 +342,114 @@ namespace VM
             this.IncrementStackPointer();
         }
 
-        private void WritePushSegment(string seg, int index)
+        private void WritePushSegmentIndex(string seg, int index)
         {
+            //May need to write push R15 etc
             int segmentBaseAddress = this.segmentLookUpTable[seg];
-            int segmentIndexAddress = segmentBaseAddress + index;
 
-            // pointer and temp are handled differently than the other segments
+            this.StoreSegmentPlusIndexPointerInR13(segmentBaseAddress, index);
 
-            streamWriter.WriteLine(@"@" + segmentIndexAddress);
-            streamWriter.WriteLine(@"D=M"); 
-            streamWriter.WriteLine(@"@SP");
-            streamWriter.WriteLine(@"A=M");
-            streamWriter.WriteLine(@"M=D");
+            this.streamWriter.WriteLine(@"@R13");
+            this.streamWriter.WriteLine(@"A=M");
+            this.streamWriter.WriteLine(@"D=M");
+            this.streamWriter.WriteLine(@"@SP");
+            this.streamWriter.WriteLine(@"A=M");
+            this.streamWriter.WriteLine(@"M=D");
 
             this.IncrementStackPointer();
         }
 
-        private void WritePop(string seg, int index)
+        private void PushR(string R)
         {
-            //BRIAN!!!!!!!!!!!!!!
-            //Here it looks like you have to store the seg[index]
-            //e.g temp[10] actually means get address that local points to + 10!!!!
+            this.streamWriter.WriteLine(@"@" + R);
+            this.streamWriter.WriteLine(@"D=M");
+            this.streamWriter.WriteLine(@"@SP");
+            this.streamWriter.WriteLine(@"A=M");
+            this.streamWriter.WriteLine(@"M=D");
 
-            int segmentBaseAddress = this.segmentLookUpTable[seg];
-            int segmentIndexAddress = segmentBaseAddress + index;
+            this.IncrementStackPointer();
 
-            streamWriter.WriteLine(@"//Write Pop "+seg+" "+index);
+        }
+
+        /// <summary>
+        /// Writes the pop to segment.
+        /// Should only be used with LCL ARG THIS THAT segment
+        /// </summary>
+        /// <param name="seg">The seg.</param>
+        /// <param name="index">The index.</param>
+        private void WritePopSegment(string seg, int index)
+        {
+            int segement = this.segmentLookUpTable[seg];
+
+            this.StoreSegmentPlusIndexPointerInR13(segement, index);
+            
+            this.streamWriter.WriteLine(@"@SP");//copy stack top to D
+            this.streamWriter.WriteLine(@"A=M-1");
+            this.streamWriter.WriteLine(@"D=M");
+
+            this.streamWriter.WriteLine(@"@R13");//get pointer to seg[index] from R13
+            this.streamWriter.WriteLine(@"A=M");
+            this.streamWriter.WriteLine(@"M=D");//make seg[index] = contents of D (which should have value from top of stack.
+
+            this.DecrementStackPointer();
+        }
+
+        /// <summary>
+        ///  segmentBaseAddress + index and store in R13
+        /// </summary>
+        /// <param name="segmentBase"></param>
+        /// <param name="index"></param>
+        private void StoreSegmentPlusIndexPointerInR13(int segmentBase, int index)
+        {
+            this.streamWriter.WriteLine(@"@" + index);
+            this.streamWriter.WriteLine(@"D=A"); // D = index 
+
+            this.streamWriter.WriteLine(@"@" + segmentBase);
+            this.streamWriter.WriteLine(@"A=A+D");// now at seg[index]
+            this.streamWriter.WriteLine(@"D=A"); //save this pointer in @R13
+            this.streamWriter.WriteLine(@"@R13");
+            this.streamWriter.WriteLine(@"M=D"); 
+        }
+
+        /// <summary>
+        /// Used to Pop to an R Register
+        /// </summary>
+        /// <param name="R"></param>
+        private void WritePopToR(string R)
+        {
+            int address =  this.segmentLookUpTable[R];
+            streamWriter.WriteLine(@"//Write Pop " +R);
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"A=M-1");
             streamWriter.WriteLine(@"D=M");
 
-            streamWriter.WriteLine(@"@" + segmentIndexAddress);
+            streamWriter.WriteLine(@"@" + address);
             streamWriter.WriteLine(@"M=D");
 
             this.DecrementStackPointer();
-            streamWriter.WriteLine(@"//End Write Pop " + seg + " " + index);
+            streamWriter.WriteLine(@"//End Write Pop " +R);
         }
 
+        /// <summary>
+        /// writes to temp or pointer
+        /// temp and pointer differ from THIS,THAT, LCL, ARG
+        /// in that temp does not contain a pointer to elsewhere
+        /// so that temp[3] go to location means 5+3
+        /// </summary>
+        /// <param name="seg">The seg.</param>
+        /// <param name="index">The index.</param>
         private void WritePopTempOrPointer(string seg, int index)
         {
-            int address;
+            int baseAddress = this.segmentLookUpTable[seg];
 
-            if (seg == "pointer")
-            {
-                address = 3;
-            }
-            else //temp
-            {
-                address = 5;
-            }
+            int address = baseAddress + index;
 
-            address = address + index;
+            this.streamWriter.WriteLine("@SP");
+            this.streamWriter.WriteLine("A=M-1"); //minus one for top value
+            this.streamWriter.WriteLine("D=M");//copy contents to D
 
-            streamWriter.WriteLine("@SP");
-            streamWriter.WriteLine("A=M-1"); //not minus one for top value
-            streamWriter.WriteLine("D=M");//copy contents to D
-
-            streamWriter.WriteLine("@"+address); 
-            streamWriter.WriteLine("M=D");
+            this.streamWriter.WriteLine("@" + address);
+            this.streamWriter.WriteLine("M=D");
 
             this.DecrementStackPointer();
         }
