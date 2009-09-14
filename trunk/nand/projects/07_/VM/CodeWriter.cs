@@ -11,7 +11,7 @@ namespace VM
         private FileStream fileStream = null;
         private StreamWriter streamWriter;
         private string vmFileName;
-        private Dictionary<string,int> segmentLookUpTable = null;
+        private Dictionary<string, int> segmentLookUpTable = null;
 
         public CodeWriter(string outputFilePath)
         {
@@ -28,14 +28,15 @@ namespace VM
         }
 
         /// <summary>
-        /// Writes the arithmetic.
+        /// Writes the assembly code that is the 
+        /// translation of the given arithmetic command.
         /// </summary>
         /// <param name="command">The command.</param>
         public void WriteArithmetic(string command)
         {
             switch (command)
             {
-                case("add"):
+                case ("add"):
                     {
                         this.WriteAdd();
                         break;
@@ -81,9 +82,15 @@ namespace VM
                         break;
                     }
             }
-            
+
         }
 
+        /// <summary>
+        /// Writes the assembly code that is hte translation of the given command.
+        /// </summary>
+        /// <param name="commandType">Type of the command.</param>
+        /// <param name="segment">The segment.</param>
+        /// <param name="index">The index.</param>
         public void WritePushPop(CommandType commandType, string segment, int index)
         {
             if (commandType == CommandType.C_PUSH)
@@ -92,30 +99,42 @@ namespace VM
                 {
                     this.WritePushConstant(index);
                 }
+                else if (segment == "static")
+                {
+                    this.WritePushStatic(index);
+                }
                 else if (segment == "temp" || segment == "pointer")
                 {
+                    // handles push temp / pointer
                     this.WritePushTempOrPointer(segment, index);
-                }
-                else 
-                {
-                    this.WritePushSegmentIndex(segment, index);
-                }
-            }
-            if(commandType == CommandType.C_POP)
-            {
-                if (segment == "temp" || segment == "pointer")
-                {
-                    this.WritePopTempOrPointer(segment, index);
                 }
                 else
                 {
-                    this.WritePopSegment(segment, index);
+                    // handles push local / arg / this / that
+                    this.WritePushSegmentIndex(segment, index);
+                }
+            }
+            if (commandType == CommandType.C_POP)
+            {
+                if (segment == "temp" || segment == "pointer")
+                {
+                    // handles push temp / pointer
+                    this.WritePopTempOrPointer(segment, index);
+                }
+                else if (segment == "static")
+                {
+                    this.WritePopStatic(index);
+                }
+                else
+                {
+                    // handles pop to local / arg / this / that [index]
+                    this.WritePopSegmentIndex(segment, index);
                 }
             }
         }
 
         /// <summary>
-        /// Just acts as a translator between local=LCL,this=THIS
+        /// Just acts as a translator between local=LCL,this=THIS etc
         /// </summary>
         private Dictionary<string, int> SetUpSegmentLookUpTable()
         {
@@ -133,7 +152,7 @@ namespace VM
             return lookUpTable;
         }
 
-        #region WriteAssemblyMethods
+        #region WriteArthemeticCommands
 
         private void WriteAdd()
         {
@@ -175,7 +194,7 @@ namespace VM
             this.WritePopToR("R15");
 
             // subtract and check for zero - this checks if they are equal
-            streamWriter.WriteLine(@"@R14"); 
+            streamWriter.WriteLine(@"@R14");
             streamWriter.WriteLine(@"D=M");
             streamWriter.WriteLine(@"@R15");
             streamWriter.WriteLine(@"M=M-D");
@@ -192,12 +211,12 @@ namespace VM
             streamWriter.WriteLine(@"(EQUAL)");
             streamWriter.WriteLine(@"@R15");
             streamWriter.WriteLine(@"M=-1");// push -1 onto stack for true (we push at end of method)
-            
+
 
             this.streamWriter.WriteLine(@"(END)");
             this.PushR("R15");
 
-            streamWriter.WriteLine(@"//End Write equality"); 
+            streamWriter.WriteLine(@"//End Write equality");
 
         }
 
@@ -205,7 +224,7 @@ namespace VM
         {
             this.WritePopToR("R14");
 
-            streamWriter.WriteLine(@"@R14"); 
+            streamWriter.WriteLine(@"@R14");
             streamWriter.WriteLine(@"M=-M");
 
             this.PushR("R14");
@@ -305,9 +324,13 @@ namespace VM
             this.PushR("R15");
         }
 
+        #endregion 
+
+        #region StackCommands
+
         private void WritePushConstant(int index)
         {
-            streamWriter.WriteLine(@"@"+index);
+            streamWriter.WriteLine(@"@" + index);
             streamWriter.WriteLine(@"D=A");
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"A=M");
@@ -359,6 +382,12 @@ namespace VM
             this.IncrementStackPointer();
         }
 
+        /// <summary>
+        /// Writes the assembly code for pushing a value into one of the mapped R
+        /// memory locations e.g. R15, R14, R13
+        /// Only used internally, i.e. you won't ever see VM code to push something onto R15
+        /// </summary>
+        /// <param name="R"></param>
         private void PushR(string R)
         {
             this.streamWriter.WriteLine(@"@" + R);
@@ -377,12 +406,13 @@ namespace VM
         /// </summary>
         /// <param name="seg">The seg.</param>
         /// <param name="index">The index.</param>
-        private void WritePopSegment(string seg, int index)
+        private void WritePopSegmentIndex(string seg, int index)
         {
             int segement = this.segmentLookUpTable[seg];
 
             this.StoreSegmentPlusIndexPointerInR13(segement, index);
-            
+
+            this.streamWriter.WriteLine(@"//WritePopSegmentIndex ");
             this.streamWriter.WriteLine(@"@SP");//copy stack top to D
             this.streamWriter.WriteLine(@"A=M-1");
             this.streamWriter.WriteLine(@"D=M");
@@ -392,23 +422,28 @@ namespace VM
             this.streamWriter.WriteLine(@"M=D");//make seg[index] = contents of D (which should have value from top of stack.
 
             this.DecrementStackPointer();
+
+            this.streamWriter.WriteLine(@"//End WritePopSegmentIndex ");
         }
 
         /// <summary>
+        ///  does what it says on the tin!
         ///  segmentBaseAddress + index and store in R13
         /// </summary>
         /// <param name="segmentBase"></param>
         /// <param name="index"></param>
         private void StoreSegmentPlusIndexPointerInR13(int segmentBase, int index)
         {
+            this.streamWriter.WriteLine(@"//Begin StoreSegmentPlusIndexPointerInR13 ");
             this.streamWriter.WriteLine(@"@" + index);
             this.streamWriter.WriteLine(@"D=A"); // D = index 
 
             this.streamWriter.WriteLine(@"@" + segmentBase);
-            this.streamWriter.WriteLine(@"A=A+D");// now at seg[index]
+            this.streamWriter.WriteLine(@"A=M+D");// now at seg[index]
             this.streamWriter.WriteLine(@"D=A"); //save this pointer in @R13
             this.streamWriter.WriteLine(@"@R13");
-            this.streamWriter.WriteLine(@"M=D"); 
+            this.streamWriter.WriteLine(@"M=D");
+            this.streamWriter.WriteLine(@"//End StoreSegmentPlusIndexPointerInR13 ");
         }
 
         /// <summary>
@@ -417,8 +452,8 @@ namespace VM
         /// <param name="R"></param>
         private void WritePopToR(string R)
         {
-            int address =  this.segmentLookUpTable[R];
-            streamWriter.WriteLine(@"//Write Pop " +R);
+            int address = this.segmentLookUpTable[R];
+            streamWriter.WriteLine(@"//Begin Write Pop " + R);
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"A=M-1");
             streamWriter.WriteLine(@"D=M");
@@ -427,7 +462,7 @@ namespace VM
             streamWriter.WriteLine(@"M=D");
 
             this.DecrementStackPointer();
-            streamWriter.WriteLine(@"//End Write Pop " +R);
+            streamWriter.WriteLine(@"// End Write Pop " + R);
         }
 
         /// <summary>
@@ -454,21 +489,52 @@ namespace VM
             this.DecrementStackPointer();
         }
 
+        /// <summary>
+        /// Writes the push static.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        private void WritePushStatic(int index)
+        {
+            this.streamWriter.WriteLine(@"@"+this.VmFileName+"."+index);
+            this.streamWriter.WriteLine("D=M");
+            this.streamWriter.WriteLine(@"@SP");
+            this.streamWriter.WriteLine(@"A=M");
+            this.streamWriter.WriteLine(@"M=D");
+            this.IncrementStackPointer();
+        }
+
+        private void WritePopStatic(int index)
+        {
+            this.streamWriter.WriteLine("@SP");
+            this.streamWriter.WriteLine("A=M-1");
+            this.streamWriter.WriteLine("D=M");
+            this.streamWriter.WriteLine(@"@" + this.VmFileName + "." + index);
+            this.streamWriter.WriteLine("M=D");
+
+            this.DecrementStackPointer();
+        }
+
+
+
+        /// <summary>
+        /// Increments the stack pointer.
+        /// </summary>
         private void IncrementStackPointer()
         {
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"M=M+1");
         }
 
+        /// <summary>
+        /// Decrements the stack pointer.
+        /// </summary>
         private void DecrementStackPointer()
         {
             streamWriter.WriteLine(@"@SP");
             streamWriter.WriteLine(@"M=M-1");
         }
 
-        
-
-        #endregion
+        #endregion 
 
         #region IDisposable Members
 
