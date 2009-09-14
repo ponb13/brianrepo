@@ -11,24 +11,41 @@ namespace VM
     {
         static void Main(string[] args)
         {
-            string intputFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.vm";
-            string outPutFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.asm";
+            string intputFilePath = @"..\..\..\MemoryAccess\PointerTest\";
+            string outPutFilePath = @"..\..\..\MemoryAccess\PointerTest\PointerTest.asm";
 
 
+            IList<string> linesOfAssemblyCode = new List<string>();
 
-            Program.Process(intputFilePath, outPutFilePath);
+            if (Program.PathIsDirectory(intputFilePath))
+            {
+                foreach (string file in Directory.GetFiles(Path.GetDirectoryName(intputFilePath)))
+                {
+                    if (Path.GetExtension(file) == ".vm")
+                    {
+                        Program.ProcessFile(Path.GetFullPath(file), linesOfAssemblyCode);
+                    }
+                }
+            }
+            else
+            {
+                Program.ProcessFile(intputFilePath, linesOfAssemblyCode);
+            }
+
+            
+            Program.WriteAssemblyCodeToFile(linesOfAssemblyCode, outPutFilePath);
         }
 
         /// <summary>
-        /// Processes the specified input file and writes to output path.
+        /// Processes the specified input path.
         /// </summary>
         /// <param name="inputPath">The input path.</param>
-        /// <param name="outputPath">The output path.</param>
-        public static void Process(string inputPath, string outputPath)
+        private static void ProcessFile(string inputPath, IList<string> linesOfAssemblyCode)
         {
+            
             using (Parser parser = new Parser(inputPath))
-            using (CodeWriter codeWriter = new CodeWriter(outputPath))
             {
+                CodeWriter codeWriter = new CodeWriter(linesOfAssemblyCode);
                 codeWriter.VmFileName = Path.GetFileNameWithoutExtension(inputPath);
                 while (parser.HasMoreCommands())
                 {
@@ -46,5 +63,30 @@ namespace VM
                 }
             }
         }
+
+        /// <summary>
+        /// Writes the assembly code to file.
+        /// </summary>
+        /// <param name="linesOfAssemblyCode">The lines of assembly code.</param>
+        /// <param name="outputPath">The output path.</param>
+        private static void WriteAssemblyCodeToFile(IList<string> linesOfAssemblyCode, string outputPath)
+        {
+            using (FileStream fileStream = new FileStream(outputPath, FileMode.Create))
+            using (StreamWriter writer = new StreamWriter(fileStream))
+            {
+                foreach (string line in linesOfAssemblyCode)
+                {
+                    writer.WriteLine(line);
+                }
+            }
+        }
+
+        private static bool PathIsDirectory(string filePath)
+        {
+            FileAttributes attr = File.GetAttributes(filePath);
+            //detect whether its a directory or file
+            return ((attr & FileAttributes.Directory) == FileAttributes.Directory);
+        }
+   
     }
 }
