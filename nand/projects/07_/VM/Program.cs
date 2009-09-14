@@ -11,16 +11,25 @@ namespace VM
     {
         static void Main(string[] args)
         {
-            string filePath = @"..\..\..\MemoryAccess\PointerTest\PointerTest.vm";
-            string outPutFilePath = @"..\..\..\MemoryAccess\PointerTest\PointerTest.asm";
+            string intputFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.vm";
+            string outPutFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.asm";
 
-            //string filePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.vm";
-            //string outPutFilePath = @"..\..\..\StackArithmetic\SimpleAdd\SimpleAdd.asm";
 
-            using (Parser parser = new Parser(filePath))
-            using (CodeWriter codeWriter = new CodeWriter(outPutFilePath))
+
+            Program.Process(intputFilePath, outPutFilePath);
+        }
+
+        /// <summary>
+        /// Processes the specified input file and writes to output path.
+        /// </summary>
+        /// <param name="inputPath">The input path.</param>
+        /// <param name="outputPath">The output path.</param>
+        public static void Process(string inputPath, string outputPath)
+        {
+            using (Parser parser = new Parser(inputPath))
+            using (CodeWriter codeWriter = new CodeWriter(outputPath))
             {
-                codeWriter.VmFileName = Path.GetFileNameWithoutExtension(filePath);
+                codeWriter.VmFileName = Path.GetFileNameWithoutExtension(inputPath);
                 while (parser.HasMoreCommands())
                 {
                     parser.Advance();
