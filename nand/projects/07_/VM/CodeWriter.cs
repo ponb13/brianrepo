@@ -6,18 +6,16 @@ using System.IO;
 
 namespace VM
 {
-    public class CodeWriter : IDisposable
+    public class CodeWriter
     {
-        private FileStream fileStream = null;
-        private StreamWriter streamWriter;
+        private IList<string> linesOfCode = null;
         private string vmFileName;
         private Dictionary<string, int> segmentLookUpTable = null;
 
-        public CodeWriter(string outputFilePath)
+        public CodeWriter(IList<string> linesOfAssemblyCode)
         {
-            this.fileStream = new FileStream(outputFilePath, FileMode.Create);
-            this.streamWriter = new StreamWriter(fileStream);
-
+            ///this.linesOfCode.Concat(linesOfAssemblyCode);
+            this.linesOfCode = linesOfAssemblyCode;
             this.segmentLookUpTable = this.SetUpSegmentLookUpTable();
         }
 
@@ -156,16 +154,16 @@ namespace VM
 
         private void WriteAdd()
         {
-            streamWriter.WriteLine(@"//Write Add");
+            linesOfCode.Add(@"//Write Add");
             // pop the operands into R14 & R15, I would expect them to be at the top of the stack
             this.WritePopToR("R14");
             this.WritePopToR("R15");
 
-            streamWriter.WriteLine(@"//still in write add");
-            streamWriter.WriteLine(@"@R14"); //Copy R14 to D and add it to R15, result is therefore in R15
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=M+D");
+            linesOfCode.Add(@"//still in write add");
+            linesOfCode.Add(@"@R14"); //Copy R14 to D and add it to R15, result is therefore in R15
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=M+D");
 
             // R15 has the sum result, although I orginally thought that push segment
             // would only be used to push from memory segments, I can push from addresses aswell
@@ -178,10 +176,10 @@ namespace VM
             this.WritePopToR("R14");
             this.WritePopToR("R15");
 
-            streamWriter.WriteLine(@"@R14"); //Copy R14 to D and add it to R15, result is therefore in R15
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=M-D");
+            linesOfCode.Add(@"@R14"); //Copy R14 to D and add it to R15, result is therefore in R15
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=M-D");
 
             // R15 has the sub result so push it onto the stack
             this.PushR("R15");
@@ -189,34 +187,34 @@ namespace VM
 
         private void WriteEquality()
         {
-            streamWriter.WriteLine(@"//Write equality");
+            linesOfCode.Add(@"//Write equality");
             this.WritePopToR("R14");
             this.WritePopToR("R15");
 
             // subtract and check for zero - this checks if they are equal
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=M-D");
-            streamWriter.WriteLine(@"D=M"); // copy subtraction result to D
-            streamWriter.WriteLine(@"@EQUAL");
-            streamWriter.WriteLine(@"D;JEQ");//jump to EQUAL if zero
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=M-D");
+            linesOfCode.Add(@"D=M"); // copy subtraction result to D
+            linesOfCode.Add(@"@EQUAL");
+            linesOfCode.Add(@"D;JEQ");//jump to EQUAL if zero
 
-            streamWriter.WriteLine(@"(NOTEQUAL)");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=0");// push zero onto stack for false (we push at end of method
-            this.streamWriter.WriteLine("@END");
-            this.streamWriter.WriteLine("0;JMP");
+            linesOfCode.Add(@"(NOTEQUAL)");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=0");// push zero onto stack for false (we push at end of method
+            this.linesOfCode.Add("@END");
+            this.linesOfCode.Add("0;JMP");
 
-            streamWriter.WriteLine(@"(EQUAL)");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=-1");// push -1 onto stack for true (we push at end of method)
+            linesOfCode.Add(@"(EQUAL)");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=-1");// push -1 onto stack for true (we push at end of method)
 
 
-            this.streamWriter.WriteLine(@"(END)");
+            this.linesOfCode.Add(@"(END)");
             this.PushR("R15");
 
-            streamWriter.WriteLine(@"//End Write equality");
+            linesOfCode.Add(@"//End Write equality");
 
         }
 
@@ -224,8 +222,8 @@ namespace VM
         {
             this.WritePopToR("R14");
 
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"M=-M");
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"M=-M");
 
             this.PushR("R14");
         }
@@ -235,10 +233,10 @@ namespace VM
             this.WritePopToR("R14");
             this.WritePopToR("R15");
 
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=D&M");
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=D&M");
 
             this.PushR("R15");
         }
@@ -248,10 +246,10 @@ namespace VM
             this.WritePopToR("R14");
             this.WritePopToR("R15");
 
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=D|M");
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=D|M");
 
             this.PushR("R15");
         }
@@ -260,8 +258,8 @@ namespace VM
         {
             this.WritePopToR("R14");
 
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"M=!M");
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"M=!M");
 
             this.PushR("R14");
         }
@@ -272,25 +270,25 @@ namespace VM
             this.WritePopToR("R14"); //y
             this.WritePopToR("R15"); //x
 
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"M=D-M"); // R15 -R14
-            streamWriter.WriteLine(@"D=M"); //store result in D
-            streamWriter.WriteLine(@"@GTTRUE");
-            streamWriter.WriteLine(@"D;JGT"); // check if result is greater than zero if so R15 is greater than R14
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"M=D-M"); // R15 -R14
+            linesOfCode.Add(@"D=M"); //store result in D
+            linesOfCode.Add(@"@GTTRUE");
+            linesOfCode.Add(@"D;JGT"); // check if result is greater than zero if so R15 is greater than R14
 
-            streamWriter.WriteLine(@"(GTFALSE)");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=-1");
-            streamWriter.WriteLine(@"@ENDGT");
-            streamWriter.WriteLine(@"0;JMP");
+            linesOfCode.Add(@"(GTFALSE)");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=-1");
+            linesOfCode.Add(@"@ENDGT");
+            linesOfCode.Add(@"0;JMP");
 
-            streamWriter.WriteLine(@"(GTTRUE)");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=-1");
+            linesOfCode.Add(@"(GTTRUE)");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=-1");
 
-            streamWriter.WriteLine(@"(ENDGT)");
+            linesOfCode.Add(@"(ENDGT)");
 
             this.PushR("R15");
         }
@@ -301,25 +299,25 @@ namespace VM
             this.WritePopToR("R14"); //y
             this.WritePopToR("R15"); //x
 
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"D=M");
-            streamWriter.WriteLine(@"@R14");
-            streamWriter.WriteLine(@"M=D-M"); // R15 -R14
-            streamWriter.WriteLine(@"D=M"); //store result in D
-            streamWriter.WriteLine(@"@LTTRUE");
-            streamWriter.WriteLine(@"D;JLT"); // check if result is greater than zero if so R15 is greater than R14
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"M=D-M"); // R15 -R14
+            linesOfCode.Add(@"D=M"); //store result in D
+            linesOfCode.Add(@"@LTTRUE");
+            linesOfCode.Add(@"D;JLT"); // check if result is greater than zero if so R15 is greater than R14
 
-            streamWriter.WriteLine(@"(LTFALSE)");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=0");
-            streamWriter.WriteLine(@"@ENDLT");
-            streamWriter.WriteLine(@"0;JMP");
+            linesOfCode.Add(@"(LTFALSE)");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=0");
+            linesOfCode.Add(@"@ENDLT");
+            linesOfCode.Add(@"0;JMP");
 
-            streamWriter.WriteLine(@"(LTTRUE)");
-            streamWriter.WriteLine(@"@R15");
-            streamWriter.WriteLine(@"M=-1");
+            linesOfCode.Add(@"(LTTRUE)");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=-1");
 
-            streamWriter.WriteLine(@"(ENDLT)");
+            linesOfCode.Add(@"(ENDLT)");
 
             this.PushR("R15");
         }
@@ -330,13 +328,13 @@ namespace VM
 
         private void WritePushConstant(int index)
         {
-            streamWriter.WriteLine(@"@" + index);
-            streamWriter.WriteLine(@"D=A");
-            streamWriter.WriteLine(@"@SP");
-            streamWriter.WriteLine(@"A=M");
-            streamWriter.WriteLine(@"M=D");
-            streamWriter.WriteLine(@"@SP");
-            streamWriter.WriteLine(@"M=M+1");
+            linesOfCode.Add(@"@" + index);
+            linesOfCode.Add(@"D=A");
+            linesOfCode.Add(@"@SP");
+            linesOfCode.Add(@"A=M");
+            linesOfCode.Add(@"M=D");
+            linesOfCode.Add(@"@SP");
+            linesOfCode.Add(@"M=M+1");
         }
 
         private void WritePushTempOrPointer(string seg, int index)
@@ -354,13 +352,13 @@ namespace VM
 
             address = address + index;
 
-            streamWriter.WriteLine(@"@" + address); // copy contents into D
-            streamWriter.WriteLine(@"D=M");
+            linesOfCode.Add(@"@" + address); // copy contents into D
+            linesOfCode.Add(@"D=M");
 
-            streamWriter.WriteLine(@"@SP"); // goto top of stack
-            streamWriter.WriteLine(@"A=M");
+            linesOfCode.Add(@"@SP"); // goto top of stack
+            linesOfCode.Add(@"A=M");
 
-            streamWriter.WriteLine(@"M=D"); // copy D into top of stack
+            linesOfCode.Add(@"M=D"); // copy D into top of stack
 
             this.IncrementStackPointer();
         }
@@ -372,12 +370,12 @@ namespace VM
 
             this.StoreSegmentPlusIndexPointerInR13(segmentBaseAddress, index);
 
-            this.streamWriter.WriteLine(@"@R13");
-            this.streamWriter.WriteLine(@"A=M");
-            this.streamWriter.WriteLine(@"D=M");
-            this.streamWriter.WriteLine(@"@SP");
-            this.streamWriter.WriteLine(@"A=M");
-            this.streamWriter.WriteLine(@"M=D");
+            this.linesOfCode.Add(@"@R13");
+            this.linesOfCode.Add(@"A=M");
+            this.linesOfCode.Add(@"D=M");
+            this.linesOfCode.Add(@"@SP");
+            this.linesOfCode.Add(@"A=M");
+            this.linesOfCode.Add(@"M=D");
 
             this.IncrementStackPointer();
         }
@@ -390,11 +388,11 @@ namespace VM
         /// <param name="R"></param>
         private void PushR(string R)
         {
-            this.streamWriter.WriteLine(@"@" + R);
-            this.streamWriter.WriteLine(@"D=M");
-            this.streamWriter.WriteLine(@"@SP");
-            this.streamWriter.WriteLine(@"A=M");
-            this.streamWriter.WriteLine(@"M=D");
+            this.linesOfCode.Add(@"@" + R);
+            this.linesOfCode.Add(@"D=M");
+            this.linesOfCode.Add(@"@SP");
+            this.linesOfCode.Add(@"A=M");
+            this.linesOfCode.Add(@"M=D");
 
             this.IncrementStackPointer();
 
@@ -412,18 +410,18 @@ namespace VM
 
             this.StoreSegmentPlusIndexPointerInR13(segement, index);
 
-            this.streamWriter.WriteLine(@"//WritePopSegmentIndex ");
-            this.streamWriter.WriteLine(@"@SP");//copy stack top to D
-            this.streamWriter.WriteLine(@"A=M-1");
-            this.streamWriter.WriteLine(@"D=M");
+            this.linesOfCode.Add(@"//WritePopSegmentIndex ");
+            this.linesOfCode.Add(@"@SP");//copy stack top to D
+            this.linesOfCode.Add(@"A=M-1");
+            this.linesOfCode.Add(@"D=M");
 
-            this.streamWriter.WriteLine(@"@R13");//get pointer to seg[index] from R13
-            this.streamWriter.WriteLine(@"A=M");
-            this.streamWriter.WriteLine(@"M=D");//make seg[index] = contents of D (which should have value from top of stack.
+            this.linesOfCode.Add(@"@R13");//get pointer to seg[index] from R13
+            this.linesOfCode.Add(@"A=M");
+            this.linesOfCode.Add(@"M=D");//make seg[index] = contents of D (which should have value from top of stack.
 
             this.DecrementStackPointer();
 
-            this.streamWriter.WriteLine(@"//End WritePopSegmentIndex ");
+            this.linesOfCode.Add(@"//End WritePopSegmentIndex ");
         }
 
         /// <summary>
@@ -434,16 +432,16 @@ namespace VM
         /// <param name="index"></param>
         private void StoreSegmentPlusIndexPointerInR13(int segmentBase, int index)
         {
-            this.streamWriter.WriteLine(@"//Begin StoreSegmentPlusIndexPointerInR13 ");
-            this.streamWriter.WriteLine(@"@" + index);
-            this.streamWriter.WriteLine(@"D=A"); // D = index 
+            this.linesOfCode.Add(@"//Begin StoreSegmentPlusIndexPointerInR13 ");
+            this.linesOfCode.Add(@"@" + index);
+            this.linesOfCode.Add(@"D=A"); // D = index 
 
-            this.streamWriter.WriteLine(@"@" + segmentBase);
-            this.streamWriter.WriteLine(@"A=M+D");// now at seg[index]
-            this.streamWriter.WriteLine(@"D=A"); //save this pointer in @R13
-            this.streamWriter.WriteLine(@"@R13");
-            this.streamWriter.WriteLine(@"M=D");
-            this.streamWriter.WriteLine(@"//End StoreSegmentPlusIndexPointerInR13 ");
+            this.linesOfCode.Add(@"@" + segmentBase);
+            this.linesOfCode.Add(@"A=M+D");// now at seg[index]
+            this.linesOfCode.Add(@"D=A"); //save this pointer in @R13
+            this.linesOfCode.Add(@"@R13");
+            this.linesOfCode.Add(@"M=D");
+            this.linesOfCode.Add(@"//End StoreSegmentPlusIndexPointerInR13 ");
         }
 
         /// <summary>
@@ -453,16 +451,16 @@ namespace VM
         private void WritePopToR(string R)
         {
             int address = this.segmentLookUpTable[R];
-            streamWriter.WriteLine(@"//Begin Write Pop " + R);
-            streamWriter.WriteLine(@"@SP");
-            streamWriter.WriteLine(@"A=M-1");
-            streamWriter.WriteLine(@"D=M");
+            linesOfCode.Add(@"//Begin Write Pop " + R);
+            linesOfCode.Add(@"@SP");
+            linesOfCode.Add(@"A=M-1");
+            linesOfCode.Add(@"D=M");
 
-            streamWriter.WriteLine(@"@" + address);
-            streamWriter.WriteLine(@"M=D");
+            linesOfCode.Add(@"@" + address);
+            linesOfCode.Add(@"M=D");
 
             this.DecrementStackPointer();
-            streamWriter.WriteLine(@"// End Write Pop " + R);
+            linesOfCode.Add(@"// End Write Pop " + R);
         }
 
         /// <summary>
@@ -479,12 +477,12 @@ namespace VM
 
             int address = baseAddress + index;
 
-            this.streamWriter.WriteLine("@SP");
-            this.streamWriter.WriteLine("A=M-1"); //minus one for top value
-            this.streamWriter.WriteLine("D=M");//copy contents to D
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("A=M-1"); //minus one for top value
+            this.linesOfCode.Add("D=M");//copy contents to D
 
-            this.streamWriter.WriteLine("@" + address);
-            this.streamWriter.WriteLine("M=D");
+            this.linesOfCode.Add("@" + address);
+            this.linesOfCode.Add("M=D");
 
             this.DecrementStackPointer();
         }
@@ -495,21 +493,21 @@ namespace VM
         /// <param name="index">The index.</param>
         private void WritePushStatic(int index)
         {
-            this.streamWriter.WriteLine(@"@"+this.VmFileName+"."+index);
-            this.streamWriter.WriteLine("D=M");
-            this.streamWriter.WriteLine(@"@SP");
-            this.streamWriter.WriteLine(@"A=M");
-            this.streamWriter.WriteLine(@"M=D");
+            this.linesOfCode.Add(@"@"+this.VmFileName+"."+index);
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add(@"@SP");
+            this.linesOfCode.Add(@"A=M");
+            this.linesOfCode.Add(@"M=D");
             this.IncrementStackPointer();
         }
 
         private void WritePopStatic(int index)
         {
-            this.streamWriter.WriteLine("@SP");
-            this.streamWriter.WriteLine("A=M-1");
-            this.streamWriter.WriteLine("D=M");
-            this.streamWriter.WriteLine(@"@" + this.VmFileName + "." + index);
-            this.streamWriter.WriteLine("M=D");
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("A=M-1");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add(@"@" + this.VmFileName + "." + index);
+            this.linesOfCode.Add("M=D");
 
             this.DecrementStackPointer();
         }
@@ -521,8 +519,8 @@ namespace VM
         /// </summary>
         private void IncrementStackPointer()
         {
-            streamWriter.WriteLine(@"@SP");
-            streamWriter.WriteLine(@"M=M+1");
+            linesOfCode.Add(@"@SP");
+            linesOfCode.Add(@"M=M+1");
         }
 
         /// <summary>
@@ -530,20 +528,10 @@ namespace VM
         /// </summary>
         private void DecrementStackPointer()
         {
-            streamWriter.WriteLine(@"@SP");
-            streamWriter.WriteLine(@"M=M-1");
+            linesOfCode.Add(@"@SP");
+            linesOfCode.Add(@"M=M-1");
         }
 
         #endregion 
-
-        #region IDisposable Members
-
-        void IDisposable.Dispose()
-        {
-            this.streamWriter.Flush();
-            this.fileStream.Close();
-        }
-
-        #endregion
     }
 }
