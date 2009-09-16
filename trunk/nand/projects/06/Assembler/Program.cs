@@ -12,6 +12,7 @@ namespace Assembler
         static void Main(string[] args)
         {
             string inputFilePath = args[0];
+            string outputFilePath = args[1];
             
             byte[] junkRemoved = Program.RemoveJunk(inputFilePath);
 
@@ -22,7 +23,7 @@ namespace Assembler
             //replace all label
             string finalBinaryOutput = Program.SecondPass(junkRemoved,symbolTable);
 
-            Program.WriteToFile(@"C:\Documents and Settings\brian\My Documents\dev\brianrepo\nand\projects\06\TestFiles\BRIANPongWithSymbols.asm", finalBinaryOutput);
+            Program.WriteToFile(outputFilePath, finalBinaryOutput);
         }
 
         /// <summary>
