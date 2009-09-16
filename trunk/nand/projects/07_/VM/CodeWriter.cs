@@ -11,6 +11,13 @@ namespace VM
         private IList<string> linesOfCode = null;
         private string vmFileName;
         private Dictionary<string, int> segmentLookUpTable = null;
+        
+        // when writing equality,greater than and less than statements
+        // we use labels, we can't keep using the same labels
+        // so keep a count of each and append to label to make each label unique
+        private int eq_count;
+        private int lt_count;
+        private int gt_count;
 
         public CodeWriter(IList<string> linesOfAssemblyCode)
         {
@@ -185,39 +192,6 @@ namespace VM
             this.PushR("R15");
         }
 
-        private void WriteEquality()
-        {
-            linesOfCode.Add(@"//Write equality");
-            this.WritePopToR("R14");
-            this.WritePopToR("R15");
-
-            // subtract and check for zero - this checks if they are equal
-            linesOfCode.Add(@"@R14");
-            linesOfCode.Add(@"D=M");
-            linesOfCode.Add(@"@R15");
-            linesOfCode.Add(@"M=M-D");
-            linesOfCode.Add(@"D=M"); // copy subtraction result to D
-            linesOfCode.Add(@"@EQUAL");
-            linesOfCode.Add(@"D;JEQ");//jump to EQUAL if zero
-
-            linesOfCode.Add(@"(NOTEQUAL)");
-            linesOfCode.Add(@"@R15");
-            linesOfCode.Add(@"M=0");// push zero onto stack for false (we push at end of method
-            this.linesOfCode.Add("@END");
-            this.linesOfCode.Add("0;JMP");
-
-            linesOfCode.Add(@"(EQUAL)");
-            linesOfCode.Add(@"@R15");
-            linesOfCode.Add(@"M=-1");// push -1 onto stack for true (we push at end of method)
-
-
-            this.linesOfCode.Add(@"(END)");
-            this.PushR("R15");
-
-            linesOfCode.Add(@"//End Write equality");
-
-        }
-
         private void WriteNegate()
         {
             this.WritePopToR("R14");
@@ -275,22 +249,23 @@ namespace VM
             linesOfCode.Add(@"@R14");
             linesOfCode.Add(@"M=D-M"); // R15 -R14
             linesOfCode.Add(@"D=M"); //store result in D
-            linesOfCode.Add(@"@GTTRUE");
+            linesOfCode.Add(@"@GTTRUE_" + this.gt_count);
             linesOfCode.Add(@"D;JGT"); // check if result is greater than zero if so R15 is greater than R14
 
-            linesOfCode.Add(@"(GTFALSE)");
             linesOfCode.Add(@"@R15");
             linesOfCode.Add(@"M=-1");
-            linesOfCode.Add(@"@ENDGT");
+            linesOfCode.Add(@"@ENDGT_" + this.gt_count);
             linesOfCode.Add(@"0;JMP");
 
-            linesOfCode.Add(@"(GTTRUE)");
+            linesOfCode.Add(@"(GTTRUE_"+ this.gt_count+")");
             linesOfCode.Add(@"@R15");
             linesOfCode.Add(@"M=-1");
 
-            linesOfCode.Add(@"(ENDGT)");
+            linesOfCode.Add(@"(ENDGT_"+this.gt_count+")");
 
             this.PushR("R15");
+
+            this.gt_count++;
         }
 
         // x < y
@@ -304,25 +279,59 @@ namespace VM
             linesOfCode.Add(@"@R14");
             linesOfCode.Add(@"M=D-M"); // R15 -R14
             linesOfCode.Add(@"D=M"); //store result in D
-            linesOfCode.Add(@"@LTTRUE");
+            linesOfCode.Add(@"@LTTRUE_" + this.lt_count);
             linesOfCode.Add(@"D;JLT"); // check if result is greater than zero if so R15 is greater than R14
 
-            linesOfCode.Add(@"(LTFALSE)");
+            linesOfCode.Add(@"(LTFALSE_"+ this.lt_count+")");
             linesOfCode.Add(@"@R15");
             linesOfCode.Add(@"M=0");
-            linesOfCode.Add(@"@ENDLT");
+            linesOfCode.Add(@"@ENDLT_"+ this.lt_count);
             linesOfCode.Add(@"0;JMP");
 
-            linesOfCode.Add(@"(LTTRUE)");
+            linesOfCode.Add(@"(LTTRUE_"+this.lt_count+")");
             linesOfCode.Add(@"@R15");
             linesOfCode.Add(@"M=-1");
 
-            linesOfCode.Add(@"(ENDLT)");
+            linesOfCode.Add(@"(ENDLT_"+ this.lt_count+")");
 
             this.PushR("R15");
+
+            this.lt_count++;
         }
 
-        #endregion 
+        // x = y
+        private void WriteEquality()
+        {
+            this.WritePopToR("R14");
+            this.WritePopToR("R15");
+
+            // subtract and check for zero - this checks if they are equal
+            linesOfCode.Add(@"@R14");
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=M-D");
+            linesOfCode.Add(@"D=M"); // copy subtraction result to D
+            linesOfCode.Add(@"@EQUAL_" + this.eq_count);
+            linesOfCode.Add(@"D;JEQ");//jump to EQUAL if zero
+
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=0");// push zero onto stack for false (we push at end of method
+            this.linesOfCode.Add("@END_EQUAL_" + this.eq_count);
+            this.linesOfCode.Add("0;JMP");
+
+            linesOfCode.Add(@"(EQUAL_" + this.eq_count + ")");
+            linesOfCode.Add(@"@R15");
+            linesOfCode.Add(@"M=-1");// push -1 onto stack for true (we push at end of method)
+
+
+            this.linesOfCode.Add(@"(END_EQUAL_"+this.eq_count+")");
+            this.PushR("R15");
+
+            this.eq_count++;
+
+        }
+
+        #endregion
 
         #region StackCommands
 
@@ -410,7 +419,6 @@ namespace VM
 
             this.StoreSegmentPlusIndexPointerInR13(segement, index);
 
-            this.linesOfCode.Add(@"//WritePopSegmentIndex ");
             this.linesOfCode.Add(@"@SP");//copy stack top to D
             this.linesOfCode.Add(@"A=M-1");
             this.linesOfCode.Add(@"D=M");
@@ -421,7 +429,6 @@ namespace VM
 
             this.DecrementStackPointer();
 
-            this.linesOfCode.Add(@"//End WritePopSegmentIndex ");
         }
 
         /// <summary>
@@ -432,7 +439,6 @@ namespace VM
         /// <param name="index"></param>
         private void StoreSegmentPlusIndexPointerInR13(int segmentBase, int index)
         {
-            this.linesOfCode.Add(@"//Begin StoreSegmentPlusIndexPointerInR13 ");
             this.linesOfCode.Add(@"@" + index);
             this.linesOfCode.Add(@"D=A"); // D = index 
 
@@ -441,7 +447,6 @@ namespace VM
             this.linesOfCode.Add(@"D=A"); //save this pointer in @R13
             this.linesOfCode.Add(@"@R13");
             this.linesOfCode.Add(@"M=D");
-            this.linesOfCode.Add(@"//End StoreSegmentPlusIndexPointerInR13 ");
         }
 
         /// <summary>
@@ -451,7 +456,6 @@ namespace VM
         private void WritePopToR(string R)
         {
             int address = this.segmentLookUpTable[R];
-            linesOfCode.Add(@"//Begin Write Pop " + R);
             linesOfCode.Add(@"@SP");
             linesOfCode.Add(@"A=M-1");
             linesOfCode.Add(@"D=M");
@@ -460,7 +464,6 @@ namespace VM
             linesOfCode.Add(@"M=D");
 
             this.DecrementStackPointer();
-            linesOfCode.Add(@"// End Write Pop " + R);
         }
 
         /// <summary>
@@ -493,7 +496,7 @@ namespace VM
         /// <param name="index">The index.</param>
         private void WritePushStatic(int index)
         {
-            this.linesOfCode.Add(@"@"+this.VmFileName+"."+index);
+            this.linesOfCode.Add(@"@" + this.VmFileName + "." + index);
             this.linesOfCode.Add("D=M");
             this.linesOfCode.Add(@"@SP");
             this.linesOfCode.Add(@"A=M");
@@ -532,6 +535,6 @@ namespace VM
             linesOfCode.Add(@"M=M-1");
         }
 
-        #endregion 
+        #endregion
     }
 }
