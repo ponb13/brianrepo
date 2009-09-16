@@ -11,8 +11,8 @@ namespace VM
     {
         static void Main(string[] args)
         {
-            string intputFilePath = @"..\..\..\MemoryAccess\PointerTest\";
-            string outPutFilePath = @"..\..\..\MemoryAccess\PointerTest\PointerTest.asm";
+            string intputFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.vm";
+            string outPutFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.asm";
 
 
             IList<string> linesOfAssemblyCode = new List<string>();
