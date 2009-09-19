@@ -65,6 +65,23 @@ namespace VMTranslator
                 commandType = CommandType.C_PUSH;
             }
 
+            else if (this.IsIfCommand())
+            {
+                commandType = CommandType.C_IF;
+            }
+            else if (this.IsFunctionCommand())
+            {
+                commandType = CommandType.C_FUNCTION;
+            }
+            else if (this.IsReturnCommand())
+            {
+                commandType = CommandType.C_RETURN;
+            }
+            else if (this.IsCallCommand())
+            {
+                commandType = CommandType.C_CALL;
+            }
+
             return commandType;
         }
 
@@ -97,8 +114,12 @@ namespace VMTranslator
             string result = string.Empty;
             if (this.GetCommandType() == CommandType.C_PUSH
                 || this.GetCommandType() == CommandType.C_POP
+                || this.GetCommandType() == CommandType.C_CALL
+                || this.GetCommandType() == CommandType.C_LABEL
+                || this.GetCommandType() == CommandType.C_IF
                 || this.GetCommandType() == CommandType.C_FUNCTION
-                || this.GetCommandType() == CommandType.C_CALL)
+                || this.GetCommandType() == CommandType.C_GOTO
+                )
             {
                 string[] wordArray = this.currentLine.Split(' ');
                 result = wordArray[2];
@@ -155,6 +176,21 @@ namespace VMTranslator
         private bool IsReturnCommand()
         {
             return this.currentLine.StartsWith("return");
+        }
+
+        private bool IsIfCommand()
+        {
+            return this.currentLine.StartsWith("if-goto");
+        }
+
+        private bool IsFunctionCommand()
+        {
+            return this.currentLine.StartsWith("function");
+        }
+
+        private bool IsCallCommand()
+        {
+            return this.currentLine.StartsWith("call");
         }
 
         #endregion
