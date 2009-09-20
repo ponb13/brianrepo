@@ -10,8 +10,8 @@ namespace VMTranslator
     {
         static void Main(string[] args)
         {
-            string intputFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.vm";
-            string outPutFilePath = @"..\..\..\MemoryAccess\StaticTest\StaticTest.asm";
+            string intputFilePath = @"..\..\..\ProgramFlow\BasicLoop\BasicLoop.vm";
+            string outPutFilePath = @"..\..\..\ProgramFlow\BasicLoop\BasicLoop.asm";
 
 
             IList<string> linesOfAssemblyCode = new List<string>();
@@ -58,6 +58,18 @@ namespace VMTranslator
                     if (commandType == CommandType.C_ARITHMETIC)
                     {
                         codeWriter.WriteArithmetic(parser.GetArg1());
+                    }
+                    if (commandType == CommandType.C_LABEL)
+                    {
+                        codeWriter.WriteLabel(parser.GetArg1());
+                    }
+                    if (commandType == CommandType.C_GOTO)
+                    {
+                        codeWriter.WriteGoto(parser.GetArg1());
+                    }
+                    if (commandType == CommandType.C_IF)
+                    {
+                        codeWriter.WriteIf(parser.GetArg1());
                     }
                 }
             }

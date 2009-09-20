@@ -11,6 +11,24 @@ namespace VMTranslator
         private IList<string> linesOfCode = null;
         private string vmFileName;
         private Dictionary<string, int> segmentLookUpTable = null;
+        private string currentFunctionName;
+
+        public string CurrentFunctionName
+        {
+            get 
+            { 
+                if(String.IsNullOrEmpty(this.currentFunctionName))
+                {
+                    return "undefined";
+                }
+                else
+                {
+                    return this.currentFunctionName;
+                }
+            }
+            set { currentFunctionName = value; }
+        }
+
 
         // when writing equality,greater than and less than statements
         // we use labels, we can't keep using the same labels
@@ -134,6 +152,34 @@ namespace VMTranslator
                     this.WritePopSegmentIndex(segment, index);
                 }
             }
+        }
+
+        /// <summary>
+        /// Writes the assembly code that effects the label command
+        /// </summary>
+        /// <param name="labelName">Name of the label.</param>
+        public void WriteLabel(string labelName)
+        {
+            linesOfCode.Add("(" + this.VmFileName + "." + this.CurrentFunctionName + "$" + labelName + ")");
+        }
+
+        /// <summary>
+        /// Writes the assembly code that effects the goto command
+        /// </summary>
+        /// <param name="labelName">Name of the label.</param>
+        public void WriteGoto(string labelName)
+        {
+            linesOfCode.Add("@"+this.VmFileName +"." +this.CurrentFunctionName + "$" + labelName);
+            linesOfCode.Add("0;JMP");
+        }
+
+        public void WriteIf(string labelName)
+        {
+            linesOfCode.Add(@"@SP");
+            linesOfCode.Add(@"A=M-1");
+            linesOfCode.Add(@"D=M");
+            linesOfCode.Add(@"@" + this.VmFileName + "." + this.CurrentFunctionName + "$" + labelName);
+            linesOfCode.Add(@"D;JNE");
         }
 
         /// <summary>
