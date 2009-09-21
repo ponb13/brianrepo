@@ -13,6 +13,13 @@ namespace VMTranslator
         private Dictionary<string, int> segmentLookUpTable = null;
         private string currentFunctionName;
 
+        // when writing equality,greater than and less than statements
+        // we use labels, we can't keep using the same labels
+        // so keep a count of each and append to label to make each label unique
+        private int eq_count;
+        private int lt_count;
+        private int gt_count;
+
         public string CurrentFunctionName
         {
             get 
@@ -28,14 +35,6 @@ namespace VMTranslator
             }
             set { currentFunctionName = value; }
         }
-
-
-        // when writing equality,greater than and less than statements
-        // we use labels, we can't keep using the same labels
-        // so keep a count of each and append to label to make each label unique
-        private int eq_count;
-        private int lt_count;
-        private int gt_count;
 
         public CodeWriter(IList<string> linesOfAssemblyCode)
         {
