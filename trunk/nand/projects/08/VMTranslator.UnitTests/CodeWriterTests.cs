@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VMTranslator.UnitTests;
 
 namespace VMTranslator.UnitTests
 {
@@ -59,12 +60,23 @@ namespace VMTranslator.UnitTests
         //
         #endregion
 
-        [TestMethod]
-        public void TestMethod1()
-        {
-            //
-            // TODO: Add test logic	here
-            //
-        }
+        /// <summary>
+        /// Writes a basic loop
+        /// </summary>
+        //[TestMethod]
+        //public void WriteLoopTest()
+        //{
+        //    IList<string> codeLines = new List<string>();
+        //    CodeWriter writer = new CodeWriter(codeLines);
+
+        //    using (FileStream fileStream = new FileStream(@"..\..\..\WriteLoopTestOutput.asm", FileMode.Create))
+        //    using (StreamWriter writer = new StreamWriter(fileStream))
+        //    {
+        //        foreach (string line in linesOfAssemblyCode)
+        //        {
+        //            writer.WriteLine(line);
+        //        }
+        //    }
+        //}
     }
 }
