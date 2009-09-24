@@ -177,8 +177,10 @@ namespace VMTranslator
             linesOfCode.Add(@"@SP");
             linesOfCode.Add(@"A=M-1");
             linesOfCode.Add(@"D=M");
+            this.DecrementStackPointer();
             linesOfCode.Add(@"@" + this.VmFileName + "." + this.CurrentFunctionName + "$" + labelName);
             linesOfCode.Add(@"D;JNE");
+            
         }
 
         /// <summary>
