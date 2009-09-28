@@ -10,8 +10,8 @@ namespace VMTranslator
     {
         static void Main(string[] args)
         {
-            string intputFilePath = @"..\..\..\ProgramFlow\FibonacciSeries\FibonacciSeries.vm";
-            string outPutFilePath = @"..\..\..\ProgramFlow\FibonacciSeries\FibonacciSeries.asm";
+            string intputFilePath = @"..\..\..\FunctionCalls\SimpleFunction\SimpleFunction.vm";
+            string outPutFilePath = @"..\..\..\FunctionCalls\SimpleFunction\SimpleFunction.asm";
 
             IList<string> linesOfAssemblyCode = new List<string>();
 
