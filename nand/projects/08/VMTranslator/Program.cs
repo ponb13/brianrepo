@@ -40,7 +40,6 @@ namespace VMTranslator
         /// <param name="inputPath">The input path.</param>
         private static void ProcessFile(string inputPath, IList<string> linesOfAssemblyCode)
         {
-
             using (Parser parser = new Parser(inputPath))
             {
                 CodeWriter codeWriter = new CodeWriter(linesOfAssemblyCode);
