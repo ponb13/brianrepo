@@ -69,6 +69,10 @@ namespace VMTranslator
                     {
                         codeWriter.WriteIf(parser.GetArg1());
                     }
+                    if (commandType == CommandType.C_CALL)
+                    {
+                        codeWriter.WriteCall(parser.GetArg1(), int.Parse(parser.GetArg2()));
+                    }
                 }
             }
         }
