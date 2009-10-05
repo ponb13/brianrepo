@@ -172,15 +172,75 @@ namespace VMTranslator
             linesOfCode.Add("0;JMP");
         }
 
+        /// <summary>
+        /// Writes assembly code that effects the if command.
+        /// </summary>
+        /// <param name="labelName">Name of the label.</param>
         public void WriteIf(string labelName)
         {
-            linesOfCode.Add(@"@SP");
-            linesOfCode.Add(@"A=M-1");
+            this.linesOfCode.Add(@"@SP");
+            this.linesOfCode.Add(@"A=M-1");
             linesOfCode.Add(@"D=M");
             this.DecrementStackPointer();
-            linesOfCode.Add(@"@" + this.VmFileName + "." + this.CurrentFunctionName + "$" + labelName);
-            linesOfCode.Add(@"D;JNE");
+            this.linesOfCode.Add(@"@" + this.VmFileName + "." + this.CurrentFunctionName + "$" + labelName);
+            this.linesOfCode.Add(@"D;JNE");
+        }
+
+        /// <summary>
+        /// Writes assembly code that effects a call function command
+        /// </summary>
+        /// <param name="functionName">Name of the function.</param>
+        /// <param name="numberOfAgrs">The number of agrs.</param>
+        public void WriteCall(string functionName, int numberOfAgrs)
+        {
+           // START HERE BRIAN!!
+            // this slightly does not make any sense - this.currentFunction name is actually the name of the
+            // function that is being called at this point in time, not the actual function we are in
+            this.CurrentFunctionName = functionName;
+
+            // push return address
+            this.linesOfCode.Add("@" + this.vmFileName + "." + this.CurrentFunctionName + "$return-address");
+            this.linesOfCode.Add("D=A");
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("A=M");
+            this.linesOfCode.Add("M=D");
+            this.IncrementStackPointer();
+
+            this.SaveSegmentPointer_ForFunctionCall("LCL");
+            this.SaveSegmentPointer_ForFunctionCall("ARG");
+            this.SaveSegmentPointer_ForFunctionCall("THIS");
+            this.SaveSegmentPointer_ForFunctionCall("THAT");
+
+            // reset Arg = SP-numberOfArgs-5
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@ARG");
+            this.linesOfCode.Add("M=D");
+            this.linesOfCode.Add("@" + numberOfAgrs);
+            this.linesOfCode.Add("D=A");
+            this.linesOfCode.Add("@ARG");
+            this.linesOfCode.Add("M=M-D");
+            this.linesOfCode.Add("@" + 5);
+            this.linesOfCode.Add("D=A");
+            this.linesOfCode.Add("@ARG");
+            this.linesOfCode.Add("M=M-D");
             
+           
+
+        }
+
+        /// <summary>
+        /// Saves the segment pointer for function call
+        /// i.e. push a pointer to a given segment 
+        /// </summary>
+        private void SaveSegmentPointer_ForFunctionCall(string segmentName)
+        {
+            this.linesOfCode.Add("@" + segmentName);
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("A=M");
+            this.linesOfCode.Add("M=D");
+            this.IncrementStackPointer();
         }
 
         /// <summary>
@@ -570,7 +630,7 @@ namespace VMTranslator
         }
 
         /// <summary>
-        /// Decrements the stack pointer.
+        /// Decrements the stack pointer.                                  
         /// </summary>
         private void DecrementStackPointer()
         {
