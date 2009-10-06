@@ -73,6 +73,14 @@ namespace VMTranslator
                     {
                         codeWriter.WriteCall(parser.GetArg1(), int.Parse(parser.GetArg2()));
                     }
+                    if (commandType == CommandType.C_FUNCTION)
+                    {
+                        codeWriter.WriteFunction(parser.GetArg1(), int.Parse(parser.GetArg2()));
+                    }
+                    if (commandType == CommandType.C_RETURN)
+                    {
+                        codeWriter.WriteReturn();
+                    }
                 }
             }
         }
