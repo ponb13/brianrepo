@@ -187,19 +187,42 @@ namespace VMTranslator
         }
 
         /// <summary>
+        /// Writes assembly code that effects a call function declaration command
+        /// </summary>
+        /// <param name="functionName">Name of the function.</param>
+        /// <param name="?">The number of args.</param>
+        public void WriteFunction(string functionName, int numberOfLocals)
+        {
+            this.CurrentFunctionName = functionName;
+            //set a label at the start of function
+            linesOfCode.Add("(" + this.VmFileName + "." + this.CurrentFunctionName + "$" + functionName + ")");
+
+            // push 0 numberOfLocals times, remember when a function is called LCL is set to SP
+            for (int i = numberOfLocals; i > 0; i--)
+            {
+                this.WritePushConstant(0);
+            }
+        }
+
+        /// <summary>
+        /// Writes assembly code that returns from a function call.
+        /// </summary>
+        public void WriteReturn()
+        {
+            //START HERE BRIAN
+        }
+
+        /// <summary>
         /// Writes assembly code that effects a call function command
         /// </summary>
         /// <param name="functionName">Name of the function.</param>
         /// <param name="numberOfAgrs">The number of agrs.</param>
         public void WriteCall(string functionName, int numberOfAgrs)
-        {
-           // START HERE BRIAN!!
-            // this slightly does not make any sense - this.currentFunction name is actually the name of the
-            // function that is being called at this point in time, not the actual function we are in
-            this.CurrentFunctionName = functionName;
-
+        {   
             // push return address
-            this.linesOfCode.Add("@" + this.vmFileName + "." + this.CurrentFunctionName + "$return-address");
+            // not sure if this is correct.
+            string returnAddressLabel = this.vmFileName + "." + this.CurrentFunctionName + "$return-address";
+            this.linesOfCode.Add("@"+returnAddressLabel);
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add("@SP");
             this.linesOfCode.Add("A=M");
@@ -220,13 +243,23 @@ namespace VMTranslator
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add("@ARG");
             this.linesOfCode.Add("M=M-D");
-            this.linesOfCode.Add("@" + 5);
+            this.linesOfCode.Add("@5");
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add("@ARG");
             this.linesOfCode.Add("M=M-D");
-            
-           
 
+            //LCL = SP
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@LCL");
+            this.linesOfCode.Add("M=D");
+            
+            //goto f
+            this.linesOfCode.Add("@"+functionName);
+            this.linesOfCode.Add("0;JMP");
+
+            //return address, this has already been pushed
+            this.linesOfCode.Add(@"("+returnAddressLabel+@")");
         }
 
         /// <summary>
