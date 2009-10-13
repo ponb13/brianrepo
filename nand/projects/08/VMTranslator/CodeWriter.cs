@@ -209,7 +209,21 @@ namespace VMTranslator
         /// </summary>
         public void WriteReturn()
         {
-            //START HERE BRIAN
+            // FRAME = LCL
+            this.linesOfCode.Add("@LCL");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@FRAME"+this.vmFileName + "." + this.CurrentFunctionName);
+            this.linesOfCode.Add("M=D");
+
+            //RET = *(FRAME-5)
+            this.linesOfCode("@5");
+            this.linesOfCode("D=A");
+            this.linesOfCode("@FRAME"+this.vmFileName + "." + this.CurrentFunctionName);
+            this.linesOfCode("D=A-D");
+            this.linesOfCode("@RET");
+            this.linesOfCode("M=D");
+            
+            // 
         }
 
         /// <summary>
@@ -221,6 +235,7 @@ namespace VMTranslator
         {   
             // push return address
             // not sure if this is correct.
+            // TODO will this work with recursion???????? increment call number????
             string returnAddressLabel = this.vmFileName + "." + this.CurrentFunctionName + "$return-address";
             this.linesOfCode.Add("@"+returnAddressLabel);
             this.linesOfCode.Add("D=A");
