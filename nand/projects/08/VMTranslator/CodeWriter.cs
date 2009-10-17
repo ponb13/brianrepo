@@ -19,6 +19,7 @@ namespace VMTranslator
         private int eq_count;
         private int lt_count;
         private int gt_count;
+        private int callCount;
 
         public string CurrentFunctionName
         {
@@ -33,7 +34,14 @@ namespace VMTranslator
                     return this.currentFunctionName;
                 }
             }
-            set { currentFunctionName = value; }
+            set 
+            {
+                this.callCount++;
+                this.currentFunctionName = value + this.callCount;
+            
+                this.callCount = 0;
+                this.currentFunctionName = value + this.callCount;
+            }
         }
 
         public CodeWriter(IList<string> linesOfAssemblyCode)
@@ -193,9 +201,8 @@ namespace VMTranslator
         /// <param name="?">The number of args.</param>
         public void WriteFunction(string functionName, int numberOfLocals)
         {
-            this.CurrentFunctionName = functionName;
             //set a label at the start of function
-            linesOfCode.Add("(" + this.VmFileName + "." + this.CurrentFunctionName + "$" + functionName + ")");
+            linesOfCode.Add("(" + this.VmFileName + "." + this.CurrentFunctionName+")");
 
             // push 0 numberOfLocals times, remember when a function is called LCL is set to SP
             for (int i = numberOfLocals; i > 0; i--)
@@ -216,14 +223,14 @@ namespace VMTranslator
             this.linesOfCode.Add("M=D");
 
             //RET = *(FRAME-5)
-            this.linesOfCode("@5");
-            this.linesOfCode("D=A");
-            this.linesOfCode("@FRAME"+this.vmFileName + "." + this.CurrentFunctionName);
-            this.linesOfCode("D=A-D");
-            this.linesOfCode("@RET");
-            this.linesOfCode("M=D");
+            this.linesOfCode.Add("@5");
+            this.linesOfCode.Add("D=A");
+            this.linesOfCode.Add("@FRAME" + this.vmFileName + "." + this.CurrentFunctionName);
+            this.linesOfCode.Add("D=M-D");
+            this.linesOfCode.Add("@RET");
+            this.linesOfCode.Add("M=D");
             
-            // 
+            // POP to ARG
         }
 
         /// <summary>
@@ -275,6 +282,8 @@ namespace VMTranslator
 
             //return address, this has already been pushed
             this.linesOfCode.Add(@"("+returnAddressLabel+@")");
+
+            this.CurrentFunctionName = functionName;
         }
 
         /// <summary>
