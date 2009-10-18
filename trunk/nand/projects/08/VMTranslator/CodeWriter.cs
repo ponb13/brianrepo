@@ -11,7 +11,7 @@ namespace VMTranslator
         private IList<string> linesOfCode = null;
         private string vmFileName;
         private Dictionary<string, int> segmentLookUpTable = null;
-        private string currentFunctionName;
+        private string currentExecutingFunction;
 
         // when writing equality,greater than and less than statements
         // we use labels, we can't keep using the same labels
@@ -19,29 +19,21 @@ namespace VMTranslator
         private int eq_count;
         private int lt_count;
         private int gt_count;
-        private int callCount;
 
-        public string CurrentFunctionName
+        public string CurrentExecutingFunction
         {
             get 
-            { 
-                if(String.IsNullOrEmpty(this.currentFunctionName))
+            {
+                if (String.IsNullOrEmpty(this.currentExecutingFunction))
                 {
                     return "undefined";
                 }
                 else
                 {
-                    return this.currentFunctionName;
+                    return this.currentExecutingFunction;
                 }
             }
-            set 
-            {
-                this.callCount++;
-                this.currentFunctionName = value + this.callCount;
-            
-                this.callCount = 0;
-                this.currentFunctionName = value + this.callCount;
-            }
+            set { this.currentExecutingFunction = value + Guid.NewGuid().ToString("N"); }
         }
 
         public CodeWriter(IList<string> linesOfAssemblyCode)
@@ -167,7 +159,7 @@ namespace VMTranslator
         /// <param name="labelName">Name of the label.</param>
         public void WriteLabel(string labelName)
         {
-            linesOfCode.Add("(" + this.VmFileName + "." + this.CurrentFunctionName + "$" + labelName + ")");
+            linesOfCode.Add("(" + this.VmFileName + "." + this.CurrentExecutingFunction + "$" + labelName + ")");
         }
 
         /// <summary>
@@ -176,7 +168,7 @@ namespace VMTranslator
         /// <param name="labelName">Name of the label.</param>
         public void WriteGoto(string labelName)
         {
-            linesOfCode.Add("@"+this.VmFileName +"." +this.CurrentFunctionName + "$" + labelName);
+            linesOfCode.Add("@" + this.VmFileName + "." + this.CurrentExecutingFunction + "$" + labelName);
             linesOfCode.Add("0;JMP");
         }
 
@@ -190,7 +182,7 @@ namespace VMTranslator
             this.linesOfCode.Add(@"A=M-1");
             linesOfCode.Add(@"D=M");
             this.DecrementStackPointer();
-            this.linesOfCode.Add(@"@" + this.VmFileName + "." + this.CurrentFunctionName + "$" + labelName);
+            this.linesOfCode.Add(@"@" + this.VmFileName + "." + this.CurrentExecutingFunction + "$" + labelName);
             this.linesOfCode.Add(@"D;JNE");
         }
 
@@ -201,8 +193,10 @@ namespace VMTranslator
         /// <param name="?">The number of args.</param>
         public void WriteFunction(string functionName, int numberOfLocals)
         {
+            linesOfCode.Add(@"//WriteFunction");
+
             //set a label at the start of function
-            linesOfCode.Add("(" + this.VmFileName + "." + this.CurrentFunctionName+")");
+            linesOfCode.Add("("+functionName+")");
 
             // push 0 numberOfLocals times, remember when a function is called LCL is set to SP
             for (int i = numberOfLocals; i > 0; i--)
@@ -212,39 +206,18 @@ namespace VMTranslator
         }
 
         /// <summary>
-        /// Writes assembly code that returns from a function call.
-        /// </summary>
-        public void WriteReturn()
-        {
-            // FRAME = LCL
-            this.linesOfCode.Add("@LCL");
-            this.linesOfCode.Add("D=M");
-            this.linesOfCode.Add("@FRAME"+this.vmFileName + "." + this.CurrentFunctionName);
-            this.linesOfCode.Add("M=D");
-
-            //RET = *(FRAME-5)
-            this.linesOfCode.Add("@5");
-            this.linesOfCode.Add("D=A");
-            this.linesOfCode.Add("@FRAME" + this.vmFileName + "." + this.CurrentFunctionName);
-            this.linesOfCode.Add("D=M-D");
-            this.linesOfCode.Add("@RET");
-            this.linesOfCode.Add("M=D");
-            
-            // POP to ARG
-        }
-
-        /// <summary>
         /// Writes assembly code that effects a call function command
         /// </summary>
         /// <param name="functionName">Name of the function.</param>
         /// <param name="numberOfAgrs">The number of agrs.</param>
         public void WriteCall(string functionName, int numberOfAgrs)
-        {   
+        {
+            linesOfCode.Add(@"//WriteCall");
             // push return address
             // not sure if this is correct.
             // TODO will this work with recursion???????? increment call number????
-            string returnAddressLabel = this.vmFileName + "." + this.CurrentFunctionName + "$return-address";
-            this.linesOfCode.Add("@"+returnAddressLabel);
+            string returnAddressLabel = this.vmFileName + "." +this.CurrentExecutingFunction + "$return-address";
+            this.linesOfCode.Add("@" + returnAddressLabel);
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add("@SP");
             this.linesOfCode.Add("A=M");
@@ -275,15 +248,82 @@ namespace VMTranslator
             this.linesOfCode.Add("D=M");
             this.linesOfCode.Add("@LCL");
             this.linesOfCode.Add("M=D");
-            
+
             //goto f
-            this.linesOfCode.Add("@"+functionName);
+            this.linesOfCode.Add("@" + functionName);
             this.linesOfCode.Add("0;JMP");
 
             //return address, this has already been pushed
-            this.linesOfCode.Add(@"("+returnAddressLabel+@")");
+            this.linesOfCode.Add(@"(" + returnAddressLabel + @")");
 
-            this.CurrentFunctionName = functionName;
+            this.CurrentExecutingFunction = functionName;
+        }
+
+        /// <summary>
+        /// Writes assembly code that returns from a function call.
+        /// </summary>
+        public void WriteReturn()
+        {
+            linesOfCode.Add(@"//WriteReturn");
+            
+            string frameLabel = "@FRAME" + this.vmFileName + "." + this.CurrentExecutingFunction;
+            string returnAddressLabel = "@RET" + Guid.NewGuid().ToString("N");
+            
+            // FRAME = LCL
+            this.linesOfCode.Add("@LCL");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add(frameLabel);
+            this.linesOfCode.Add("M=D");
+
+            // RET = *(FRAME-5)
+            this.linesOfCode.Add("@5");
+            this.linesOfCode.Add("D=A");
+            this.linesOfCode.Add(frameLabel);
+            this.linesOfCode.Add("D=M-D");
+            this.linesOfCode.Add(returnAddressLabel);
+            this.linesOfCode.Add("M=D");
+            
+            // POP to where ever ARG is pointing at
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("A=M-1"); // got sp-1 to get value at top of stack
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@ARG");
+            this.linesOfCode.Add("A=M");
+            this.linesOfCode.Add("M=D");
+
+            // Set SP = ARG+1
+            this.linesOfCode.Add("@ARG");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("M=D+1");
+
+            // Restore segments
+            this.WriteRestoreSegmentForReturn("THAT", 1, frameLabel);
+            this.WriteRestoreSegmentForReturn("THIS", 2, frameLabel);
+            this.WriteRestoreSegmentForReturn("ARG", 3, frameLabel);
+            this.WriteRestoreSegmentForReturn("LCL", 4, frameLabel);
+
+            // goto RET
+            this.linesOfCode.Add(returnAddressLabel);
+            this.linesOfCode.Add("0;JMP");
+        }
+
+        /// <summary>
+        /// Writes the restore segment for return.
+        /// See P.163
+        /// </summary>
+        /// <param name="segment">The segment.</param>
+        /// <param name="frameIndex">Index of the frame.</param>
+        private void WriteRestoreSegmentForReturn(string segmentToRestore, int frameOffset, string currentFrameLabel)
+        {
+            linesOfCode.Add(@"//WriteRestore " + segmentToRestore + " SegmentForReturn");
+            
+            this.linesOfCode.Add(@"@" + frameOffset);
+            this.linesOfCode.Add("D=A");
+            this.linesOfCode.Add(currentFrameLabel);
+            this.linesOfCode.Add("D=M-D");
+            this.linesOfCode.Add("@"+segmentToRestore);
+            this.linesOfCode.Add("M=D");
         }
 
         /// <summary>
@@ -292,6 +332,8 @@ namespace VMTranslator
         /// </summary>
         private void SaveSegmentPointer_ForFunctionCall(string segmentName)
         {
+            linesOfCode.Add(@"//SaveSegmentPointer_ForFunctionCall");
+            
             this.linesOfCode.Add("@" + segmentName);
             this.linesOfCode.Add("D=M");
             this.linesOfCode.Add("@SP");
