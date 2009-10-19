@@ -321,7 +321,8 @@ namespace VMTranslator
             this.linesOfCode.Add(@"@" + frameOffset);
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add(currentFrameLabel);
-            this.linesOfCode.Add("D=M-D");
+            this.linesOfCode.Add("A=M-D");
+            this.linesOfCode.Add("D=M");
             this.linesOfCode.Add("@"+segmentToRestore);
             this.linesOfCode.Add("M=D");
         }
