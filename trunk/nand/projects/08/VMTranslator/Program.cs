@@ -10,10 +10,12 @@ namespace VMTranslator
     {
         static void Main(string[] args)
         {
-            string intputFilePath = @"..\..\..\FunctionCalls\SimpleFunction\SimpleFunction.vm";
-            string outPutFilePath = @"..\..\..\FunctionCalls\SimpleFunction\SimpleFunction.asm";
+            string intputFilePath = @"..\..\..\FunctionCalls\FibonacciElement\";
+            string outPutFilePath = @"..\..\..\FunctionCalls\FibonacciElement\FibonacciElement.asm";
 
             IList<string> linesOfAssemblyCode = new List<string>();
+            // add the init code see p.165
+            Program.WriteInitCode(linesOfAssemblyCode);
 
             if (Program.PathIsDirectory(intputFilePath))
             {
@@ -35,11 +37,27 @@ namespace VMTranslator
         }
 
         /// <summary>
+        /// Writes the init asssembly code.
+        /// </summary>
+        private static void WriteInitCode(IList<string> linesOfCode)
+        {
+            linesOfCode.Add("@256");
+            linesOfCode.Add("D=A");
+            linesOfCode.Add("@SP");
+            linesOfCode.Add("M=D");
+
+            CodeWriter codeWriter = new CodeWriter(linesOfCode);
+            codeWriter.WriteCall("Sys.init", 0);
+
+        }
+
+        /// <summary>
         /// Processes the specified input path.
         /// </summary>
         /// <param name="inputPath">The input path.</param>
         private static void ProcessFile(string inputPath, IList<string> linesOfAssemblyCode)
         {
+            linesOfAssemblyCode.Add("/////////////START"+Path.GetFileName(inputPath)+"////////////////////////");
             using (Parser parser = new Parser(inputPath))
             {
                 CodeWriter codeWriter = new CodeWriter(linesOfAssemblyCode);
@@ -83,6 +101,7 @@ namespace VMTranslator
                     }
                 }
             }
+            linesOfAssemblyCode.Add("/////////////END" + Path.GetFileName(inputPath) + "////////////////////////");
         }
 
         /// <summary>
