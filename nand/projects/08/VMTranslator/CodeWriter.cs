@@ -26,7 +26,8 @@ namespace VMTranslator
             {
                 if (String.IsNullOrEmpty(this.currentExecutingFunction))
                 {
-                    return "undefined";
+                    this.currentExecutingFunction = "undefined" + Guid.NewGuid().ToString("N");
+                    return this.currentExecutingFunction;
                 }
                 else
                 {
@@ -187,13 +188,13 @@ namespace VMTranslator
         }
 
         /// <summary>
-        /// Writes assembly code that effects a call function declaration command
+        /// Writes assembly code that effects a declare function declaration command
         /// </summary>
         /// <param name="functionName">Name of the function.</param>
         /// <param name="?">The number of args.</param>
         public void WriteFunction(string functionName, int numberOfLocals)
         {
-            linesOfCode.Add(@"//WriteFunction");
+            linesOfCode.Add(@"//WriteFunction" + functionName);
 
             //set a label at the start of function
             linesOfCode.Add("("+functionName+")");
@@ -201,6 +202,7 @@ namespace VMTranslator
             // push 0 numberOfLocals times, remember when a function is called LCL is set to SP
             for (int i = numberOfLocals; i > 0; i--)
             {
+                this.linesOfCode.Add("// pushing 0 for local var");
                 this.WritePushConstant(0);
             }
         }
@@ -212,10 +214,8 @@ namespace VMTranslator
         /// <param name="numberOfAgrs">The number of agrs.</param>
         public void WriteCall(string functionName, int numberOfAgrs)
         {
-            linesOfCode.Add(@"//WriteCall");
+            linesOfCode.Add(@"//WriteCall " + functionName);
             // push return address
-            // not sure if this is correct.
-            // TODO will this work with recursion???????? increment call number????
             string returnAddressLabel = this.vmFileName + "." +this.CurrentExecutingFunction + "$return-address";
             this.linesOfCode.Add("@" + returnAddressLabel);
             this.linesOfCode.Add("D=A");
@@ -254,9 +254,25 @@ namespace VMTranslator
             this.linesOfCode.Add("0;JMP");
 
             //return address, this has already been pushed
-            this.linesOfCode.Add(@"(" + returnAddressLabel + @")");
+            this.linesOfCode.Add(@"(" + returnAddressLabel + @")" + "//callers - return label - i.e. start executing from here once " + functionName +" completes");
 
             this.CurrentExecutingFunction = functionName;
+        }
+
+        /// <summary>
+        /// Saves the segment pointer for function call
+        /// i.e. push a pointer to a given segment 
+        /// </summary>
+        private void SaveSegmentPointer_ForFunctionCall(string segmentName)
+        {
+            linesOfCode.Add(@"//Save "+segmentName+" for function call");
+
+            this.linesOfCode.Add("@" + segmentName);
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@SP");
+            this.linesOfCode.Add("A=M");
+            this.linesOfCode.Add("M=D");
+            this.IncrementStackPointer();
         }
 
         /// <summary>
@@ -308,6 +324,7 @@ namespace VMTranslator
             this.linesOfCode.Add("0;JMP");
         }
 
+
         /// <summary>
         /// Writes the restore segment for return.
         /// See P.163
@@ -325,22 +342,6 @@ namespace VMTranslator
             this.linesOfCode.Add("D=M");
             this.linesOfCode.Add("@"+segmentToRestore);
             this.linesOfCode.Add("M=D");
-        }
-
-        /// <summary>
-        /// Saves the segment pointer for function call
-        /// i.e. push a pointer to a given segment 
-        /// </summary>
-        private void SaveSegmentPointer_ForFunctionCall(string segmentName)
-        {
-            linesOfCode.Add(@"//SaveSegmentPointer_ForFunctionCall");
-            
-            this.linesOfCode.Add("@" + segmentName);
-            this.linesOfCode.Add("D=M");
-            this.linesOfCode.Add("@SP");
-            this.linesOfCode.Add("A=M");
-            this.linesOfCode.Add("M=D");
-            this.IncrementStackPointer();
         }
 
         /// <summary>
