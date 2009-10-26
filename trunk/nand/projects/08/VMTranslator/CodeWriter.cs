@@ -12,6 +12,7 @@ namespace VMTranslator
         private string vmFileName;
         private Dictionary<string, int> segmentLookUpTable = null;
         private string currentExecutingFunction;
+        private int returnCount;
 
         // when writing equality,greater than and less than statements
         // we use labels, we can't keep using the same labels
@@ -26,7 +27,7 @@ namespace VMTranslator
             {
                 if (String.IsNullOrEmpty(this.currentExecutingFunction))
                 {
-                    this.currentExecutingFunction = "undefined" + Guid.NewGuid().ToString("N");
+                    this.currentExecutingFunction = "undefined";
                     return this.currentExecutingFunction;
                 }
                 else
@@ -34,7 +35,7 @@ namespace VMTranslator
                     return this.currentExecutingFunction;
                 }
             }
-            set { this.currentExecutingFunction = value + Guid.NewGuid().ToString("N"); }
+            set { this.currentExecutingFunction = value; }
         }
 
         public CodeWriter(IList<string> linesOfAssemblyCode)
@@ -216,7 +217,9 @@ namespace VMTranslator
         {
             linesOfCode.Add(@"//WriteCall " + functionName);
             // push return address
-            string returnAddressLabel = this.vmFileName + "." +this.CurrentExecutingFunction + "$return-address";
+            this.returnCount++;
+            string returnAddressLabel = "return_"+returnCount;
+
             this.linesOfCode.Add("@" + returnAddressLabel);
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add("@SP");
@@ -254,7 +257,7 @@ namespace VMTranslator
             this.linesOfCode.Add("0;JMP");
 
             //return address, this has already been pushed
-            this.linesOfCode.Add(@"(" + returnAddressLabel + @")" + "//callers - return label - i.e. start executing from here once " + functionName +" completes");
+            this.linesOfCode.Add(@"(" + returnAddressLabel + ")" + "//callers - return label - i.e. start executing from here once " + functionName + " completes");
 
             this.CurrentExecutingFunction = functionName;
         }
@@ -282,8 +285,8 @@ namespace VMTranslator
         {
             linesOfCode.Add(@"//WriteReturn");
             
-            string frameLabel = "@FRAME" + this.vmFileName + "." + this.CurrentExecutingFunction;
-            string returnAddressLabel = "@RET" + Guid.NewGuid().ToString("N");
+            string frameLabel = "@FRAME";
+            string returnAddressPointer = "@RET_Pointer" ;
             
             // FRAME = LCL
             this.linesOfCode.Add("@LCL");
@@ -291,12 +294,12 @@ namespace VMTranslator
             this.linesOfCode.Add(frameLabel);
             this.linesOfCode.Add("M=D");
 
-            // RET = *(FRAME-5)
+            // RET pointer = *(FRAME-5)
             this.linesOfCode.Add("@5");
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add(frameLabel);
             this.linesOfCode.Add("D=M-D");
-            this.linesOfCode.Add(returnAddressLabel);
+            this.linesOfCode.Add(returnAddressPointer);
             this.linesOfCode.Add("M=D");
             
             // POP to where ever ARG is pointing at
@@ -320,7 +323,7 @@ namespace VMTranslator
             this.WriteRestoreSegmentForReturn("LCL", 4, frameLabel);
 
             // goto RET
-            this.linesOfCode.Add(returnAddressLabel);
+            this.linesOfCode.Add("@RET_Pointer");
             this.linesOfCode.Add("0;JMP");
         }
 
