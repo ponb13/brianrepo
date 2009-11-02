@@ -46,8 +46,12 @@ namespace VMTranslator
             linesOfCode.Add("@SP");
             linesOfCode.Add("M=D");
 
-            linesOfCode.Add("@Sys.init");
-            linesOfCode.Add("0;JMP");
+
+            CodeWriter cd = new CodeWriter(linesOfCode);
+            cd.WriteCall("Sys.init", 0);
+
+            //linesOfCode.Add("@Sys.init");
+            //linesOfCode.Add("0;JMP");
         }
 
         /// <summary>
