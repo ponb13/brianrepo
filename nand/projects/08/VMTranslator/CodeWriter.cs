@@ -218,9 +218,9 @@ namespace VMTranslator
             linesOfCode.Add(@"//WriteCall " + functionName);
             // push return address
             this.returnCount++;
-            string returnAddressLabel = "return_"+returnCount;
+            string returnAddressLabel = Guid.NewGuid().ToString("N")+"return";
 
-            this.linesOfCode.Add("@" + returnAddressLabel);
+            this.linesOfCode.Add("@" + returnAddressLabel + "//pushing return address"); 
             this.linesOfCode.Add("D=A");
             this.linesOfCode.Add("@SP");
             this.linesOfCode.Add("A=M");
@@ -301,8 +301,16 @@ namespace VMTranslator
             this.linesOfCode.Add("D=M-D");
             this.linesOfCode.Add(returnAddressPointer);
             this.linesOfCode.Add("M=D");
+
+            //pointer shizzles
+            this.linesOfCode.Add(returnAddressPointer);
+            this.linesOfCode.Add("A=M");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add(returnAddressPointer);
+            this.linesOfCode.Add("M=D");
+
             
-            // POP to where ever ARG is pointing at
+            // POP to where ever ARG is pointing at - put return value  at top of stack
             this.linesOfCode.Add("@SP");
             this.linesOfCode.Add("A=M-1"); // got sp-1 to get value at top of stack
             this.linesOfCode.Add("D=M");
@@ -324,6 +332,7 @@ namespace VMTranslator
 
             // goto RET
             this.linesOfCode.Add("@RET_Pointer");
+            this.linesOfCode.Add("A=M");
             this.linesOfCode.Add("0;JMP");
         }
 
