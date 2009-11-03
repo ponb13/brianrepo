@@ -489,6 +489,7 @@ namespace VMTranslator
         // x < y
         private void WriteLessThan()
         {
+            this.linesOfCode.Add("// writing less than");
             this.WritePopToR("R14"); //y
             this.WritePopToR("R15"); //x
 
