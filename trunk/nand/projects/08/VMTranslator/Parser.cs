@@ -137,15 +137,15 @@ namespace VMTranslator
         private bool IsArithmeticCommand()
         {
             bool result = false;
-            if (this.currentLine.Equals("sub") ||
-                this.currentLine.Equals("add") ||
-                this.currentLine.Equals("neg") ||
-                this.currentLine.Equals("eq") ||
-                this.currentLine.Equals("gt") ||
-                this.currentLine.Equals("lt") ||
-                this.currentLine.Equals("and") ||
-                this.currentLine.Equals("or") ||
-                this.currentLine.Equals("not"))
+            if (this.currentLine.StartsWith("sub") ||
+                this.currentLine.StartsWith("add") ||
+                this.currentLine.StartsWith("neg") ||
+                this.currentLine.StartsWith("eq") ||
+                this.currentLine.StartsWith("gt") ||
+                this.currentLine.StartsWith("lt") ||
+                this.currentLine.StartsWith("and") ||
+                this.currentLine.StartsWith("or") ||
+                this.currentLine.StartsWith("not"))
             {
                 result = true;
             }
