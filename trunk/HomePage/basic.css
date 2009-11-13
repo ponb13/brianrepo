@@ -1,0 +1,43 @@
+#col1
+{
+	width: 48%;
+	margin-left: 3%;
+	float: left;
+	border: solid 1px black;
+	display: inline;
+}
+
+#col2
+{
+	width: 20%;
+	margin-left: 3%;
+	float: left;
+	border: solid 1px black;
+	margin-bottom: 10px;
+}
+
+#col3
+{
+	width: 20%;
+	margin-left: 3%;
+	float: left;
+	border: solid 1px black;
+	margin-bottom: 10px;
+}
+
+#header
+{
+	border: solid 1px black;
+	margin-bottom: 10px;
+}
+
+#footer
+{
+	border: solid 1px black;
+	clear: both;
+}
+
+.boxLiner
+{
+	padding: 7px;
+}
