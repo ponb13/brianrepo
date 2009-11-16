@@ -1,43 +1,90 @@
+/*
+	Brian Byrne November 2009
+*/
+
+/*	
+	html reset taken from :
+	http://meyerweb.com/eric/tools/css/reset/
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	background: transparent;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+/*Basic Fonts*/
+body
+{
+	font-size: 120%;
+	font-family: Tahoma,Verdana,Arial,Sans-Serif;
+}
+
+h1,h2,h3,h4,p
+{
+	padding-bottom: 1em;
+}
+
+/*Basic Structure*/
 #col1
 {
-	width: 48%;
-	margin-left: 3%;
+	width: 70%;
+	margin-left: 2%;
 	float: left;
-	border: solid 1px black;
+	background: #F4F4F4;
 	display: inline;
 }
 
 #col2
 {
-	width: 20%;
-	margin-left: 3%;
+	width: 22%;
+	margin-left: 2%;
 	float: left;
-	border: solid 1px black;
-	margin-bottom: 10px;
-}
-
-#col3
-{
-	width: 20%;
-	margin-left: 3%;
-	float: left;
-	border: solid 1px black;
+	background: #F4F4F4;
 	margin-bottom: 10px;
 }
 
 #header
 {
-	border: solid 1px black;
+	background: #F4F4F4;
 	margin-bottom: 10px;
+	font-size: 170%;
 }
 
 #footer
 {
-	border: solid 1px black;
+	background: #F4F4F4;
 	clear: both;
 }
 
 .boxLiner
 {
-	padding: 7px;
+	padding: 14px;
+}
+
+ul.navList
+{
+	font-size: 170%;
+}
+
+ul.navList li
+{
+	
+	padding: 0.3em 0em 0.3em 0.3em;
 }
