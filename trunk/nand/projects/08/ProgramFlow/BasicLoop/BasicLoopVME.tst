@@ -3,7 +3,7 @@
 // MIT Press. Book site: www.idc.ac.il/tecs
 // File name: projects/08/ProgramFlow/BasicLoop/BasicLoopVME.tst
 
-load BasicLoop.vm,
+load bri.vm,
 output-file BasicLoop.out,
 compare-to BasicLoop.cmp,
 output-list RAM[0]%D1.6.1 RAM[256]%D1.6.1;
