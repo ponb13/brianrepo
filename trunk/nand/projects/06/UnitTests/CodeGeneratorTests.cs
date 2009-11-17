@@ -74,10 +74,5 @@ namespace UnitTests
             Assert.IsTrue(CodeGenerator.Dest("AMD") == "111");
         }
 
-        [TestMethod]
-        public void BinaryConvertTest()
-        {
-            string  stringRep = DecimalToBinaryConverter.GetStringRep(2400);
-        }
     }
 }
