@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assembler.cs" />
     <Compile Include="CodeGenerator.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="DecimalToBinaryConverter.cs" />
