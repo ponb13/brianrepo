@@ -5,6 +5,11 @@ using System.Text;
 
 namespace Assembler
 {
+    /// <summary>
+    /// Helper Class, get the binary representation of an int.
+    /// As this is a toy Assembly it actually returns a string
+    /// representation.
+    /// </summary>
     public class DecimalToBinaryConverter
     {
         private static int[] binaryValues = new int[15]
@@ -26,7 +31,13 @@ namespace Assembler
                 1,
             };
 
-        public static int[] Convert(int valueToConvert)
+
+        /// <summary>
+        /// Converts the specified value to (string rep) of binary.
+        /// </summary>
+        /// <param name="valueToConvert">The value to convert.</param>
+        /// <returns></returns>
+        private static int[] Convert(int valueToConvert)
         {
             int[] binaryRep = new int[15];
 
@@ -49,6 +60,12 @@ namespace Assembler
             return binaryRep;
         }
 
+        /// <summary>
+        /// Converts the specified int value into binary representation
+        /// (actually a string rep of the binary).
+        /// </summary>
+        /// <param name="valToConvert">The val to convert.</param>
+        /// <returns></returns>
         public static string GetStringRep(int valToConvert)
         {
             int[] binaryRep = DecimalToBinaryConverter.Convert(valToConvert);
