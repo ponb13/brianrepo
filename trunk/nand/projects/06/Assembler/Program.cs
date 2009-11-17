@@ -20,6 +20,7 @@ namespace Assembler
                 string assembledCode = assembler.Assemble();
 
                 Program.WriteToFile(outputPath, assembledCode);
+                Console.WriteLine("Assembly Complete, written to " + Path.GetFullPath(outputPath));
             }
             else
             {
@@ -28,20 +29,11 @@ namespace Assembler
             
         }
 
-
-        
-
-        
-
-       
-
-        
-
         /// <summary>
-        /// 
+        /// Writes to file.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="content"></param>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="content">The content.</param>
         private static void WriteToFile(string filePath, string content)
         {
             File.Delete(filePath);
