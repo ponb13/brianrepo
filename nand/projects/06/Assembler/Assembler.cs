@@ -9,10 +9,14 @@ namespace Assembler
 {
     /// <summary>
     /// Acts as the glue between the input file, 
-    /// the junk, the parser and the codegenerator.
+    /// the junk remover, the parser and the codegenerator.
     /// </summary>
     public class Assembler
     {
+        /// <summary>
+        /// Gets or sets the input file path.
+        /// </summary>
+        /// <value>The input file path.</value>
         private string InputFilePath
         {
             get;
@@ -41,9 +45,9 @@ namespace Assembler
         }
 
         /// <summary>
-        /// Peforms the assemble of this inputFile.
+        /// Preforms the full assembly process on the input file
         /// </summary>
-        /// <returns></returns>
+        /// <returns>the binary as a string of zeros and ones</returns>
         public string Assemble()
         {
             // confusingly the binary represtation is actually a string of zeros and ones.
@@ -111,8 +115,44 @@ namespace Assembler
         }
 
         /// <summary>
+        /// Handles the ACommands.
+        /// ACommands can be symbols or literals
+        /// e.g. @120 is a literal while @foo is a symbol
+        /// </summary>
+        /// <param name="symbol">The symbol.</param>
+        /// <param name="addressCount">The address count.</param>
+        private string Handle_A_Command(string symbol, ref int addressCounter)
+        {
+            string binaryLine = string.Empty;
+            
+            if (this.SymbolTable.Contains(symbol))
+            {
+                int address = this.SymbolTable.GetAddress(symbol);
+                binaryLine = CodeGenerator.Get_AInstruction(address.ToString());
+            }
+            else
+            {
+                int literalVal;
+                //check if its int literal if it is just add it
+                if (int.TryParse(symbol, out literalVal))
+                {
+                    binaryLine = CodeGenerator.Get_AInstruction(literalVal.ToString());
+                }
+                else
+                {
+                    // add the new address
+                    this.SymbolTable.AddEntry(symbol, addressCounter);
+                    binaryLine = CodeGenerator.Get_AInstruction(addressCounter.ToString());
+                    addressCounter++;
+                }
+            }
+
+            return binaryLine;
+        }
+
+        /// <summary>
         /// Seconds the pass.
-        /// TODO - break into smaller methods!!!
+        /// TODO - refactor! break into smaller methods!!!
         /// after the first symbol table filling pass,
         /// we march thru the lines again, the parser gives us each command and its type
         /// we pass these to the code generator to build our binary representation
@@ -127,7 +167,7 @@ namespace Assembler
             using (Parser parser = new Parser(inputStream))
             {
                 StringBuilder fullBinaryListing = new StringBuilder();
-                // magic number, new variables in the hack platform are store from address 16 upwards.
+                // magic number, new variables in the hack platform are stored from address 16 upwards.
                 int addressCounter = 16;
 
                 //TODO  - horrible nested while and if chain - break into methods
@@ -142,28 +182,7 @@ namespace Assembler
                     }
                     else if (parser.CommandType() == Command.A_COMMAND)
                     {
-                        if (this.SymbolTable.Contains(parser.Symbol()))
-                        {
-                            int address = this.SymbolTable.GetAddress(parser.Symbol());
-                            binaryLine = CodeGenerator.Get_AInstruction(address.ToString());
-                        }
-                        else
-                        {
-                            int literalVal;
-                            //check if its int literal if it is just add it
-                            if (int.TryParse(parser.Symbol(), out literalVal))
-                            {
-                                binaryLine = CodeGenerator.Get_AInstruction(literalVal.ToString());
-                            }
-                            else
-                            {
-
-                                // add the new address
-                                this.SymbolTable.AddEntry(parser.Symbol(), addressCounter);
-                                binaryLine = CodeGenerator.Get_AInstruction(addressCounter.ToString());
-                                addressCounter++;
-                            }
-                        }
+                        binaryLine = this.Handle_A_Command(parser.Symbol(), ref addressCounter);
 
                         fullBinaryListing.Append(binaryLine + Environment.NewLine);
                     }
@@ -171,6 +190,7 @@ namespace Assembler
 
                 return fullBinaryListing.ToString();
             }
+           
         }
     }
 }
