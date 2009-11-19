@@ -13,6 +13,7 @@ namespace Assembler
     /// </summary>
     public class Assembler
     {
+        #region properties
         /// <summary>
         /// Gets or sets the input file path.
         /// </summary>
@@ -33,7 +34,9 @@ namespace Assembler
             get;
             set;
         }
+        #endregion
 
+        #region .ctors
         /// <summary>
         /// Initializes a new instance of the <see cref="Assembler"/> class.
         /// </summary>
@@ -43,7 +46,9 @@ namespace Assembler
             this.InputFilePath = input;
             this.SymbolTable = new SymbolTable();
         }
+        #endregion
 
+        #region public methods
         /// <summary>
         /// Preforms the full assembly process on the input file
         /// </summary>
@@ -61,7 +66,9 @@ namespace Assembler
 
             return finalBinaryRepresentation;
         }
+        #endregion
 
+        #region private methods
         /// <summary>
         /// Removes Junk From the stream and returns a byte array
         /// i.e. removes comments etc
@@ -74,6 +81,7 @@ namespace Assembler
             using (FileStream fileStream = new FileStream(inputFilePath, FileMode.Open))
             using (MemoryStream outputStream = new MemoryStream())
             {
+                
                 JunkRemover junkRemover = new JunkRemover(fileStream, outputStream);
 
                 result = outputStream.ToArray();
@@ -190,7 +198,8 @@ namespace Assembler
 
                 return fullBinaryListing.ToString();
             }
-           
+        #endregion
+
         }
     }
 }
