@@ -15,6 +15,7 @@ namespace Assembler
             {
                 string inputPath = args[0];
                 string outputPath = args[1];
+
                 // TODO could do with some error handling around this , try catch invalid filepaths etc...
                 Assembler assembler = new Assembler(inputPath);
                 string assembledCode = assembler.Assemble();
