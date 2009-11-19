@@ -8,7 +8,7 @@ namespace Assembler
     /// <summary>
     /// Helper Class, get the binary representation of an int.
     /// As this is a toy Assembly it actually returns a string
-    /// representation.
+    /// representation. (yes a bit confusing).
     /// </summary>
     public class DecimalToBinaryConverter
     {
