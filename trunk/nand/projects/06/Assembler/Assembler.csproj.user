@@ -1,5 +1,0 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>"C:\Documents and Settings\brian\My Documents\code\brianrepo\nand\projects\07_\BriTest.asm" "C:\Documents and Settings\brian\My Documents\code\brianrepo\nand\projects\07_\BriTest.bin"</StartArguments>
-  </PropertyGroup>
-</Project>
