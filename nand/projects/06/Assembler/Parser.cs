@@ -11,6 +11,9 @@ namespace Assembler
     {
         private StreamReader reader;
 
+        /// <summary>
+        /// the currently loaded line.
+        /// </summary>
         public string currentTxtCommand;
 
         public Parser()
@@ -18,16 +21,29 @@ namespace Assembler
             // useful for testing
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Parser"/> class.
+        /// </summary>
+        /// <param name="inputStream">The input stream.</param>
         public Parser(Stream inputStream)
         {
             reader = new StreamReader(inputStream);
         }
 
+        /// <summary>
+        /// Determines whether the assembly language file has more commands.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if [has more commands]; otherwise, <c>false</c>.
+        /// </returns>
         public bool HasMoreCommands()
         {
             return !reader.EndOfStream;
         }
 
+        /// <summary>
+        /// Readers the next line of the currently loaded assembly language file
+        /// </summary>
         public void Advance()
         {
             if (this.HasMoreCommands())
@@ -36,6 +52,10 @@ namespace Assembler
             }
         }
 
+        /// <summary>
+        /// Finds the command type of the current assembly language line
+        /// </summary>
+        /// <returns></returns>
         public Command CommandType()
         {
             Command commandType = Command.ERROR;
@@ -61,7 +81,7 @@ namespace Assembler
         }
 
         /// <summary>
-        /// Returns the destination mnemonic of a c instruction
+        /// Extracts the destination Mnemonic from the assembly language line
         /// Should only be called if the current command is a c command.
         /// </summary>
         /// <returns></returns>
@@ -139,11 +159,15 @@ namespace Assembler
             return comp;
         }
 
+        /// <summary>
+        /// Extracts the jump Mnemonic from the assembly language line
+        /// </summary>
+        /// <returns></returns>
         public string Jump()
         {
             if (this.CommandType() != Command.C_COMMAND)
             {
-                throw new Exception("Dest should only be called when CommandType is C_Command " + Environment.NewLine
+                throw new Exception("Jump should only be called when CommandType is C_Command " + Environment.NewLine
                     + "Current Command Type: " + this.CommandType() + Environment.NewLine
                     + "Current current text command: " + this.currentTxtCommand);
 
