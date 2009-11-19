@@ -29,7 +29,7 @@ namespace Assembler
             }
             else
             {
-                Console.WriteLine("Specify an input .asm file and an output file.");
+                Console.WriteLine("Specify an input .asm file and an output file. See the test files folder for some assembly files...");
             }
             
         }
