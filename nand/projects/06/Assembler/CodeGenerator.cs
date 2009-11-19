@@ -5,8 +5,12 @@ using System.Text;
 
 namespace Assembler
 {
+    /// <summary>
+    /// Provides methods that return the machine code for a given assembly language mnemonic.
+    /// </summary>
     public static class CodeGenerator
     {
+        #region public methods 
         /// <summary>
         /// Just a simpler way of building a c instruction, one method that just calls all the required methods.
         /// </summary>
@@ -21,6 +25,11 @@ namespace Assembler
             return "111"+Comp(compNmemonic)+Dest(destNmemonic) + Jump(jmpNmemonic);
         }
         
+        /// <summary>
+        /// return the destination bits for a given mnemonic
+        /// </summary>
+        /// <param name="mnemonic"></param>
+        /// <returns></returns>
         public static string Dest(string mnemonic)
         {
             string binary = String.Empty;
@@ -72,6 +81,11 @@ namespace Assembler
             return binary;
         }
 
+        /// <summary>
+        /// return the jumps bits for a given jump mnemonic
+        /// </summary>
+        /// <param name="mnemonic"></param>
+        /// <returns></returns>
         public static string Jump(string mnemonic)
         {
             string binary = string.Empty;
@@ -124,6 +138,11 @@ namespace Assembler
             return binary;
         }
 
+        /// <summary>
+        /// returns the comp bits for a given mnemonic
+        /// </summary>
+        /// <param name="mnemonic"></param>
+        /// <returns></returns>
         public static string Comp(string mnemonic)
         {
             string binary = String.Empty; 
@@ -274,10 +293,15 @@ namespace Assembler
             return binary;
         }
 
+        /// <summary>
+        /// returns the bits for assembly Ainstruction
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
         public static string Get_AInstruction(string val)
         {
             return "0"+DecimalToBinaryConverter.GetStringRep(int.Parse(val));
         }
-        
+        #endregion
     }
 }

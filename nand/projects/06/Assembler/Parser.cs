@@ -7,6 +7,10 @@ using System.Text.RegularExpressions;
 
 namespace Assembler
 {
+    /// <summary>
+    /// Encapsulates a way of reading the assembly landguage file.
+    /// Read each line and call methods to extract parts of the line.
+    /// </summary>
     public class Parser : IDisposable
     {
         private StreamReader reader;

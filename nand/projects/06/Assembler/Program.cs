@@ -7,6 +7,10 @@ using System.IO;
 
 namespace Assembler
 {
+    /// <summary>
+    /// A toy assembler for the hack platform
+    /// See http://www1.idc.ac.il/tecs/
+    /// </summary>
     public class Program
     {
         static void Main(string[] args)
@@ -30,6 +34,7 @@ namespace Assembler
             
         }
 
+        #region private methods
         /// <summary>
         /// Writes to file.
         /// </summary>
@@ -40,6 +45,7 @@ namespace Assembler
             File.Delete(filePath);
             File.AppendAllText(filePath, content);
         }
+        #endregion
 
     }
 }
