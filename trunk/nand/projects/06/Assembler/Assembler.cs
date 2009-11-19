@@ -79,12 +79,9 @@ namespace Assembler
             byte[] result;
 
             using (FileStream fileStream = new FileStream(inputFilePath, FileMode.Open))
-            using (MemoryStream outputStream = new MemoryStream())
+            using (JunkRemover junkRemover = new JunkRemover(fileStream))
             {
-                
-                JunkRemover junkRemover = new JunkRemover(fileStream, outputStream);
-
-                result = outputStream.ToArray();
+                result = junkRemover.RemoveJunk();
             }
 
             return result;

@@ -8,39 +8,61 @@ using System.IO;
 
 namespace Assembler
 {
-    public class JunkRemover
+    /// <summary>
+    /// Very Simple Junk remover
+    /// Removes comments and empty lines.
+    /// </summary>
+    public class JunkRemover : IDisposable
     {
-
         private StreamReader reader;
-        private StreamWriter writer;
-        
-        public JunkRemover(Stream inputStream, Stream outputStream)
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JunkRemover"/> class.
+        /// </summary>
+        /// <param name="inputStream">The input stream.</param>
+        public JunkRemover(Stream inputStream)
         {
             reader = new StreamReader(inputStream);
-            writer = new StreamWriter(outputStream);
-            RemoveJunk();
+        }
+
+        /// <summary>
+        /// Removes the junk from file.
+        /// </summary>
+        public byte[] RemoveJunk()
+        {
+            using (MemoryStream outputStream = new MemoryStream())
+            using (StreamWriter writer = new StreamWriter(outputStream))
+            {
+                
+                while (!reader.EndOfStream)
+                {
+                    string line = (reader.ReadLine());
+
+                    // remove comments
+                    Regex regex = new Regex(@"\/\/.*");
+                    line = regex.Replace(line, "");
+
+                    // ignore empty lines
+                    if (!String.IsNullOrEmpty(line.Trim()))
+                    {
+                        writer.WriteLine(line);
+                    }
+                }
+                writer.Flush();
+
+                return outputStream.ToArray();
+            }
             
         }
 
-        private void RemoveJunk()
+
+        #region IDisposable Members
+
+        void IDisposable.Dispose()
         {
-            while (!reader.EndOfStream)
-            {
-                string line = (reader.ReadLine());
-                
-                // remove comments
-                Regex regex = new Regex(@"\/\/.*");
-                line = regex.Replace(line, "");
-
-                // ignore empty lines
-                if (!String.IsNullOrEmpty(line.Trim()))
-                {
-                    writer.WriteLine(line);
-                }
-            }
-
-            writer.Flush();
+            reader.Dispose();
         }
 
+        #endregion
     }
 }

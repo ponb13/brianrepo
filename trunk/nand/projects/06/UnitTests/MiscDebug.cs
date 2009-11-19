@@ -11,9 +11,9 @@ namespace UnitTests
     /// Summary description for Debug
     /// </summary>
     [TestClass]
-    public class Debug
+    public class MiscDebug
     {
-        public Debug()
+        public MiscDebug()
         {
             //
             // TODO: Add constructor logic here
