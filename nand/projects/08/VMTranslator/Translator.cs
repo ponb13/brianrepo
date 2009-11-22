@@ -42,8 +42,7 @@ namespace VMTranslator
         }
 
         /// <summary>
-        /// Begins the translation of file / directory 
-        /// set in the constructor
+        /// Begins the translation of the loaded file / directory
         /// </summary>
         public void Translate()
         {
@@ -159,6 +158,8 @@ namespace VMTranslator
         /// </summary>
         private void WriteAssemblyCodeToFile()
         {
+            File.Delete(outputPath);
+
             using (FileStream fileStream = new FileStream(this.outputPath, FileMode.Create, FileAccess.Write))
             using (StreamWriter writer = new StreamWriter(fileStream))
             {
