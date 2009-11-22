@@ -6,13 +6,29 @@ using System.IO;
 
 namespace VMTranslator
 {
+    /// <summary>
+    /// Translates vm commands into hack assembly language
+    /// </summary>
     public class CodeWriter
     {
+        #region private variables
+
+        /// <summary>
+        /// store the lines of generated vm code as a list of strings
+        /// little bit simpler than constantly writing to an output stream
+        /// </summary>
         private IList<string> linesOfCode = null;
-        private string vmFileName;
+
+        /// <summary>
+        /// See SetUpSegmentLookUpTable method in this class.
+        /// </summary>
         private Dictionary<string, int> segmentLookUpTable = null;
+        
+        /// <summary>
+        /// The name of the vm function that is currently executing.
+        /// </summary>
         private string currentExecutingFunction;
-        private int returnCount;
+        
 
         // when writing equality,greater than and less than statements
         // we use labels, we can't keep using the same labels
@@ -21,6 +37,14 @@ namespace VMTranslator
         private int lt_count;
         private int gt_count;
 
+        #endregion
+
+        #region public properties
+        /// <summary>
+        /// Gets or sets the current executing function name.
+        /// usful for building label names in hack assembly code.
+        /// </summary>
+        /// <value>The current executing function.</value>
         public string CurrentExecutingFunction
         {
             get 
@@ -38,20 +62,32 @@ namespace VMTranslator
             set { this.currentExecutingFunction = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the name of the vm file.
+        /// </summary>
+        /// <value>The name of the vm file.</value>
+        public string VmFileName
+        {
+            get;
+            set;
+        }
+        #endregion
+
+        #region ctors
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CodeWriter"/> class.
+        /// </summary>
+        /// <param name="linesOfAssemblyCode">The lines of assembly code.</param>
         public CodeWriter(IList<string> linesOfAssemblyCode)
         {
             this.linesOfCode = linesOfAssemblyCode;
             this.segmentLookUpTable = this.SetUpSegmentLookUpTable();
         }
+        #endregion
 
-        public string VmFileName
-        {
-            get { return this.vmFileName; }
-            set { this.vmFileName = value; }
-        }
-
+        #region public methods
         /// <summary>
-        /// Writes the assembly code that is the 
+        /// Writes the hack assembly code that is the 
         /// translation of the given arithmetic command.
         /// </summary>
         /// <param name="command">The command.</param>
@@ -106,7 +142,7 @@ namespace VMTranslator
                     }
             }
         }
-
+    
         /// <summary>
         /// Writes the assembly code that is hte translation of the given command.
         /// </summary>
@@ -217,7 +253,6 @@ namespace VMTranslator
         {
             linesOfCode.Add(@"//WriteCall " + functionName);
             // push return address
-            this.returnCount++;
             string returnAddressLabel = Guid.NewGuid().ToString("N")+"return";
 
             this.linesOfCode.Add("@" + returnAddressLabel + "//pushing return address"); 
@@ -335,29 +370,11 @@ namespace VMTranslator
             this.linesOfCode.Add("A=M");
             this.linesOfCode.Add("0;JMP");
         }
+        #endregion
 
-
+        #region Memory Segment mapping
         /// <summary>
-        /// Writes the restore segment for return.
-        /// See P.163
-        /// </summary>
-        /// <param name="segment">The segment.</param>
-        /// <param name="frameIndex">Index of the frame.</param>
-        private void WriteRestoreSegmentForReturn(string segmentToRestore, int frameOffset, string currentFrameLabel)
-        {
-            linesOfCode.Add(@"//WriteRestore " + segmentToRestore + " SegmentForReturn");
-            
-            this.linesOfCode.Add(@"@" + frameOffset);
-            this.linesOfCode.Add("D=A");
-            this.linesOfCode.Add(currentFrameLabel);
-            this.linesOfCode.Add("A=M-D");
-            this.linesOfCode.Add("D=M");
-            this.linesOfCode.Add("@"+segmentToRestore);
-            this.linesOfCode.Add("M=D");
-        }
-
-        /// <summary>
-        /// Just acts as a translator between local=LCL,this=THIS etc
+        /// Maps memory location names to their actual addresses
         /// </summary>
         private Dictionary<string, int> SetUpSegmentLookUpTable()
         {
@@ -372,11 +389,12 @@ namespace VMTranslator
             lookUpTable.Add("R15", 15);
             lookUpTable.Add("pointer", 3);
             lookUpTable.Add("temp", 5);
+
             return lookUpTable;
         }
+        #endregion
 
-        #region WriteArthemeticCommands
-
+        #region Arthemtic command
         private void WriteAdd()
         {
             linesOfCode.Add(@"//Write Add");
@@ -391,7 +409,7 @@ namespace VMTranslator
             linesOfCode.Add(@"M=M+D");
 
             // R15 has the sum result, although I orginally thought that push segment
-            // would only be used to push from memory segments, I can push from addresses aswell
+            // would only be used to push from memory segments, we can push from addresses aswell
             this.PushR("R15");
         }
 
@@ -554,6 +572,29 @@ namespace VMTranslator
 
         #region StackCommands
 
+        /// <summary>
+        /// Writes the restore segment for return.
+        /// See P.163
+        /// </summary>
+        /// <param name="segment">The segment.</param>
+        /// <param name="frameIndex">Index of the frame.</param>
+        private void WriteRestoreSegmentForReturn(string segmentToRestore, int frameOffset, string currentFrameLabel)
+        {
+            linesOfCode.Add(@"//WriteRestore " + segmentToRestore + " SegmentForReturn");
+
+            this.linesOfCode.Add(@"@" + frameOffset);
+            this.linesOfCode.Add("D=A");
+            this.linesOfCode.Add(currentFrameLabel);
+            this.linesOfCode.Add("A=M-D");
+            this.linesOfCode.Add("D=M");
+            this.linesOfCode.Add("@" + segmentToRestore);
+            this.linesOfCode.Add("M=D");
+        }
+
+        /// <summary>
+        /// writes the assembly code for pushing a constant onto the stack
+        /// </summary>
+        /// <param name="index"></param>
         private void WritePushConstant(int index)
         {
             linesOfCode.Add(@"@" + index);
@@ -565,6 +606,11 @@ namespace VMTranslator
             linesOfCode.Add(@"M=M+1");
         }
 
+        /// <summary>
+        /// Writes the assembly code to push Temp or Pointer segments 
+        /// </summary>
+        /// <param name="seg"></param>
+        /// <param name="index"></param>
         private void WritePushTempOrPointer(string seg, int index)
         {
             int address;
@@ -591,6 +637,11 @@ namespace VMTranslator
             this.IncrementStackPointer();
         }
 
+        /// <summary>
+        /// Writes the assembly code to push memory segment[n]
+        /// </summary>
+        /// <param name="seg"></param>
+        /// <param name="index"></param>
         private void WritePushSegmentIndex(string seg, int index)
         {
             //May need to write push R15 etc
@@ -751,7 +802,6 @@ namespace VMTranslator
             linesOfCode.Add(@"@SP");
             linesOfCode.Add(@"M=M-1");
         }
-
         #endregion
     }
 }
