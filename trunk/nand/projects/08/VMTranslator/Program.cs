@@ -10,6 +10,7 @@ namespace VMTranslator
     {
         static void Main(string[] args)
         {
+            // TODO - could do with some exception handling, some cmd line switches might be nice to (e.g. quiet mode).
             if (args.Count() == 2)
             {
                 string inputPath = args[0];
@@ -23,7 +24,7 @@ namespace VMTranslator
             }
             else
             {
-                Console.WriteLine("Please supplier input file / directory and output file path.");
+                Console.WriteLine("Please specify an input file / directory and an output file path.");
             }
 
         }
