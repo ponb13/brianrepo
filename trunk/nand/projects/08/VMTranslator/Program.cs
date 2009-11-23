@@ -25,6 +25,7 @@ namespace VMTranslator
             else
             {
                 Console.WriteLine("Please specify an input file / directory and an output file path.");
+                Console.ReadKey();
             }
 
         }
