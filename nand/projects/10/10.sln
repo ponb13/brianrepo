@@ -3,6 +3,41 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{1D19E4D7-E266-4B8E-9D5F-443F5CCB1893}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{960C41B5-4899-4AC8-8747-AA02DD57E210}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressionlessSquare", "ExpressionlessSquare", "{055175BD-673C-4F68-9987-70484031D46C}"
+	ProjectSection(SolutionItems) = preProject
+		TestFiles\ExpressionlessSquare\Main.jack = TestFiles\ExpressionlessSquare\Main.jack
+		TestFiles\ExpressionlessSquare\Main.xml = TestFiles\ExpressionlessSquare\Main.xml
+		TestFiles\ExpressionlessSquare\MainT.xml = TestFiles\ExpressionlessSquare\MainT.xml
+		TestFiles\ExpressionlessSquare\Square.jack = TestFiles\ExpressionlessSquare\Square.jack
+		TestFiles\ExpressionlessSquare\Square.xml = TestFiles\ExpressionlessSquare\Square.xml
+		TestFiles\ExpressionlessSquare\SquareGame.jack = TestFiles\ExpressionlessSquare\SquareGame.jack
+		TestFiles\ExpressionlessSquare\SquareGame.xml = TestFiles\ExpressionlessSquare\SquareGame.xml
+		TestFiles\ExpressionlessSquare\SquareGameT.xml = TestFiles\ExpressionlessSquare\SquareGameT.xml
+		TestFiles\ExpressionlessSquare\SquareT.xml = TestFiles\ExpressionlessSquare\SquareT.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ArrayTest", "ArrayTest", "{270BB0E7-8F97-4126-A4EF-E6BD463613CF}"
+	ProjectSection(SolutionItems) = preProject
+		TestFiles\ArrayTest\Main.jack = TestFiles\ArrayTest\Main.jack
+		TestFiles\ArrayTest\Main.xml = TestFiles\ArrayTest\Main.xml
+		TestFiles\ArrayTest\MainT.xml = TestFiles\ArrayTest\MainT.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Square", "Square", "{70D9276C-EA20-47E2-BCB8-C30F6EACA85B}"
+	ProjectSection(SolutionItems) = preProject
+		TestFiles\Square\Main.jack = TestFiles\Square\Main.jack
+		TestFiles\Square\Main.xml = TestFiles\Square\Main.xml
+		TestFiles\Square\MainT.xml = TestFiles\Square\MainT.xml
+		TestFiles\Square\Square.jack = TestFiles\Square\Square.jack
+		TestFiles\Square\Square.xml = TestFiles\Square\Square.xml
+		TestFiles\Square\SquareGame.jack = TestFiles\Square\SquareGame.jack
+		TestFiles\Square\SquareGame.xml = TestFiles\Square\SquareGame.xml
+		TestFiles\Square\SquareGameT.xml = TestFiles\Square\SquareGameT.xml
+		TestFiles\Square\SquareT.xml = TestFiles\Square\SquareT.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -16,5 +51,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{055175BD-673C-4F68-9987-70484031D46C} = {960C41B5-4899-4AC8-8747-AA02DD57E210}
+		{270BB0E7-8F97-4126-A4EF-E6BD463613CF} = {960C41B5-4899-4AC8-8747-AA02DD57E210}
+		{70D9276C-EA20-47E2-BCB8-C30F6EACA85B} = {960C41B5-4899-4AC8-8747-AA02DD57E210}
 	EndGlobalSection
 EndGlobal
