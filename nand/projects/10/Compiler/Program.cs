@@ -9,6 +9,8 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
+            Compiler compiler = new Compiler(@"C:\Documents and Settings\brian\My Documents\code\brianrepo\nand\projects\10\TestFiles\ArrayTest\Main.jack", @"C:\asd.txt");
+            compiler.Compile();
         }
     }
 }
