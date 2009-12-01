@@ -33,7 +33,7 @@ namespace Compiler
             string fullFileContents = this.reader.ReadToEnd();
 
             
-            fullFileContents = Regex.Replace(fullFileContents, @"/\*[\d\D]*?\*/|\/\/.*","asdasdsdasd");
+            fullFileContents = Regex.Replace(fullFileContents, @"/\*[\d\D]*?\*/|\/\/.*","");
 
             return fullFileContents;
         }
