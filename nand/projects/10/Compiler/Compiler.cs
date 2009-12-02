@@ -9,13 +9,14 @@ namespace Compiler
     public class Compiler
     {
         private string inputPath;
-        private string outputPath;
+        private string tokenizerOutputPath;
         private string currentFileContents; 
         
-        public Compiler(string inputPath, string outputPath)
+        public Compiler(string inputPath)
         {
             this.inputPath = inputPath;
-            this.outputPath = outputPath;
+
+            this.tokenizerOutputPath = Path.Combine(Path.GetDirectoryName(inputPath), @"Output\" + Path.GetFileNameWithoutExtension(inputPath) + "T.xml");
         }
 
         public void Compile()
