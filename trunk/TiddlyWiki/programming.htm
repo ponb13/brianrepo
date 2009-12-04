@@ -511,6 +511,67 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
+<div title="GettingStarted" modifier="bplus" created="200912041609" changecount="1">
+<pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
+* [[SiteTitle]] &amp; [[SiteSubtitle]]: The title and subtitle of the site, as shown above (after saving, they will also appear in the browser title bar)
+* [[MainMenu]]: The menu (usually on the left)
+* [[DefaultTiddlers]]: Contains the names of the tiddlers that you want to appear when the TiddlyWiki is opened
+You'll also need to enter your username for signing your edits: &lt;&lt;option txtUserName&gt;&gt;</pre>
+</div>
+<div title="Insert Using a SQL string" modifier="bplus" created="200912041612" modified="200912041616" changecount="3">
+<pre>        /// &lt;summary&gt;
+        /// Inserts the new lims system.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;limsSystem&quot;&gt;The lims system.&lt;/param&gt;
+        public static void InsertNewLimsSystem(DTOLimsSystem limsSystem, DTOTestIdentification testIdentification)
+        {
+            using (DataAnalysisDataContext db = new DataAnalysisDataContext())
+            {
+                db.ExecuteCommand(LimsFactory.InsertNewLimsSystemSql, limsSystem.LimsSystemKey, limsSystem.LimsName);
+
+                db.SubmitChanges();
+            }
+
+            using (SqlConnection conn = LimsFactory.GetConnection(LimsFactory.ConnectionString))
+            using (SqlCommand command = new SqlCommand(LimsFactory.InsertNewTestIdentificationSql, conn))
+            {
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(command))
+                {
+                    
+//this command.AddParameter is an extension method - see Extensions link in this wiki
+command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentifier, testIdentification.TestIdentificationKey);
+                    command.AddParameter(&quot;@LimsSystemKey&quot;, SqlDbType.UniqueIdentifier, testIdentification.LimsSystemKeyKey);
+                    command.AddParameter(&quot;@Code1&quot;, SqlDbType.NVarChar, string.IsNullOrEmpty(testIdentification.Code1) ? null : testIdentification.Code1);
+                    command.AddParameter(&quot;@Code2&quot;, SqlDbType.NVarChar, string.IsNullOrEmpty(testIdentification.Code2) ? null : testIdentification.Code2);
+                    command.AddParameter(&quot;@Code3&quot;, SqlDbType.NVarChar, string.IsNullOrEmpty(testIdentification.Code3) ? null : testIdentification.Code3);
+                    command.AddParameter(&quot;@Code4&quot;, SqlDbType.NVarChar, string.IsNullOrEmpty(testIdentification.Code4) ? null : testIdentification.Code4);
+                    command.AddParameter(&quot;@Code5&quot;, SqlDbType.NVarChar, string.IsNullOrEmpty(testIdentification.Code5) ? null : testIdentification.Code5);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+
+         /// &lt;summary&gt;
+        /// Sql to insert a new TestIdentification.
+        /// &lt;/summary&gt;
+        private const string InsertNewTestIdentificationSql = @&quot;INSERT INTO dbo.[TestIdentification] (TestIdentifictaionKey,LimsSystemKey,Code1,Code2,Code3,Code4,Code5)
+                                                                VALUES(@TestIdentificationKey,@LimsSystemKey,@Code1,@Code2,@Code3,@Code4,@Code5)&quot;;
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
 <div title="MainMenu" modifier="bplus" created="200912031657" modified="200912031658" changecount="3">
 <pre>[[Sql]]
 [[C#]]
@@ -522,8 +583,37 @@ Also see [[AdvancedOptions]]</pre>
 <div title="SiteTitle" modifier="bplus" created="200912031656" changecount="1">
 <pre>Programming</pre>
 </div>
-<div title="Sql" modifier="bplus" created="200912031706" changecount="1">
-<pre>test</pre>
+<div title="Sql" modifier="bplus" created="200912031706" modified="200912041619" tags="sql" changecount="4">
+<pre>[[Insert Using a SQL string]]
+[[SqlCommand Extension Methods]]</pre>
+</div>
+<div title="SqlCommand Extension Methods" modifier="bplus" created="200912041617" changecount="1">
+<pre>//Extensions 
+ /// &lt;summary&gt;
+        /// Adds the parameter.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;command&quot;&gt;The command.&lt;/param&gt;
+        /// &lt;param name=&quot;name&quot;&gt;The name.&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;The value.&lt;/param&gt;
+        public static void AddParameter(this SqlCommand command, string name, object value)
+        {
+            command.Parameters.AddWithValue(name, value ?? DBNull.Value);
+        }
+
+        /// &lt;summary&gt;
+        /// Adds the parameter.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;command&quot;&gt;The command.&lt;/param&gt;
+        /// &lt;param name=&quot;name&quot;&gt;The name.&lt;/param&gt;
+        /// &lt;param name=&quot;type&quot;&gt;The type.&lt;/param&gt;
+        /// &lt;param name=&quot;value&quot;&gt;The value.&lt;/param&gt;
+        public static void AddParameter(this SqlCommand command, string name, SqlDbType type, object value)
+        {
+            SqlParameter param = new SqlParameter(name, type);
+            param.Value = value ?? DBNull.Value;
+
+            command.Parameters.Add(param);
+        }</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
