@@ -16,24 +16,14 @@ namespace Compiler
         {
             this.inputPath = inputPath;
 
-            this.tokenizerOutputPath = Path.Combine(Path.GetDirectoryName(inputPath), @"Output\" + Path.GetFileNameWithoutExtension(inputPath) + "T.xml");
+            //this.tokenizerOutputPath = Path.Combine(Path.GetDirectoryName(inputPath), @"Output\" + Path.GetFileNameWithoutExtension(inputPath) + "T.xml");
         }
 
         public void Compile()
         {
-            this.RemoveJunk();
-            File.AppendAllText(outputPath, currentFileContents); 
+            Tokenizer tokenizer = new Tokenizer(this.inputPath);
         }
 
-        /// <summary>
-        /// Removes the junk from file.
-        /// </summary>
-        private void  RemoveJunk()
-        {
-            using(JunkRemover junkRemover = new JunkRemover(this.inputPath))
-            {
-                this.currentFileContents = junkRemover.RemoveJunk();
-            }
-        }
+       
     }
 }
