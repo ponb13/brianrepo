@@ -633,12 +633,12 @@ command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentif
             command.Parameters.Add(param);
         }</pre>
 </div>
-<div title="Update with an inner join" modifier="bplus" created="200912101640" changecount="1">
+<div title="Update with an inner join" modifier="bplus" created="200912101640" modified="200912101705" changecount="2">
 <pre>UPDATE Suppliers
 				SET Name = @SupplierNameFromFile, CurrencyId = @CurrencyIdFromFile, Active=1
 				FROM Suppliers
 					INNER JOIN SupplierAddresses 
-						ON Suppliers.SupplierCode = SupplierAddresses.OriginalCode
+						ON Suppliers.SupplierCode = SupplierAddresses.SupplierCode
 				WHERE SupplierAddresses.OriginalCode = @SupplierOriginalCodeFromFile</pre>
 </div>
 </div>
