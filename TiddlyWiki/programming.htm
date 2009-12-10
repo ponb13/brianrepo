@@ -600,9 +600,10 @@ command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentif
 <div title="SiteTitle" modifier="bplus" created="200912031656" changecount="1">
 <pre>Programming</pre>
 </div>
-<div title="Sql" modifier="bplus" created="200912031706" modified="200912041619" tags="sql" changecount="4">
+<div title="Sql" modifier="bplus" created="200912031706" modified="200912101640" tags="sql" changecount="5">
 <pre>[[Insert Using a SQL string]]
-[[SqlCommand Extension Methods]]</pre>
+[[SqlCommand Extension Methods]]
+[[Update with an inner join]]</pre>
 </div>
 <div title="SqlCommand Extension Methods" modifier="bplus" created="200912041617" changecount="1">
 <pre>//Extensions 
@@ -631,6 +632,14 @@ command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentif
 
             command.Parameters.Add(param);
         }</pre>
+</div>
+<div title="Update with an inner join" modifier="bplus" created="200912101640" changecount="1">
+<pre>UPDATE Suppliers
+				SET Name = @SupplierNameFromFile, CurrencyId = @CurrencyIdFromFile, Active=1
+				FROM Suppliers
+					INNER JOIN SupplierAddresses 
+						ON Suppliers.SupplierCode = SupplierAddresses.OriginalCode
+				WHERE SupplierAddresses.OriginalCode = @SupplierOriginalCodeFromFile</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
