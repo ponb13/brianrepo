@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Interfaces;
+using States;
 
 namespace Compiler
 {
-    public class Tokenizer : IDisposable
+    public class Tokenizer : ITokenizer, IDisposable
     {
-        private IList<Pair<string, string>> tokens;
+        
         private StreamReader streamReader;
-
 
         public Tokenizer(string filePath)
         {
             streamReader = new StreamReader(filePath);
+            this.State = NewToken.Instance();
         }
 
         /// <summary>
@@ -30,7 +32,14 @@ namespace Compiler
 
         public Pair<string, string> GetNextToken()
         {
-            (char)this.streamReader.Read();
+            this.State = NewToken.Instance();
+
+            while(this.State != typeof(TokenComplete))
+            {
+                this.State.ReadChar(this);
+            }
+
+            return null;
         }
 
         #region IDisposable Members
@@ -38,6 +47,30 @@ namespace Compiler
         public void Dispose()
         {
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region ITokenizer Members
+
+        /// <summary>
+        /// Gets or sets the state.
+        /// </summary>
+        /// <value>The state.</value>
+        public IState State
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the token chars.
+        /// </summary>
+        /// <value>The token chars.</value>
+        public IList<char> TokenChars
+        {
+            get;
+            set;
         }
 
         #endregion

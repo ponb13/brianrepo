@@ -38,7 +38,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Square", "Square", "{70D927
 		TestFiles\Square\SquareT.xml = TestFiles\Square\SquareT.xml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "States", "States\States.csproj", "{87B12A99-DC66-4776-9AF6-350A9142F3B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "Interfaces\Interfaces.csproj", "{40466602-6C97-4902-B12D-8F41D5DBEECB}"
+EndProject
 Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -48,6 +56,14 @@ Global
 		{1D19E4D7-E266-4B8E-9D5F-443F5CCB1893}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D19E4D7-E266-4B8E-9D5F-443F5CCB1893}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D19E4D7-E266-4B8E-9D5F-443F5CCB1893}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87B12A99-DC66-4776-9AF6-350A9142F3B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87B12A99-DC66-4776-9AF6-350A9142F3B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87B12A99-DC66-4776-9AF6-350A9142F3B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87B12A99-DC66-4776-9AF6-350A9142F3B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40466602-6C97-4902-B12D-8F41D5DBEECB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40466602-6C97-4902-B12D-8F41D5DBEECB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40466602-6C97-4902-B12D-8F41D5DBEECB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40466602-6C97-4902-B12D-8F41D5DBEECB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
