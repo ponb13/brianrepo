@@ -9,8 +9,6 @@ namespace Compiler
     public class Compiler
     {
         private string inputPath;
-        private string tokenizerOutputPath;
-        private string currentFileContents; 
         
         public Compiler(string inputPath)
         {
