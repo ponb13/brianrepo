@@ -10,9 +10,6 @@ namespace States
 {
     public class Extensions
     {
-        public string ExtractToken(this IState state, StreamReader streamReader)
-        {
-
-        }
+        
     }
 }

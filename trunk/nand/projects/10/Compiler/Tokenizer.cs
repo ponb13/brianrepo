@@ -72,7 +72,11 @@ namespace Compiler
                 this.State.Read(this);
             }
 
-            return null;
+            return new Pair<string, string>
+            {
+                Value1 = this.State.ToString(),
+                Value2 = this.TokenCharacters.ToString()
+            };
         }
 
         #region IDisposable Members
