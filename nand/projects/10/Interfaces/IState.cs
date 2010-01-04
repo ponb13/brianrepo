@@ -7,6 +7,6 @@ namespace Interfaces
 {
     public interface IState
     {
-        void ReadChar(ITokenizer tokenizer); 
+        void Read(ITokenizer tokenizer); 
     }
 }

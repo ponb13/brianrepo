@@ -19,7 +19,10 @@ namespace Compiler
 
         public void Compile()
         {
-            Tokenizer tokenizer = new Tokenizer(this.inputPath);
+            using (Tokenizer tokenizer = new Tokenizer(this.inputPath))
+            {
+                Pair<string, string> token = tokenizer.GetNextToken();
+            }
         }
 
        
