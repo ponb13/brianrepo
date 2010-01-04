@@ -10,8 +10,8 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string inputPath = @"../../../TestFiles/ArrayTest/Main.jack";
-            
+            //string inputPath = @"../../../TestFiles/ArrayTest/Main.jack";
+            string inputPath = @"../../../TestFiles/UnitTestFiles/Junk.jack";
 
             Compiler compiler = new Compiler(inputPath);
             compiler.Compile();

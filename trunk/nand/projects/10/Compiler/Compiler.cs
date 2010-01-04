@@ -9,19 +9,22 @@ namespace Compiler
     public class Compiler
     {
         private string inputPath;
+        private IList<Pair<string, string>> tokens = new List<Pair<string, string>>();
         
         public Compiler(string inputPath)
         {
             this.inputPath = inputPath;
-
-            //this.tokenizerOutputPath = Path.Combine(Path.GetDirectoryName(inputPath), @"Output\" + Path.GetFileNameWithoutExtension(inputPath) + "T.xml");
         }
 
         public void Compile()
         {
             using (Tokenizer tokenizer = new Tokenizer(this.inputPath))
             {
-                Pair<string, string> token = tokenizer.GetNextToken();
+                while (tokenizer.HasMoreTokens())
+                {
+                    Pair<string, string> token = tokenizer.GetNextToken();
+                    tokens.Add(token);
+                }
             }
         }
 
