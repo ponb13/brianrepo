@@ -10,7 +10,7 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string inputPath = @"C:\Documents and Settings\brian\My Documents\code\brianrepo\nand\projects\10\TestFiles\ArrayTest\Main.jack";
+            string inputPath = @"../../../TestFiles/ArrayTest/Main.jack";
             
 
             Compiler compiler = new Compiler(inputPath);

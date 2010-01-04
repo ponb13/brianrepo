@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Interfaces
 {
@@ -13,7 +14,13 @@ namespace Interfaces
             set;
         }
 
-        IList<char> TokenChars
+        StringBuilder TokenCharacters
+        {
+            get;
+            set;
+        }
+
+        StreamReader StrmReader
         {
             get;
             set;
