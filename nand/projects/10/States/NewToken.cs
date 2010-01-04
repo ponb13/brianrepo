@@ -41,10 +41,30 @@ namespace States
 
             if (this.IsPossibleKeyword(peekedChar))
             {
-                tokenizer.State = KeywordToken.Instance();
+                tokenizer.State = Keyword.Instance();
             }
-            
+            else if(this.IsWhiteSpace(peekedChar))
+            {
+                //  Just consume white space, don't change change state
+                tokenizer.StrmReader.Read();
+            }
+            else if (this.IsSymbol(peekChar))
+            {
+            }
 
+        }
+
+        private void IsSymbol(char peekChar)
+        {
+            string peekedStr = peekedChar.ToString();
+            Match match @"{|}|(|)|{|}|.|,|;|+|-|*|/|&|"
+        }
+
+        private bool IsWhiteSpace(char peekedChar)
+        {
+            string peekedStr = peekedChar.ToString();
+            Match match = Regex.Match(peekedChar.ToString(), @"\s", RegexOptions.Compiled);
+            return match.Success;
         }
 
         /// <summary>

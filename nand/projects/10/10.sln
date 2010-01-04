@@ -42,6 +42,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "States", "States\States.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "Interfaces\Interfaces.csproj", "{40466602-6C97-4902-B12D-8F41D5DBEECB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTestFiles", "UnitTestFiles", "{55CA2380-D3E6-4A82-B83E-2C3F85536DCF}"
+	ProjectSection(SolutionItems) = preProject
+		TestFiles\UnitTestFiles\Junk.jack = TestFiles\UnitTestFiles\Junk.jack
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -72,5 +77,6 @@ Global
 		{055175BD-673C-4F68-9987-70484031D46C} = {960C41B5-4899-4AC8-8747-AA02DD57E210}
 		{270BB0E7-8F97-4126-A4EF-E6BD463613CF} = {960C41B5-4899-4AC8-8747-AA02DD57E210}
 		{70D9276C-EA20-47E2-BCB8-C30F6EACA85B} = {960C41B5-4899-4AC8-8747-AA02DD57E210}
+		{55CA2380-D3E6-4A82-B83E-2C3F85536DCF} = {960C41B5-4899-4AC8-8747-AA02DD57E210}
 	EndGlobalSection
 EndGlobal

@@ -52,7 +52,7 @@ namespace States
             }
             else 
             {
-                tokenizer.State = IdentifierToken.Instance();
+                tokenizer.State = Identifier.Instance();
             }
         }
 
