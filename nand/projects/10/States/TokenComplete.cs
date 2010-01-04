@@ -26,7 +26,7 @@ namespace States
 
         public void Read(ITokenizer tokenizer)
         {
-            tokenizer.State = NewToken.Instance();
+            // do nothing
         }
 
         #endregion
