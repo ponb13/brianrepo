@@ -45,7 +45,7 @@ namespace States
         {
             if(this.ReadCharsAreValidIdentifier(tokenizer.TokenCharacters.ToString()))
             {
-
+                tokenizer.State = TokenComplete.Instance();
             }
         }
 
@@ -70,7 +70,9 @@ namespace States
         /// <returns></returns>
         private bool ReadCharsAreValidIdentifier(string tokenCharacters)
         {
-            // TODO need to ensure not a keyword aswell
+            //  TODO need to ensure not a keyword aswell? might need to as we should 
+            //  only transition to this state from keyowrd state
+
             // TODO need to ensure does not start with digit
             string validIdentifierPattern = "[0-9a-zA-Z_]*";
             Match match = Regex.Match(tokenCharacters, validIdentifierPattern, RegexOptions.Compiled);

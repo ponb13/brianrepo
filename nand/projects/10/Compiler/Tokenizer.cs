@@ -67,14 +67,19 @@ namespace Compiler
         {
             this.State = NewToken.Instance();
 
+            IState previousState = NewToken.Instance();
+
             while (this.State.GetType() != typeof(TokenComplete))
             {
+                // save previous state, when parse to end of token
+                // we'd only get TokenComplete state at the end otherwise
+                previousState = this.State;
                 this.State.Read(this);
             }
 
             return new Pair<string, string>
             {
-                Value1 = this.State.ToString(),
+                Value1 = previousState.ToString(),
                 Value2 = this.TokenCharacters.ToString()
             };
         }
