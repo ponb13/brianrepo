@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Compiler
+namespace Interfaces
 {
+    /// <summary>
+    /// not nice, this isn't an interface, 
+    /// hack a roo it can live here for now.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="U"></typeparam>
     public class Pair<T,U>
     {
         /// <summary>
