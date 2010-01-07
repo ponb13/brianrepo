@@ -27,17 +27,30 @@ namespace States
 
         public void Read(ITokenizer tokenizer)
         {
-            // kind of pointless having a state for symbol...
             StreamReader streamReader = tokenizer.StrmReader;
-            tokenizer.TokenCharacters.Append(streamReader.Read());
+            char symbolChar = (char)streamReader.Read();
+            tokenizer.TokenCharacters.Append(symbolChar);
 
-            this.ChangeState();
+            this.ChangeState(tokenizer, symbolChar);
         }
         #endregion
 
-        private void ChangeState(ITokenizer tokenizer)
+        /// <summary>
+        /// Changes the state of the tokenizer
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer.</param>
+        /// <param name="symbolCharacter">The symbol character.</param>
+        private void ChangeState(ITokenizer tokenizer, char symbolChar)
         {
-            tokenizer.State = TokenComplete.Instance();
+            if (symbolChar == '"')
+            {
+                tokenizer.TokenCharacters = new StringBuilder();
+                tokenizer.State = StringConstant.Instance();
+            }
+            else
+            {
+                tokenizer.State = TokenComplete.Instance();
+            }
         }
     }
 }

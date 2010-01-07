@@ -48,18 +48,35 @@ namespace States
                 //  Just consume white space, don't change change state
                 tokenizer.StrmReader.Read();
             }
-            else if (this.IsSymbol(peekChar))
+            else if (this.IsSymbol(peekedChar))
             {
+                tokenizer.State = Symbol.Instance();
             }
+            // note we don't transition to stringConstant state from here, that transition is only availble from Symbol state
 
         }
 
-        private void IsSymbol(char peekChar)
+        /// <summary>
+        /// Determines whether the specified peeked char is symbol.
+        /// </summary>
+        /// <param name="peekedChar">The peeked char.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified peeked char is symbol; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsSymbol(char peekedChar)
         {
             string peekedStr = peekedChar.ToString();
-            Match match @"{|}|(|)|{|}|.|,|;|+|-|*|/|&|"
+            Match match = Regex.Match(peekedStr,@"[{}()[\]\|\,\;\+\-\*\/\&""\|\<\>\=\~]");
+            return match.Success;
         }
 
+        /// <summary>
+        /// Determines whether [is white space] [the specified peeked char].
+        /// </summary>
+        /// <param name="peekedChar">The peeked char.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is white space] [the specified peeked char]; otherwise, <c>false</c>.
+        /// </returns>
         private bool IsWhiteSpace(char peekedChar)
         {
             string peekedStr = peekedChar.ToString();
