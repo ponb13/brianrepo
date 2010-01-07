@@ -35,9 +35,6 @@ namespace States
             }
 
             this.ChangeState(tokenizer);
-
-            
-
         }
 
         /// <summary>
