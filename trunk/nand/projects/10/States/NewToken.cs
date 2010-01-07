@@ -52,8 +52,48 @@ namespace States
             {
                 tokenizer.State = Symbol.Instance();
             }
-            // note we don't transition to stringConstant state from here, that transition is only availble from Symbol state
+            else if (this.IsStringConstant(tokenizer))
+            {
+                tokenizer.PreviousTokens.Pop();
+                
+                tokenizer.State = StringConstant.Instance();
+            }
 
+        }
+
+        /// <summary>
+        /// Determines whether [is string constant].
+        /// Check previous tokens to determine if this is a string constant
+        /// i.e if the previous token was quotes (") and they aren't closing quotes
+        /// then we have a string constant.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if [is string constant]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsStringConstant(ITokenizer tokenizer)
+        {
+            bool retVal = false;
+
+            if (tokenizer.PreviousTokens.Count > 0)
+            {
+                Pair<string, string> previousToken = tokenizer.PreviousTokens.Pop();
+
+                if (previousToken.Value1 == "\"" && previousToken.Value2 == "Symbol")
+                {
+                    Pair<string, string> nextPreviousToken = tokenizer.PreviousTokens.Pop();
+                    if (nextPreviousToken.Value1 == "\"" && nextPreviousToken.Value2 == "Symbol"
+                        || nextPreviousToken.Value2 == "StringConstant")
+                    {
+                        retVal = false;
+                    }
+                    else
+                    {
+                        retVal = true;
+                    }
+                }
+            }
+
+            return retVal;
         }
 
         /// <summary>

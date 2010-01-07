@@ -42,15 +42,7 @@ namespace States
         /// <param name="symbolCharacter">The symbol character.</param>
         private void ChangeState(ITokenizer tokenizer, char symbolChar)
         {
-            if (symbolChar == '"')
-            {
-                tokenizer.TokenCharacters = new StringBuilder();
-                tokenizer.State = StringConstant.Instance();
-            }
-            else
-            {
-                tokenizer.State = TokenComplete.Instance();
-            }
+            tokenizer.State = TokenComplete.Instance();
         }
     }
 }

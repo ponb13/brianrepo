@@ -25,5 +25,12 @@ namespace Interfaces
             get;
             set;
         }
+
+        Stack<Pair<string, string>> PreviousTokens
+        {
+            get;
+            set;
+        }
+        
     }
 }
