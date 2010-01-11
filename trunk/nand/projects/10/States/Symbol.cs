@@ -93,6 +93,8 @@ namespace States
                     retVal = true;
                 }
             }
+
+            return retVal;
         }
     }
 }
