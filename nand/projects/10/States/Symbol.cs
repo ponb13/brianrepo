@@ -63,12 +63,36 @@ namespace States
             {
                 tokenizer.State = StringConstant.Instance();
             }
+            else if(this.IsComment( tokenizer.StrmReader, symbolChar))
+            {
+                tokenizer.State = Comment.Instance();
+            }
             else
             {
                 tokenizer.State = NewToken.Instance();
             }
 
             tokenizer.State.Read(tokenizer);
+        }
+
+        /// <summary>
+        /// Checks if the current is the beginning of a comment
+        /// </summary>
+        /// <param name="streamReader"></param>
+        /// <param name="symbol"></param>
+        private bool IsComment(StreamReader streamReader, char currentChar)
+        {
+            bool retVal = false;
+            char nextChar = (char)streamReader.Peek();
+
+            // matches '//' or '/*'
+            if (currentChar == '/')
+            {
+                if (nextChar == '/' || nextChar == '*')
+                {
+                    retVal = true;
+                }
+            }
         }
     }
 }

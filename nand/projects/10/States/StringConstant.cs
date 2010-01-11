@@ -51,6 +51,12 @@ namespace States
             // read untill we hit closing quotes
             while ((char)streamReader.Peek() != '"')
             {
+                if (streamReader.EndOfStream)
+                {
+                    // TODO: Clean this up - proper exception line number etc
+                    throw new Exception("End of stream before closing quotes found");
+                }
+
                 this.TokenCharacters.Append((char)streamReader.Read());
             }
 
