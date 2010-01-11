@@ -32,5 +32,16 @@ namespace Interfaces
             get;
             set;
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return this.Value1.ToString() + " " +this.Value2.ToString();
+        }
     }
 }

@@ -28,6 +28,7 @@ namespace States
         /// <returns></returns>
         public static IState Instance(StringBuilder parsedCharacters)
         {
+            StringBuilder.tokenCharacters = new StringBuilder();            
             state.TokenCharacters = parsedCharacters;
             return state;
         }

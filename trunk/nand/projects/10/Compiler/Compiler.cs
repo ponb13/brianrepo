@@ -18,9 +18,19 @@ namespace Compiler
 
         public void Compile()
         {
-            using (Tokenizer tokenizer = new Tokenizer(this.inputPath))
+            try
             {
-                IList<Pair<string, string>> tokens = tokenizer.GetTokens();
+                using (Tokenizer tokenizer = new Tokenizer(this.inputPath))
+                {
+                    IList<Pair<string, string>> tokens = tokenizer.GetTokens();
+                    Console.WriteLine(tokens.PairListToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                // TODO remove exception handling from here
+                Console.WriteLine(ex);
+                Console.ReadKey();
             }
         }
 

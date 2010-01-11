@@ -48,7 +48,6 @@ namespace States
 
             if (!streamReader.EndOfStream)
             {
-
                 char peekedChar = (char)streamReader.Peek();
 
                 if (this.IsPossibleKeyword(peekedChar))
@@ -64,8 +63,7 @@ namespace States
                 {
                     tokenizer.State = Symbol.Instance();
                 }
-            
-
+                
                 tokenizer.State.Read(tokenizer);
             }
         }
