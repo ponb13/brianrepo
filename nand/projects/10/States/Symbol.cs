@@ -11,6 +11,7 @@ namespace States
     {
         #region singleton logic
         private static IState state = new Symbol();
+        private static StringBuilder tokenCharacters;
 
         private Symbol()
         {
@@ -19,17 +20,31 @@ namespace States
 
         public static IState Instance()
         {
+            // always clear chars when instance is called
+            Symbol.tokenCharacters = new StringBuilder();
             return state;
         }
+
         #endregion
 
         #region IState Members
+        /// <summary>
+        /// Gets or sets the token characters.
+        /// </summary>
+        /// <value>The token characters.</value>
+        public StringBuilder TokenCharacters
+        {
+            get { return Symbol.tokenCharacters; }
+            set { Symbol.tokenCharacters = value; }
+        }
 
         public void Read(ITokenizer tokenizer)
         {
             StreamReader streamReader = tokenizer.StrmReader;
             char symbolChar = (char)streamReader.Read();
-            tokenizer.TokenCharacters.Append(symbolChar);
+            this.TokenCharacters.Append(symbolChar);
+
+            tokenizer.Tokens.Add(this.CreateTokenObject());
 
             this.ChangeState(tokenizer, symbolChar);
         }
@@ -42,7 +57,18 @@ namespace States
         /// <param name="symbolCharacter">The symbol character.</param>
         private void ChangeState(ITokenizer tokenizer, char symbolChar)
         {
-            tokenizer.State = TokenComplete.Instance();
+            this.CreateTokenObject();
+
+            if (symbolChar == '"')
+            {
+                tokenizer.State = StringConstant.Instance();
+            }
+            else
+            {
+                tokenizer.State = NewToken.Instance();
+            }
+
+            tokenizer.State.Read(tokenizer);
         }
     }
 }

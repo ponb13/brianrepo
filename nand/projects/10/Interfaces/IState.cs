@@ -7,6 +7,13 @@ namespace Interfaces
 {
     public interface IState
     {
-        void Read(ITokenizer tokenizer); 
+        void Read(ITokenizer tokenizer);
+
+        StringBuilder TokenCharacters
+        {
+            get;
+            set;
+        }
+
     }
 }

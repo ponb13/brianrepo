@@ -10,7 +10,6 @@ namespace Compiler
     public class Compiler
     {
         private string inputPath;
-        private IList<Pair<string, string>> tokens = new List<Pair<string, string>>();
         
         public Compiler(string inputPath)
         {
@@ -21,11 +20,7 @@ namespace Compiler
         {
             using (Tokenizer tokenizer = new Tokenizer(this.inputPath))
             {
-                while (tokenizer.HasMoreTokens())
-                {
-                    Pair<string, string> token = tokenizer.GetNextToken();
-                    tokens.Add(token);
-                }
+                IList<Pair<string, string>> tokens = tokenizer.GetTokens();
             }
         }
 

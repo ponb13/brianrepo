@@ -12,6 +12,7 @@ namespace States
     {
         #region singleton logic
         private static IState state = new Keyword();
+        private static StringBuilder tokenCharacters;
 
         private Keyword()
         {
@@ -19,6 +20,8 @@ namespace States
 
         public static IState Instance()
         {
+            // always clear chars when instance is called
+            Keyword.tokenCharacters = new StringBuilder();
             return state;
         }
 
@@ -26,12 +29,22 @@ namespace States
 
         #region IState Members
 
+        /// <summary>
+        /// Gets or sets the token characters.
+        /// </summary>
+        /// <value>The token characters.</value>
+        public StringBuilder TokenCharacters
+        {
+            get{ return Keyword.tokenCharacters; }
+            set{ Keyword.tokenCharacters = value; }
+        }
+        
         public void Read(ITokenizer tokenizer)
         {
             StreamReader streamReader = tokenizer.StrmReader;
             while (this.IsValidKeywordChar((char)streamReader.Peek()))
             {
-                tokenizer.TokenCharacters.Append((char)streamReader.Read());
+                this.TokenCharacters.Append((char)streamReader.Read());
             }
 
             this.ChangeState(tokenizer);
@@ -45,12 +58,15 @@ namespace States
         {
             if (this.ReadCharsAreValidKeyword(tokenizer))
             {
-                tokenizer.State = TokenComplete.Instance();
+                tokenizer.Tokens.Add(this.CreateTokenObject());
+                tokenizer.State = NewToken.Instance();
             }
             else 
             {
-                tokenizer.State = Identifier.Instance();
+                tokenizer.State = Identifier.Instance(this.TokenCharacters);
             }
+
+            tokenizer.State.Read(tokenizer);
         }
 
         /// <summary>
@@ -77,7 +93,7 @@ namespace States
         private bool ReadCharsAreValidKeyword(ITokenizer tokenizer)
         {
             string keywordPattern = "class|constructor|function|method|field|static|var|int|char|boolean|void|true|false|null|this|let|do|if|else|while|return";
-            Match match = Regex.Match(tokenizer.TokenCharacters.ToString(), keywordPattern, RegexOptions.Compiled);
+            Match match = Regex.Match(this.TokenCharacters.ToString(), keywordPattern, RegexOptions.Compiled);
 
             return match.Success;
         }

@@ -10,6 +10,8 @@ namespace States
 {
     public class Identifier : IState
     {
+        private static StringBuilder tokenCharacters;
+        
         #region singleton logic
         private static IState state = new Identifier();
 
@@ -18,34 +20,74 @@ namespace States
 
         }
 
-        public static IState Instance()
+        /// <summary>
+        /// Create an instance with chars already parsed
+        /// i.e. move to this state but give chars from previous state
+        /// </summary>
+        /// <param name="parsedCharacters"></param>
+        /// <returns></returns>
+        public static IState Instance(StringBuilder parsedCharacters)
         {
+            state.TokenCharacters = parsedCharacters;
             return state;
         }
 
+        /// <summary>
+        /// Gets the sinlge instance
+        /// </summary>
+        /// <returns></returns>
+        public static IState Instance()
+        {
+            // always clear chars when instance is called
+            state.TokenCharacters = new StringBuilder();
+            return state;
+        }
         #endregion
 
-
-
         #region IState Members
+        /// <summary>
+        /// Gets or sets the token characters.
+        /// </summary>
+        /// <value>The token characters.</value>
+        public StringBuilder TokenCharacters
+        {
+            get { return Identifier.tokenCharacters; }
+            set { Identifier.tokenCharacters = value; }
+        }
 
+        /// <summary>
+        /// Reads from the stream 
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer.</param>
         public void Read(ITokenizer tokenizer)
         {
             StreamReader streamReader = tokenizer.StrmReader;
 
             while (this.IsValidIdentifierCharacter((char)streamReader.Peek()))
             {
-                tokenizer.TokenCharacters.Append((char)streamReader.Read());
+                this.TokenCharacters.Append((char)streamReader.Read());
             }
+
+            tokenizer.Tokens.Add(this.CreateTokenObject());
 
             this.ChangeState(tokenizer);
         }
 
+        /// <summary>
+        /// Changes the state.
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer.</param>
         private void ChangeState(ITokenizer tokenizer)
         {
-            if(this.ReadCharsAreValidIdentifier(tokenizer.TokenCharacters.ToString()))
+            if (this.ReadCharsAreValidIdentifier(this.TokenCharacters.ToString()))
             {
-                tokenizer.State = TokenComplete.Instance();
+                tokenizer.State = NewToken.Instance();
+                tokenizer.State.Read(tokenizer);
+
+            }
+            else
+            {
+                throw new Exception("Invalid identifier");
             }
         }
 
@@ -70,7 +112,7 @@ namespace States
         /// <returns></returns>
         private bool ReadCharsAreValidIdentifier(string tokenCharacters)
         {
-            //  TODO need to ensure not a keyword aswell? might need to as we should 
+            //  TODO need to ensure not a keyword aswell? might not need to as we should 
             //  only transition to this state from keyowrd state
 
             // TODO need to ensure does not start with digit
