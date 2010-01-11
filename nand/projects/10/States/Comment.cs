@@ -51,7 +51,7 @@ namespace States
                 // this.ReadSingleLineComment(tokenizer);
             }
 
-            this.ChangeState();
+            this.ChangeState(tokenizer);
 
         }
 
@@ -65,10 +65,10 @@ namespace States
         }
 
 
-        private void ChangeState()
+        private void ChangeState(ITokenizer tokenizer)
         {
             IState newToken = NewToken.Instance();
-            newToken.Read();
+            newToken.Read(tokenizer);
         }
 
 
