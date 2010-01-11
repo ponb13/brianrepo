@@ -12,6 +12,7 @@ namespace States
     {
         #region singleton logic
         private static IState state = new StringConstant();
+        private static StringBuilder tokenCharacters;
 
         private StringConstant()
         {
@@ -19,11 +20,22 @@ namespace States
 
         public static IState Instance()
         {
+            // always clear chars when instance is called
+            state.TokenCharacters = new StringBuilder();
             return state;
         }
         #endregion
 
         #region IState Members
+        /// <summary>
+        /// Gets or sets the token characters.
+        /// </summary>
+        /// <value>The token characters.</value>
+        public StringBuilder TokenCharacters
+        {
+            get { return StringConstant.tokenCharacters; }
+            set { StringConstant.tokenCharacters = value; }
+        }
 
         /// <summary>
         /// Reads for the tokenizers stream.
@@ -39,15 +51,26 @@ namespace States
             // read untill we hit closing quotes
             while ((char)streamReader.Peek() != '"')
             {
-                tokenizer.TokenCharacters.Append((char)streamReader.Read());
+                this.TokenCharacters.Append((char)streamReader.Read());
             }
+
+            tokenizer.Tokens.Add(this.CreateTokenObject());
+
 
             this.ChangeState(tokenizer);
         }
 
         private void ChangeState(ITokenizer tokenizer)
         {
-            tokenizer.State = TokenComplete.Instance();
+
+            // HACK - we know that the peeked char will be a closing "
+            // so create a new token and add it to list
+            IState symbolState = Symbol.Instance();
+            symbolState.TokenCharacters.Append((char)tokenizer.StrmReader.Read());
+            tokenizer.Tokens.Add(symbolState.CreateTokenObject());
+
+            tokenizer.State = NewToken.Instance();
+            tokenizer.State.Read(tokenizer);
         }
 
         #endregion

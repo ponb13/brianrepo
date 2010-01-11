@@ -12,6 +12,7 @@ namespace States
     {
         #region singleton logic
         private static IState state = new NewToken();
+        private static StringBuilder tokenCharacters = new StringBuilder();
 
         private NewToken()
         {
@@ -19,17 +20,25 @@ namespace States
 
         public static IState Instance()
         {
+            // always clear chars when instance is called
+            state.TokenCharacters = new StringBuilder();
             return state;
         }
         #endregion
         
         #region IState Members
+        /// <summary>
+        /// Gets or sets the token characters.
+        /// </summary>
+        /// <value>The token characters.</value>
+        public StringBuilder TokenCharacters
+        {
+            get { return NewToken.tokenCharacters; }
+            set { NewToken.tokenCharacters = value; }
+        }
 
         public void Read(ITokenizer tokenizer)
         {
-            // we're in a new token so clear the previously read chars
-            tokenizer.TokenCharacters = new StringBuilder();
-
             this.ChangeState(tokenizer);
         }
 
@@ -37,63 +46,28 @@ namespace States
         {
             StreamReader streamReader = tokenizer.StrmReader;
 
-            char peekedChar = (char)streamReader.Peek();
-
-            if (this.IsPossibleKeyword(peekedChar))
+            if (!streamReader.EndOfStream)
             {
-                tokenizer.State = Keyword.Instance();
-            }
-            else if(this.IsWhiteSpace(peekedChar))
-            {
-                //  Just consume white space, don't change change state
-                tokenizer.StrmReader.Read();
-            }
-            else if (this.IsSymbol(peekedChar))
-            {
-                tokenizer.State = Symbol.Instance();
-            }
-            else if (this.IsStringConstant(tokenizer))
-            {
-                tokenizer.PreviousTokens.Pop();
-                
-                tokenizer.State = StringConstant.Instance();
-            }
 
-        }
+                char peekedChar = (char)streamReader.Peek();
 
-        /// <summary>
-        /// Determines whether [is string constant].
-        /// Check previous tokens to determine if this is a string constant
-        /// i.e if the previous token was quotes (") and they aren't closing quotes
-        /// then we have a string constant.
-        /// </summary>
-        /// <returns>
-        /// 	<c>true</c> if [is string constant]; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsStringConstant(ITokenizer tokenizer)
-        {
-            bool retVal = false;
-
-            if (tokenizer.PreviousTokens.Count > 0)
-            {
-                Pair<string, string> previousToken = tokenizer.PreviousTokens.Pop();
-
-                if (previousToken.Value1 == "\"" && previousToken.Value2 == "Symbol")
+                if (this.IsPossibleKeyword(peekedChar))
                 {
-                    Pair<string, string> nextPreviousToken = tokenizer.PreviousTokens.Pop();
-                    if (nextPreviousToken.Value1 == "\"" && nextPreviousToken.Value2 == "Symbol"
-                        || nextPreviousToken.Value2 == "StringConstant")
-                    {
-                        retVal = false;
-                    }
-                    else
-                    {
-                        retVal = true;
-                    }
+                    tokenizer.State = Keyword.Instance();
                 }
-            }
+                else if (this.IsWhiteSpace(peekedChar))
+                {
+                    //  Just consume white space, don't change change state
+                    tokenizer.StrmReader.Read();
+                }
+                else if (this.IsSymbol(peekedChar))
+                {
+                    tokenizer.State = Symbol.Instance();
+                }
+            
 
-            return retVal;
+                tokenizer.State.Read(tokenizer);
+            }
         }
 
         /// <summary>

@@ -12,23 +12,17 @@ namespace Compiler
     {
         #region ITokenizer Members
 
-        private Stack<Pair<string, string>> previousTokens = new Stack<Pair<string, string>>();
-
-        /// <summary>
-        /// Gets or sets the state.
-        /// </summary>
-        /// <value>The state.</value>
-        public IState State
+        public IList<Pair<string, string>> Tokens
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Gets or sets the token chars.
+        /// Gets or sets the state.
         /// </summary>
-        /// <value>The token chars.</value>
-        public StringBuilder TokenCharacters
+        /// <value>The state.</value>
+        public IState State
         {
             get;
             set;
@@ -45,29 +39,14 @@ namespace Compiler
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the previous token.
-        /// Cache the previous token, useful for making decisions on state change.
-        /// </summary>
-        /// <value>The previous token.</value>
-        public Stack<Pair<string, string>> PreviousTokens
-        {
-            get
-            {
-                return this.previousTokens;
-            }
-            set
-            {
-                this.previousTokens = value;
-            }
-        }
+        
 
         #endregion
         
         public Tokenizer(string filePath)
         {
+            this.Tokens = new List<Pair<string,string>>();
             this.StrmReader = new StreamReader(filePath);
-            this.TokenCharacters = new StringBuilder();
             this.State = NewToken.Instance();
         }
 
@@ -82,44 +61,18 @@ namespace Compiler
             return !this.StrmReader.EndOfStream;
         }
 
-        public Pair<string, string> GetNextToken()
+        public IList<Pair<string, string>> GetTokens()
         {
             this.State = NewToken.Instance();
 
-            IState previousState = NewToken.Instance();
-
-            while (this.State.GetType() != typeof(TokenComplete))
-            {
-                // save previous state, when parse to end of token
-                // we'd only get TokenComplete state at the end otherwise
-                previousState = this.State;
-                this.State.Read(this);
-            }
-
-            Pair<string, string> token = this.CreateTokenObject(previousState);
-
-            //Cache the token
-            this.PreviousTokens.Push(token);
-
-            return token;
-        }
-
-        /// <summary>
-        /// Creates the token object.
-        /// </summary>
-        /// <param name="previousState">previous state i.e. the state before token complete is the token name!</param>
-        /// <returns></returns>
-        private Pair<string,string> CreateTokenObject(IState previousState)
-        {
-            string stateName = previousState.ToString().Split('.').Last();
+           
+            this.State.Read(this);
             
-            return new Pair<string, string>
-            {
-                Value1 = stateName,
-                Value2 = this.TokenCharacters.ToString()
-            };
+
+            return this.Tokens;
         }
 
+        
         #region IDisposable Members
 
         public void Dispose()

@@ -14,19 +14,13 @@ namespace Interfaces
             set;
         }
 
-        StringBuilder TokenCharacters
+        IList<Pair<string, string>> Tokens
         {
             get;
             set;
         }
 
         StreamReader StrmReader
-        {
-            get;
-            set;
-        }
-
-        Stack<Pair<string, string>> PreviousTokens
         {
             get;
             set;
