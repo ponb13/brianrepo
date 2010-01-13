@@ -44,8 +44,6 @@ namespace States
             char symbolChar = (char)streamReader.Read();
             this.TokenCharacters.Append(symbolChar);
 
-            tokenizer.Tokens.Add(this.CreateTokenObject());
-
             this.ChangeState(tokenizer, symbolChar);
         }
         #endregion
@@ -59,20 +57,25 @@ namespace States
         {
             this.CreateTokenObject();
 
+            IState nextState = null;
+
             if (symbolChar == '"')
             {
-                tokenizer.State = StringConstant.Instance();
+                nextState = StringConstant.Instance();
             }
-            else if(this.IsComment( tokenizer.StrmReader, symbolChar))
+            else if(this.IsComment(tokenizer.StrmReader, symbolChar))
             {
-                tokenizer.State = Comment.Instance();
+                //pass the starting comment symbol to Comment instance
+                nextState = Comment.Instance(tokenCharacters);
             }
             else
             {
-                tokenizer.State = NewToken.Instance();
+                // else its just a symbol so create the token.
+                tokenizer.Tokens.Add(this.CreateTokenObject());
+                nextState = NewToken.Instance();
             }
 
-            tokenizer.State.Read(tokenizer);
+            nextState.Read(tokenizer);
         }
 
         /// <summary>
@@ -83,12 +86,12 @@ namespace States
         private bool IsComment(StreamReader streamReader, char currentChar)
         {
             bool retVal = false;
-            char nextChar = (char)streamReader.Peek();
+            char peekedChar = (char)streamReader.Peek();
 
             // matches '//' or '/*'
             if (currentChar == '/')
             {
-                if (nextChar == '/' || nextChar == '*')
+                if (peekedChar == '/' || peekedChar == '*')
                 {
                     retVal = true;
                 }

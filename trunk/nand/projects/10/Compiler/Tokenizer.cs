@@ -19,16 +19,6 @@ namespace Compiler
         }
 
         /// <summary>
-        /// Gets or sets the state.
-        /// </summary>
-        /// <value>The state.</value>
-        public IState State
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets the stream reader.
         /// public so that state classes can access stream
         /// </summary>
@@ -47,7 +37,6 @@ namespace Compiler
         {
             this.Tokens = new List<Pair<string,string>>();
             this.StrmReader = new StreamReader(filePath);
-            this.State = NewToken.Instance();
         }
 
         /// <summary>
@@ -63,10 +52,10 @@ namespace Compiler
 
         public IList<Pair<string, string>> GetTokens()
         {
-            this.State = NewToken.Instance();
+            IState startState = NewToken.Instance();
 
-           
-            this.State.Read(this);
+
+            startState.Read(this);
             
 
             return this.Tokens;

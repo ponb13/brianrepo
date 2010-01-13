@@ -82,8 +82,8 @@ namespace States
         {
             if (this.ReadCharsAreValidIdentifier(this.TokenCharacters.ToString()))
             {
-                tokenizer.State = NewToken.Instance();
-                tokenizer.State.Read(tokenizer);
+                IState nextState = NewToken.Instance();
+                nextState.Read(tokenizer);
 
             }
             else
