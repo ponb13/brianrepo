@@ -8,12 +8,6 @@ namespace Interfaces
 {
     public interface ITokenizer
     {
-        IState State
-        {
-            get;
-            set;
-        }
-
         IList<Pair<string, string>> Tokens
         {
             get;

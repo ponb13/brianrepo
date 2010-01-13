@@ -46,25 +46,28 @@ namespace States
         {
             StreamReader streamReader = tokenizer.StrmReader;
 
+            IState nextState = null;
+
             if (!streamReader.EndOfStream)
             {
                 char peekedChar = (char)streamReader.Peek();
 
                 if (this.IsPossibleKeyword(peekedChar))
                 {
-                    tokenizer.State = Keyword.Instance();
+                    nextState = Keyword.Instance();
                 }
                 else if (this.IsWhiteSpace(peekedChar))
                 {
                     //  Just consume white space, don't change change state
                     tokenizer.StrmReader.Read();
+                    nextState = NewToken.Instance();
                 }
                 else if (this.IsSymbol(peekedChar))
                 {
-                    tokenizer.State = Symbol.Instance();
+                    nextState = Symbol.Instance();
                 }
-                
-                tokenizer.State.Read(tokenizer);
+
+                nextState.Read(tokenizer);
             }
         }
 

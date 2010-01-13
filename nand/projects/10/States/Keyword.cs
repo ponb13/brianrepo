@@ -56,17 +56,18 @@ namespace States
         /// <param name="tokenizer">The tokenizer.</param>
         private void ChangeState(ITokenizer tokenizer)
         {
+            IState nextState = null;
             if (this.ReadCharsAreValidKeyword(tokenizer))
             {
                 tokenizer.Tokens.Add(this.CreateTokenObject());
-                tokenizer.State = NewToken.Instance();
+                nextState = NewToken.Instance();
             }
             else 
             {
-                tokenizer.State = Identifier.Instance(this.TokenCharacters);
+                nextState = Identifier.Instance(this.TokenCharacters);
             }
 
-            tokenizer.State.Read(tokenizer);
+            nextState.Read(tokenizer);
         }
 
         /// <summary>
