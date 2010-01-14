@@ -511,8 +511,166 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
+<div title="C#" modifier="bplus" created="201001141315" changecount="1">
+<pre>[[Custom Controls Validation]]</pre>
+</div>
 <div title="Css" modifier="bplus" created="200912070950" modified="200912070950" tags="forms css" changecount="2">
 <pre>[[Forms]]</pre>
+</div>
+<div title="Custom Controls Validation" modifier="bplus" created="201001141321" changecount="1">
+<pre>Notice the attribute on the class ValidationResult, notice the property ValidationResult if it returns a non empty string it is valid.
+You can use any validator you like with this- e.g. required field validator will work with this.
+
+namespace Something.UI
+{
+    [ToolboxData(&quot;&lt;{0}:OrderStatusCheckBoxList runat=server&gt;&lt;/{0}:OrderStatusCheckBoxList&gt;&quot;)]
+    [ValidationProperty(&quot;ValidationResult&quot;)]
+    public class OrderStatusCheckBoxList : CheckBoxList
+    {
+        /// &lt;summary&gt;
+        /// Gets or sets the max displayable status.
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;The max displayable status.&lt;/value&gt;
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public OrderStatus? MaxDisplayableStatus { get; set; }
+
+        /// &lt;summary&gt;
+        /// Gets or sets a value indicating whether [append open to output on open statuses].
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;
+        /// 	&lt;c&gt;true&lt;/c&gt; if [append open to output on open statuses]; otherwise, &lt;c&gt;false&lt;/c&gt;.
+        /// &lt;/value&gt;
+        public bool AppendOpenToOutputOnOpenStatuses
+        {
+            get;
+            set;
+        }
+
+        /// &lt;summary&gt;
+        /// Reloads this instance.
+        /// &lt;/summary&gt;
+        public virtual void Reload()
+        {
+            this.Items.Clear();
+
+            int maxValue = this.MaxDisplayableStatus.HasValue ? (int)this.MaxDisplayableStatus.Value : Int32.MaxValue;
+
+            foreach (int i in Enum.GetValues(typeof(OrderStatus)))
+            {
+                if (i != 0 &amp;&amp; i &lt;= maxValue)
+                {
+                    string orderStatusName = Enum.GetName(typeof(OrderStatus), i);
+
+                    this.Items.Add(new ListItem(this.GetOrderStatusName(i), i.ToString(CultureInfo.InvariantCulture)));
+                }
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the name of the order status.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;enumValue&quot;&gt;The enum value.&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private string GetOrderStatusName(int enumValue)
+        {
+            string orderStatusName = Enum.GetName(typeof(OrderStatus), enumValue);
+
+            if (this.AppendOpenToOutputOnOpenStatuses)
+            {
+                if (orderStatusName == &quot;Approved&quot;
+                        || orderStatusName == &quot;Despatched&quot;
+                        || orderStatusName == &quot;GoodsReceived&quot;
+                        || orderStatusName == &quot;Complete&quot;)
+                {
+                    orderStatusName = orderStatusName + &quot; (Open)&quot;;
+                }
+            }
+
+            return orderStatusName;
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the validation result.
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;The validation result.&lt;/value&gt;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public string ValidationResult
+        {
+            get
+            {
+                if (this.GetSelectedStatusIds().Count &gt; 0 )
+                {
+                    return &quot;Valid&quot;;
+                }
+                else
+                {
+                    return String.Empty;
+                }
+            }
+        }
+
+
+        /// &lt;summary&gt;
+        /// Handles the &lt;see cref=&quot;E:System.Web.UI.Control.Init&quot;/&gt; event.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;e&quot;&gt;An &lt;see cref=&quot;T:System.EventArgs&quot;/&gt; object that contains the event data.&lt;/param&gt;
+        protected override void OnInit(EventArgs e)
+        {
+            base.OnInit(e);
+            if (Items.Count &lt;= 0)
+            {
+                this.Reload();
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the selected status ids.
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public IList&lt;string&gt; GetSelectedStatusIds()
+        {
+            IList&lt;string&gt; selectedIds = new List&lt;string&gt;();
+
+            foreach (ListItem item in this.Items)
+            {
+                if (item.Selected)
+                {
+                    selectedIds.Add(item.Value);
+                }
+            }
+
+            return selectedIds;
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the selected status ids as bar separated list (string).
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        public string GetSelectedStatusIdsAsBarSeparatedList()
+        {
+            StringBuilder strBuilder = new StringBuilder();
+
+            IList&lt;string&gt; selectedStatusIds = this.GetSelectedStatusIds();
+            if (selectedStatusIds.Count &gt; 0)
+            {
+                strBuilder.Append(selectedStatusIds[0]);
+                if (this.GetSelectedStatusIds().Count &gt; 1)
+                {
+                    for (int i = 1; i &lt; selectedStatusIds.Count; i++)
+                    {
+                        strBuilder.Append(&quot;|&quot;);
+
+                        strBuilder.Append(selectedStatusIds[i]);
+                    }
+                }
+            }
+
+            return strBuilder.ToString();
+        }
+    }
+}
+</pre>
 </div>
 <div title="Forms" modifier="bplus" created="200912070952" changecount="1">
 <pre>Textbox styles from POPS
@@ -589,7 +747,7 @@ command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentif
 
 </pre>
 </div>
-<div title="MainMenu" modifier="bplus" created="200912031657" modified="200912031658" changecount="3">
+<div title="MainMenu" modifier="bplus" created="200912031657" modified="201001141314" changecount="4">
 <pre>[[Sql]]
 [[C#]]
 [[Css]]</pre>
