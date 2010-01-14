@@ -65,13 +65,32 @@ namespace States
                 {
                     nextState = Symbol.Instance();
                 }
+                else if (this.IsPossibleIdentifierCharacter(peekedChar))
+                {
+                    nextState = Identifier.Instance();
+                }
 
                 if (nextState != null)
                 {
                     nextState.Read(tokenizer);
                 }
+                
                
             }
+        }
+
+        /// <summary>
+        /// Determines if single char is valid as part of a Identifier
+        /// alphanumeric and underscore are valid characters
+        /// </summary>
+        /// <param name="peekedChar"></param>
+        /// <returns></returns>
+        private bool IsPossibleIdentifierCharacter(char peekedChar)
+        {
+            string validIdentifierCharPattern = "[0-9a-zA-Z_]";
+            Match match = Regex.Match(peekedChar.ToString(), validIdentifierCharPattern, RegexOptions.Compiled);
+
+            return match.Success;
         }
 
         /// <summary>
@@ -84,7 +103,7 @@ namespace States
         private bool IsSymbol(char peekedChar)
         {
             string peekedStr = peekedChar.ToString();
-            Match match = Regex.Match(peekedStr,@"[{}()[\]\|\,\;\+\-\*\/\&""\|\<\>\=\~]");
+            Match match = Regex.Match(peekedStr,@"[.{}()[\]\|\,\;\+\-\*\/\&""\|\<\>\=\~]");
             return match.Success;
         }
 

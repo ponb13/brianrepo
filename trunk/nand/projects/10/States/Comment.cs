@@ -81,13 +81,9 @@ namespace States
                 this.TokenCharacters.Append(readChar);
 
                 // look for closing * and the closing single \
-                if (readChar == '*')
+                if (readChar == '*' && (char)streamReader.Peek() == '/')
                 {
-                    char peekedChar = (char)streamReader.Peek();
-                    if(peekedChar == '/' )
-                    {
-                        this.TokenCharacters.Append((char)streamReader.Read());
-                    }
+                    this.TokenCharacters.Append((char)streamReader.Read());
                     break;
                 }
             }
