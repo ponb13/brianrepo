@@ -58,7 +58,6 @@ namespace States
                 }
                 else if (this.IsWhiteSpace(peekedChar))
                 {
-                    //  Just consume white space, don't change change state
                     tokenizer.StrmReader.Read();
                     nextState = NewToken.Instance();
                 }
@@ -67,7 +66,11 @@ namespace States
                     nextState = Symbol.Instance();
                 }
 
-                nextState.Read(tokenizer);
+                if (nextState != null)
+                {
+                    nextState.Read(tokenizer);
+                }
+               
             }
         }
 
