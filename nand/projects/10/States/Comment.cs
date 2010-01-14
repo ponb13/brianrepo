@@ -84,14 +84,12 @@ namespace States
                 if (readChar == '*')
                 {
                     char peekedChar = (char)streamReader.Peek();
-                    if(peekedChar == '\\' )
+                    if(peekedChar == '/' )
                     {
                         this.TokenCharacters.Append((char)streamReader.Read());
-                        
                     }
+                    break;
                 }
-
-                break;
             }
         }
 
