@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Extensions.cs" />
     <Compile Include="Identifier.cs" />
+    <Compile Include="IntegerConstant.cs" />
     <Compile Include="Keyword.cs" />
     <Compile Include="NewToken.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
