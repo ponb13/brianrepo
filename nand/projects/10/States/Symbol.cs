@@ -42,7 +42,12 @@ namespace States
         {
             StreamReader streamReader = tokenizer.StrmReader;
             char symbolChar = (char)streamReader.Read();
-            this.TokenCharacters.Append(symbolChar);
+
+            // don't actually add " to token 
+            if (symbolChar != '"')
+            {
+                this.TokenCharacters.Append(symbolChar);
+            }
 
             this.ChangeState(tokenizer, symbolChar);
         }
