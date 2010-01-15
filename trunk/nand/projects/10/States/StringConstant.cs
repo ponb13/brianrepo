@@ -56,7 +56,6 @@ namespace States
                     // TODO: Clean this up - proper exception line number etc
                     throw new Exception("End of stream before closing quotes found");
                 }
-
                 this.TokenCharacters.Append((char)streamReader.Read());
             }
 
@@ -68,13 +67,9 @@ namespace States
 
         private void ChangeState(ITokenizer tokenizer)
         {
-
-            // HACK - we know that the peeked char will be a closing "
-            // so create a new token and add it to list
-            IState symbolState = Symbol.Instance();
-            symbolState.TokenCharacters.Append((char)tokenizer.StrmReader.Read());
-            tokenizer.Tokens.Add(symbolState.CreateTokenObject());
-
+            // don't add closing quote
+            tokenizer.StrmReader.Read();
+            
             IState nextState = NewToken.Instance();
             nextState.Read(tokenizer);
         }

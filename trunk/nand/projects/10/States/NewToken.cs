@@ -25,7 +25,7 @@ namespace States
             return state;
         }
         #endregion
-        
+
         #region IState Members
         /// <summary>
         /// Gets or sets the token characters.
@@ -42,6 +42,10 @@ namespace States
             this.ChangeState(tokenizer);
         }
 
+        /// <summary>
+        /// Changes the state.
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer.</param>
         private void ChangeState(ITokenizer tokenizer)
         {
             StreamReader streamReader = tokenizer.StrmReader;
@@ -52,6 +56,8 @@ namespace States
             {
                 char peekedChar = (char)streamReader.Peek();
 
+                //  the order of these ifs matters - 
+                //  IsIntegerConstant must be checked before Identifier.
                 if (this.IsPossibleKeyword(peekedChar))
                 {
                     nextState = Keyword.Instance();
@@ -65,6 +71,10 @@ namespace States
                 {
                     nextState = Symbol.Instance();
                 }
+                else if (this.IsIntegerConstant(peekedChar))
+                {
+                    nextState = IntegerConstant.Instance();
+                }
                 else if (this.IsPossibleIdentifierCharacter(peekedChar))
                 {
                     nextState = Identifier.Instance();
@@ -74,8 +84,6 @@ namespace States
                 {
                     nextState.Read(tokenizer);
                 }
-                
-               
             }
         }
 
@@ -103,7 +111,7 @@ namespace States
         private bool IsSymbol(char peekedChar)
         {
             string peekedStr = peekedChar.ToString();
-            Match match = Regex.Match(peekedStr,@"[.{}()[\]\|\,\;\+\-\*\/\&""\|\<\>\=\~]");
+            Match match = Regex.Match(peekedStr, @"[.{}()[\]\|\,\;\+\-\*\/\&""\|\<\>\=\~]");
             return match.Success;
         }
 
@@ -130,14 +138,24 @@ namespace States
         /// </returns>
         private bool IsPossibleKeyword(char peekedChar)
         {
-            bool retVal = false;
-
             //first letter of all keywords
             Match match = Regex.Match(peekedChar.ToString(), "[c|f|m|s|v|i|b|v|t|l|d|i|e|w|r]", RegexOptions.Compiled);
 
-            retVal = match.Success;
+            return match.Success;
+        }
 
-            return retVal;
+        /// <summary>
+        /// Determines whether [is integer constant] [the specified peeked char].
+        /// </summary>
+        /// <param name="peekedChar">The peeked char.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is integer constant] [the specified peeked char]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsIntegerConstant(char peekedChar)
+        {
+            Match match = Regex.Match(peekedChar.ToString(), "[0-9]", RegexOptions.Compiled);
+
+            return match.Success;
         }
 
         #endregion
