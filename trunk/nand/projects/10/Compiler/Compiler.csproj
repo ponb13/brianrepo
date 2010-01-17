@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompilationEngine.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Program.cs" />
