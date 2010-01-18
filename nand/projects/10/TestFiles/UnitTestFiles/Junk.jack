@@ -1,1 +1,6 @@
-something.balh
+class SquareGame 
+{
+	field int x, y;
+    field int size;
+
+}
