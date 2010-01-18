@@ -7,6 +7,9 @@ using Interfaces;
 
 namespace Compiler
 {
+    /// <summary>
+    /// NOTE while statment is broken!!!
+    /// </summary>
     public class CompilationEngine
     {
         /// <summary>
@@ -37,30 +40,22 @@ namespace Compiler
         /// </summary>
         public XElement CompileClass()
         {
-            // TODO compile the class declaration tokens.
-            Pair<string, string> classKeyword = this.classTokens.Pop();
-            Pair<string, string> className = this.classTokens.Pop();
-            Pair<string, string> classOpeningBrace = this.classTokens.Pop();
+            XElement classXml = new XElement("class");
 
-            XElement classXml = new XElement("class",
-                                        new XElement(classKeyword.Value1, classKeyword.Value2),
-                                        new XElement(className.Value1, className.Value2),
-                                        new XElement(classOpeningBrace.Value1, classOpeningBrace.Value2));
+            // compile class keyword
+            this.CompileTerm(classXml);
+            // compiler class name
+            this.CompileTerm(classXml);
+            // compile opening curely of class
+            this.CompileTerm(classXml);
 
-
-            if (this.IsClassVariableDeclaration())
+            if (this.IsSubRourtineDeclaration())
             {
-                this.CompileClassVarDeclaration(classXml);
+                this.CompileSubRoutine(classXml);
             }
-            else if (this.IsSubRourtineDeclaration())
-            {
-                this.CompilerSubRoutine(classXml);
-            }
-            
-            //this.CompileStatements(classXml);
 
-            Pair<string, string> classClosingBrace = this.classTokens.Pop();
-            classXml.Add(new XElement(classClosingBrace.Value1, classClosingBrace.Value2));
+            // compile class closing curely
+            this.CompileTerm(classXml);
 
 
             return classXml;
@@ -81,18 +76,67 @@ namespace Compiler
                 classVariableElement.Add(new XElement(token.Value1, token.Value2));
             }
 
-            Pair<string,string> semiColon = this.classTokens.Pop();
-            classVariableElement.Add(new XElement(semiColon.Value1, semiColon.Value2));
+            this.CompileTerm(classVariableElement);
 
             if (IsClassVariableDeclaration())
             {
+                // recursively handle all class variables
                 this.CompileClassVarDeclaration(parentElement);
             }
         }
 
-        private void CompilerSubRoutine(XElement parentElement)
+        /// <summary>
+        /// Compiles the sub routine.
+        /// </summary>
+        /// <param name="parentElement">The parent element.</param>
+        private void CompileSubRoutine(XElement parentElement)
         {
-            // start here brian!
+            XElement subRoutineElement = new XElement("subroutineDec");
+            parentElement.Add(subRoutineElement);
+
+            // while not the opening bracked of the method/constructor/function params
+            while (this.classTokens.Peek().Value2 != "(")
+            {
+                Pair<string,string> token = this.classTokens.Pop();
+                subRoutineElement.Add(new XElement(token.Value1, token.Value2));
+            }
+
+            // add the opening braket of param list
+            this.CompileTerm(subRoutineElement);
+
+            // add the param list
+            this.CompileParameterList(subRoutineElement);
+
+            // add closing bracket of params
+            this.CompileTerm(subRoutineElement);
+
+            // add opening curley of methodBody
+            this.CompileTerm(subRoutineElement);
+
+            // add statements to body
+            this.CompileStatements(subRoutineElement);
+
+            // add closing curely of methodBody
+            this.CompileTerm(subRoutineElement);
+
+        }
+
+        /// <summary>
+        /// Compiles the parameter list of a method/function/constructor
+        /// </summary>
+        /// <param name="parentElement">The parent element.</param>
+        private void CompileParameterList(XElement parentElement)
+        {
+            // add param list as child
+            XElement parameterList = new XElement("parameterList");
+            parentElement.Add(parameterList);
+
+            // add the params
+            while (this.classTokens.Peek().Value2 != ")")
+            {
+                Pair<string, string> token = this.classTokens.Pop();
+                parameterList.Add(new XElement(token.Value1, token.Value2));
+            }
         }
 
         /// <summary>
@@ -114,16 +158,49 @@ namespace Compiler
         /// </summary>
         private void CompileWhile(XElement parent)
         {
-            Pair<string,string> whileKeyword = this.classTokens.Pop();
-            Pair<string,string> openingBracket = this.classTokens.Pop();
-            Pair<string,string> expression = this.classTokens.Pop(); //TODO replace this with real expression parsing!
-            Pair<string,string> closingBracket = this.classTokens.Pop();
+            XElement whileElement = new XElement("whileStatement");
+            parent.Add(whileElement);
 
-            parent.Add(new XElement("whileStatement",
-                    new XElement(whileKeyword.Value1, whileKeyword.Value2),
-                    new XElement(openingBracket.Value1, openingBracket.Value2),
-                    new XElement(expression.Value1, expression.Value2),
-                    new XElement(closingBracket.Value1, closingBracket.Value2)));
+            // compile the while keyword
+            this.CompileTerm(whileElement);
+            // compile the opening bracket 
+            this.CompileTerm(whileElement);
+            //compile the expression
+            this.CompileExpression(whileElement);
+            //compile the closing bracket
+            this.CompileTerm(whileElement);
+        }
+
+        /// <summary>
+        /// Compiles a terminal.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileTerm(XElement parent)
+        {
+            // TODO see page 216 for look ahead on array handling etc (peek!).
+            Pair<string, string> terminal = this.classTokens.Pop();
+            parent.Add(new XElement(terminal.Value1, terminal.Value2));
+        }
+
+        /// <summary>
+        /// Compiles an expression.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileExpression(XElement parent)
+        {
+            // TODO this "term" element maybe it should be compile terminal????
+            XElement expressionElement = new XElement("expression");
+            parent.Add(expressionElement);
+            XElement termElement = new XElement("term");
+            expressionElement.Add(termElement);
+
+            Pair<string, string> expressionTermToken = this.classTokens.Pop();
+
+            termElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
+
+
+            // TODO - this is just a placeholder - will on compile expressionless...
+            //this.CompileTerm(expressionElement);
         }
 
         /// <summary>
