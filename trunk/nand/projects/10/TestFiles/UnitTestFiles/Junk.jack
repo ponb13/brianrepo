@@ -1,6 +1,11 @@
-class SquareGame 
-{
-	field int x, y;
-    field int size;
-
+class SquareGame {
+ method void run()
+ {
+         while (key) {
+                let key = key;
+                do moveSquare();
+            }
 }
+}
+            
+    
