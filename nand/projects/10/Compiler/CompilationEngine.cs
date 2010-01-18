@@ -8,7 +8,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// NOTE while statment is broken!!!
+    /// 1st task fix while statementt
     /// </summary>
     public class CompilationEngine
     {
