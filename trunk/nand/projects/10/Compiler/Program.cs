@@ -10,11 +10,23 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string inputPath = @"../../../TestFiles/ArrayTest/Main.jack";
-            //string inputPath = @"../../../TestFiles/UnitTestFiles/Junk.jack";
+            try
+            {
+                //string inputPath = @"../../../TestFiles/ExpressionlessSquare/";
+                string inputPath = @"../../../TestFiles/UnitTestFiles/";
 
-            Compiler compiler = new Compiler(inputPath);
-            compiler.Compile();
+                foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
+                {
+                    Compiler compiler = new Compiler(filepath);
+                    compiler.Compile();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Console.ReadKey();
+            }
+
         }
     }
 }
