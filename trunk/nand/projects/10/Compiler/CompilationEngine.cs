@@ -23,7 +23,7 @@ namespace Compiler
         /// Initializes a new instance of the <see cref="CompilationEngine"/> class.
         /// </summary>
         /// <param name="classtokensList">The classtokens list.</param>
-        public CompilationEngine(IList<Pair<string,string>> classTokensList)
+        public CompilationEngine(IList<Pair<string, string>> classTokensList)
         {
             // reverse tokens before push onto stack (so we Pop them in the correct order!)
             classTokensList = classTokensList.Reverse().ToList();
@@ -49,9 +49,9 @@ namespace Compiler
             // compile opening curely of class
             this.CompileTerm(classXml);
 
-            if (this.IsSubRourtineDeclaration())
+            while (this.IsSubRourtineDeclaration())
             {
-                this.CompileSubRoutineDeclaration(classXml);
+                this.CompileSubRoutine(classXml);
             }
 
             // compile class closing curely
@@ -89,7 +89,7 @@ namespace Compiler
         /// Compiles the sub routine.
         /// </summary>
         /// <param name="parentElement">The parent element.</param>
-        private void CompileSubRoutineDeclaration(XElement parentElement)
+        private void CompileSubRoutine(XElement parentElement)
         {
             XElement subRoutineElement = new XElement("subroutineDec");
             parentElement.Add(subRoutineElement);
@@ -97,7 +97,7 @@ namespace Compiler
             // while not the opening bracked of the method/constructor/function params
             while (this.classTokens.Peek().Value2 != "(")
             {
-                Pair<string,string> token = this.classTokens.Pop();
+                Pair<string, string> token = this.classTokens.Pop();
                 subRoutineElement.Add(new XElement(token.Value1, token.Value2));
             }
 
@@ -110,15 +110,38 @@ namespace Compiler
             // add closing bracket of params
             this.CompileTerm(subRoutineElement);
 
+            // compile sub routine body
+            this.CompileSubroutineBody(subRoutineElement);
+        }
+
+        /// <summary>
+        /// Compiles the subroutine body.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileSubroutineBody(XElement parent)
+        {
+            XElement subRoutineBody = new XElement("subroutineBody");
+            parent.Add(subRoutineBody);
+
             // add opening curley of methodBody
-            this.CompileTerm(subRoutineElement);
+            this.CompileTerm(subRoutineBody);
 
-            // add statements to body
-            this.CompileStatements(subRoutineElement);
+            // while is statement || expression || variableDeclaration
+            while (this.IsStatement()) // TODO or is expression or variable declaraiotn
+            {
+                if (this.IsStatement())
+                {
+                    // add statements to body
+                    this.CompileStatements(subRoutineBody);
+                }
+                else 
+                {
 
+                }
+            }
+            
             // add closing curely of methodBody
-            this.CompileTerm(subRoutineElement);
-
+            this.CompileTerm(subRoutineBody);
         }
 
         /// <summary>
@@ -144,28 +167,34 @@ namespace Compiler
         /// </summary>
         private void CompileStatements(XElement parentElement)
         {
-            XElement statementsElement = new XElement("statements");
-            parentElement.Add(statementsElement);
-            
-            
-            if (this.IsLetStatement())
+            if(this.IsStatement())
             {
+                XElement statementsElement = new XElement("statements");
+                parentElement.Add(statementsElement);
 
-            }
-            else if(this.IsIfStatement())
-            {
+                // keep adding statements to this statement element
+                while (this.IsStatement())
+                {
+                    if (this.IsLetStatement())
+                    {
+                        this.CompileLet(statementsElement);
+                    }
+                    else if (this.IsIfStatement())
+                    {
 
-            }
-            else if(this.IsWhileStatement())
-            {
-                this.CompileWhile(statementsElement);
-            }
-            else if(this.IsDoStatement())
-            {
-            }
-            else if(this.IsReturnStatement())
-            {
-
+                    }
+                    else if (this.IsWhileStatement())
+                    {
+                        this.CompileWhile(statementsElement);
+                    }
+                    else if (this.IsDoStatement())
+                    {
+                    }
+                    else if (this.IsReturnStatement())
+                    {
+                        this.CompileReturn(statementsElement);
+                    }
+                }
             }
         }
 
@@ -185,6 +214,48 @@ namespace Compiler
             this.CompileExpression(whileElement);
             //compile the closing bracket
             this.CompileTerm(whileElement);
+            //compile the opening curly bracket
+            this.CompileTerm(whileElement);
+            //compile statements inside while 
+            this.CompileStatements(whileElement);
+        }
+
+        /// <summary>
+        /// Compiles a let statment.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileLet(XElement parent)
+        {
+            // TODO needs Real Expression compilation.
+
+            XElement letElement = new XElement("letStatement");
+            parent.Add(letElement);
+
+            // compile let keyword
+            this.CompileTerm(letElement);
+            // compile identifier
+            this.CompileTerm(letElement);
+            // compile =
+            this.CompileTerm(letElement);
+            // compile expression
+            this.CompileExpression(letElement);
+            //compile ;
+            this.CompileTerm(letElement);
+        }
+
+        private void CompileReturn(XElement parent)
+        {
+            XElement returnElement = new XElement("returnStatement");
+            parent.Add(returnElement);
+
+            // compile return keyword
+            this.CompileTerm(returnElement);
+
+            // compile return expression
+            this.CompileExpression(returnElement);
+
+            // compile the ;
+            this.CompileTerm(returnElement);
         }
 
         /// <summary>
@@ -228,7 +299,7 @@ namespace Compiler
         private bool IsClassVariableDeclaration()
         {
             Pair<string, string> peekedToken = this.classTokens.Peek();
-            return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "field" || peekedToken.Value2 =="static");
+            return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "field" || peekedToken.Value2 == "static");
         }
 
         /// <summary>
@@ -243,24 +314,38 @@ namespace Compiler
             return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "function" || peekedToken.Value2 == "constructor" || peekedToken.Value2 == "method");
         }
 
+        private bool IsExpression()
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool IsStatement()
+        {
+            return (IsLetStatement() || IsIfStatement() || IsDoStatement() || IsReturnStatement() || IsWhileStatement());
+        }
+
         private bool IsLetStatement()
-        {          
-            return false;
+        {
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+            return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "let";
         }
 
         private bool IsIfStatement()
         {
-            return false;
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+            return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "if";
         }
 
         private bool IsDoStatement()
         {
-            return false;
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+            return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "do"; ;
         }
 
         private bool IsReturnStatement()
         {
-            return false;
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+            return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "return";
         }
 
         /// <summary>
@@ -275,10 +360,5 @@ namespace Compiler
             Pair<string, string> peekedToken = this.classTokens.Peek();
             return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "while";
         }
-
-
-          
-
-
     }
 }

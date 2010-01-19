@@ -1,11 +1,21 @@
-class SquareGame {
- method void run()
- {
-         while (key) {
+class foo
+{
+        
+        constructor SquareGame new() 
+        {
+			let square = square;
+			let direction = direction;
+			
+			while (key) 
+			{
                 let key = key;
-                do moveSquare();
-            }
+			}
+
+			return square;
+		}
+        
+        
 }
-}
+
             
     
