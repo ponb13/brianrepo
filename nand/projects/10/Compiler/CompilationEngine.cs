@@ -8,7 +8,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// 1st task fix while statementt
+    /// 
     /// </summary>
     public class CompilationEngine
     {
@@ -151,6 +151,7 @@ namespace Compiler
             {
                 this.CompileWhile(statementsElement);
             }
+
         }
 
         /// <summary>
