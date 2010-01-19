@@ -51,7 +51,7 @@ namespace Compiler
 
             if (this.IsSubRourtineDeclaration())
             {
-                this.CompileSubRoutine(classXml);
+                this.CompileSubRoutineDeclaration(classXml);
             }
 
             // compile class closing curely
@@ -89,7 +89,7 @@ namespace Compiler
         /// Compiles the sub routine.
         /// </summary>
         /// <param name="parentElement">The parent element.</param>
-        private void CompileSubRoutine(XElement parentElement)
+        private void CompileSubRoutineDeclaration(XElement parentElement)
         {
             XElement subRoutineElement = new XElement("subroutineDec");
             parentElement.Add(subRoutineElement);
