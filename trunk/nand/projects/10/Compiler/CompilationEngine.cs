@@ -147,11 +147,26 @@ namespace Compiler
             XElement statementsElement = new XElement("statements");
             parentElement.Add(statementsElement);
             
-            if (this.IsWhileDeclaration())
+            
+            if (this.IsLetStatement())
+            {
+
+            }
+            else if(this.IsIfStatement())
+            {
+
+            }
+            else if(this.IsWhileStatement())
             {
                 this.CompileWhile(statementsElement);
             }
+            else if(this.IsDoStatement())
+            {
+            }
+            else if(this.IsReturnStatement())
+            {
 
+            }
         }
 
         /// <summary>
@@ -205,19 +220,6 @@ namespace Compiler
         }
 
         /// <summary>
-        /// Determines whether the token is the beginning of a while statment
-        /// </summary>
-        /// <param name="token">The token.</param>
-        /// <returns>
-        /// 	<c>true</c> if [is while statement] [the specified token]; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsWhileDeclaration()
-        {
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-            return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "while";
-        }
-
-        /// <summary>
         /// Determines whether [is class variable declaration].
         /// </summary>
         /// <returns>
@@ -240,6 +242,42 @@ namespace Compiler
             Pair<string, string> peekedToken = this.classTokens.Peek();
             return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "function" || peekedToken.Value2 == "constructor" || peekedToken.Value2 == "method");
         }
+
+        private bool IsLetStatement()
+        {          
+            return false;
+        }
+
+        private bool IsIfStatement()
+        {
+            return false;
+        }
+
+        private bool IsDoStatement()
+        {
+            return false;
+        }
+
+        private bool IsReturnStatement()
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the token is the beginning of a while statment
+        /// </summary>
+        /// <param name="token">The token.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is while statement] [the specified token]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsWhileStatement()
+        {
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+            return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "while";
+        }
+
+
+          
 
 
     }
