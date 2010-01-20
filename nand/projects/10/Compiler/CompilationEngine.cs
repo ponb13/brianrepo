@@ -181,7 +181,7 @@ namespace Compiler
                     }
                     else if (this.IsIfStatement())
                     {
-
+                        this.CompileIf(statementsElement);
                     }
                     else if (this.IsWhileStatement())
                     {
@@ -189,12 +189,81 @@ namespace Compiler
                     }
                     else if (this.IsDoStatement())
                     {
+                        this.CompileDoStatement(statementsElement);
                     }
                     else if (this.IsReturnStatement())
                     {
                         this.CompileReturn(statementsElement);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Compiles a do statement.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileDoStatement(XElement parent)
+        {
+            XElement doElement = new XElement("doStatement");
+            parent.Add(doElement);
+
+            // compile do keyword
+            this.CompileTerm(doElement);
+
+            // this compile identifier, it can be in form of name.something.anotherThing(expression)  etc
+            // so keep consuming until hit opening brace of expression
+            while (this.classTokens.Peek().Value2 != "(")
+            {
+                this.CompileTerm(doElement);
+            }
+
+            // compile opening brace of the expression
+            this.CompileTerm(doElement);
+            // compile the expression
+            this.CompileExpression(doElement);
+            // compile clsoing brace of the expression
+            this.CompileTerm(doElement);
+            // compile ;
+            this.CompileTerm(doElement);
+        }
+
+        /// <summary>
+        /// Compiles an if statement.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileIf(XElement parent)
+        {
+            XElement ifElement = new XElement("ifStatement");
+            parent.Add(ifElement);
+
+            // compile if keyword
+            this.CompileTerm(ifElement);
+            // compile  opening bracket
+            this.CompileTerm(ifElement);
+            // compiler expression
+            this.CompileExpression(ifElement);
+            // compile closing bracket
+            this.CompileTerm(ifElement);
+            // compile opening curly brace
+            this.CompileTerm(ifElement);
+            //compile the statement inside the if
+            this.CompileStatements(ifElement);
+            // compile closing curly brace
+            this.CompileTerm(ifElement);
+
+            // compile else statement if there is one
+            if (this.classTokens.Peek().Value2 == "else")
+            {
+                // this maybe incorrect, may should create elseStatement and add children??
+                // compile the else keyword
+                this.CompileTerm(ifElement);
+                // compile opening curly brace
+                this.CompileTerm(ifElement);
+                // compile statments
+                this.CompileStatements(ifElement);
+                // compile closing curly brace
+                this.CompileTerm(ifElement);
             }
         }
 
@@ -226,8 +295,6 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileLet(XElement parent)
         {
-            // TODO needs Real Expression compilation.
-
             XElement letElement = new XElement("letStatement");
             parent.Add(letElement);
 
