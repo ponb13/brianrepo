@@ -3,12 +3,10 @@ class foo
         
         constructor SquareGame new() 
         {
-			let square = square;
-			let direction = direction;
-			
-			while (key) 
+			if (key) 
 			{
-                let key = key;
+				do square.dispose.something(someExp);
+                
 			}
 
 			return square;
