@@ -511,8 +511,9 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="C#" modifier="bplus" created="201001141315" changecount="1">
-<pre>[[Custom Controls Validation]]</pre>
+<div title="C#" modifier="bplus" created="201001141315" modified="201001201014" changecount="3">
+<pre>[[Custom Controls Validation]]
+[[Using a reader with Sql IDataRecord]]</pre>
 </div>
 <div title="Css" modifier="bplus" created="200912070950" modified="200912070950" tags="forms css" changecount="2">
 <pre>[[Forms]]</pre>
@@ -798,6 +799,38 @@ command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentif
 					INNER JOIN SupplierAddresses 
 						ON Suppliers.SupplierCode = SupplierAddresses.SupplierCode
 				WHERE SupplierAddresses.OriginalCode = @SupplierOriginalCodeFromFile</pre>
+</div>
+<div title="Using a reader with Sql IDataRecord" modifier="bplus" created="201001201014" modified="201001201014" changecount="2">
+<pre>could refactor the creating product into a another method - Method would take reader as type IDataRecord
+
+public static IList&lt;Product&gt; GetDuplicateProductsForSupplier(string supplierCode)
+        {
+            IList&lt;Product&gt; products = new List&lt;Product&gt;();
+
+            using (SqlConnection conn = SqlMapper.GetConnection())
+            using (SqlCommand command = new SqlCommand(SqlMapper.GetDuplicateProductsForSupplierSql, conn))
+            {
+                command.AddParameter(&quot;@SupplierCode&quot;, supplierCode);
+
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Product product = new Product
+                        {
+                            SupplierCode = reader.GetString(reader.GetOrdinal(&quot;SupplierCode&quot;)),
+                            SupplierProductCode = reader.GetString(reader.GetOrdinal(&quot;SupplierProductCode&quot;)),
+                            Description = reader.GetString(reader.GetOrdinal(&quot;Description&quot;)),
+                            Unit = reader.GetString(reader.GetOrdinal(&quot;Unit&quot;))
+                        };
+
+                        products.Add(product);
+                    }
+                }
+            }
+
+            return products;
+        }</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
