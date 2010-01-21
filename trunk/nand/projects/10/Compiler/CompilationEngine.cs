@@ -62,7 +62,7 @@ namespace Compiler
         }
 
         /// <summary>
-        /// Compile a variable declaration
+        /// Compile a class variable declaration
         /// </summary>
         /// <param name="parentElement">The parent element.</param>
         private void CompileClassVarDeclaration(XElement parentElement)
@@ -126,22 +126,62 @@ namespace Compiler
             // add opening curley of methodBody
             this.CompileTerm(subRoutineBody);
 
+            this.CompileVariableDeclaration(subRoutineBody);
+
             // while is statement || expression || variableDeclaration
-            while (this.IsStatement()) // TODO or is expression or variable declaraiotn
+            while (this.IsStatement() || this.IsVariableDeclaration()) // TODO or is expression or variable declaraiotn
             {
                 if (this.IsStatement())
                 {
                     // add statements to body
                     this.CompileStatements(subRoutineBody);
                 }
-                else 
+                else if(this.IsVariableDeclaration())
                 {
-
+                    this.CompileVariableDeclaration(subRoutineBody);
                 }
             }
             
             // add closing curely of methodBody
             this.CompileTerm(subRoutineBody);
+        }
+
+        /// <summary>
+        /// Compiles the variable declaration.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileVariableDeclaration(XElement parent)
+        {
+            XElement varDec = new XElement("varDec");
+            parent.Add(varDec);
+
+            // compile the var keyword
+            this.CompileTerm(varDec);
+            // compile the type keyword
+            this.CompileTerm(varDec);
+            // compile the identifier
+            this.CompileTerm(varDec);
+
+            // check for comma
+            if(this.classTokens.Peek().Value2 == ",")
+            {
+                // compile the comma
+                this.CompileTerm(varDec);
+
+                while (this.classTokens.Peek().Value2 != ";")
+                {
+                    this.CompileTerm(varDec);
+                    if (this.classTokens.Peek().Value2 == ",")
+                    {
+                        this.CompileTerm(varDec);
+                    }
+                }
+            }
+
+            // compile the ending ;
+            this.CompileTerm(varDec);
+
+            
         }
 
         /// <summary>
@@ -348,9 +388,13 @@ namespace Compiler
             XElement termElement = new XElement("term");
             expressionElement.Add(termElement);
 
-            Pair<string, string> expressionTermToken = this.classTokens.Pop();
+            // ensure there is something between the brackets. i.e. not just closed brackets.
+            if (this.classTokens.Peek().Value2 != ")")
+            {
+                Pair<string, string> expressionTermToken = this.classTokens.Pop();
 
-            termElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
+                termElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
+            }
 
 
             // TODO - this is just a placeholder - will on compile expressionless...
@@ -384,6 +428,12 @@ namespace Compiler
         private bool IsExpression()
         {
             throw new NotImplementedException();
+        }
+
+        private bool IsVariableDeclaration()
+        {
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+            return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "var";
         }
 
         private bool IsStatement()

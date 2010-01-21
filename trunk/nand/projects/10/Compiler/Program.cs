@@ -12,8 +12,8 @@ namespace Compiler
         {
             try
             {
-                //string inputPath = @"../../../TestFiles/ExpressionlessSquare/";
-                string inputPath = @"../../../TestFiles/UnitTestFiles/";
+                string inputPath = @"../../../TestFiles/ExpressionlessSquare/";
+                //string inputPath = @"../../../TestFiles/UnitTestFiles/";
 
                 foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
                 {
