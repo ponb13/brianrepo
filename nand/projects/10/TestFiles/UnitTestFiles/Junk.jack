@@ -3,13 +3,8 @@ class foo
         
         constructor SquareGame new() 
         {
-			if (key) 
-			{
-				do square.dispose.something(someExp);
-                
-			}
-
-			return square;
+			var int 12,13, 16;
+			var char a, v, c;
 		}
         
         
