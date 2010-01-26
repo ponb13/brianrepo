@@ -14,10 +14,7 @@ namespace Compiler
         {
             try
             {
-                //string inputPath = @"../../../TestFiles/UnitTestFiles/";
-                
                 string inputPath = @"../../../TestFiles/ExpressionlessSquare/";
-                
 
                 foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
                 {
@@ -25,8 +22,6 @@ namespace Compiler
                     Compiler compiler = new Compiler(filepath);
                     Program.WriteOuput(compiler.Compile(), outputPath);
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -39,11 +34,15 @@ namespace Compiler
         private static string GetOutputFilePath(string inputPath, string filepath)
         {
             string outputPath = inputPath + @"/Output";
-            return outputPath + @"/"+Path.GetFileName(filepath);
+            return outputPath + @"/" + Path.GetFileNameWithoutExtension(filepath)+ ".xml";
         }
 
         private static void WriteOuput(XElement compiledClass, string outputPath)
         {
+            if (File.Exists(outputPath))
+            {
+                File.Delete(outputPath);
+            }
             using (StreamWriter sw = new StreamWriter(File.Create(outputPath)))
             {
                 sw.Write(compiledClass.ToString());
