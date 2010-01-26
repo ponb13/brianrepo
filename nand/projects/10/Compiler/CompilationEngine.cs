@@ -49,9 +49,10 @@ namespace Compiler
             // compile opening curely of class
             this.CompileTerm(classXml);
 
+            this.CompileClassVarDeclaration(classXml);
+
             while (this.IsSubRourtineDeclaration())
             {
-                
                 this.CompileSubRoutine(classXml);
             }
 
@@ -68,21 +69,24 @@ namespace Compiler
         /// <param name="parentElement">The parent element.</param>
         private void CompileClassVarDeclaration(XElement parentElement)
         {
-            XElement classVariableElement = new XElement("classVarDec");
-            parentElement.Add(classVariableElement);
-
-            while (this.classTokens.Peek().Value2 != ";")
-            {
-                Pair<string, string> token = this.classTokens.Pop();
-                classVariableElement.Add(new XElement(token.Value1, token.Value2));
-            }
-
-            this.CompileTerm(classVariableElement);
-
             if (IsClassVariableDeclaration())
             {
+                XElement classVariableElement = new XElement("classVarDec");
+                parentElement.Add(classVariableElement);
+
+                while (this.classTokens.Peek().Value2 != ";")
+                {
+                    Pair<string, string> token = this.classTokens.Pop();
+                    classVariableElement.Add(new XElement(token.Value1, token.Value2));
+                }
+
+                // compile ;
+                this.CompileTerm(classVariableElement);
+
+
                 // recursively handle all class variables
                 this.CompileClassVarDeclaration(parentElement);
+
             }
         }
 
@@ -137,12 +141,12 @@ namespace Compiler
                     // add statements to body
                     this.CompileStatements(subRoutineBody);
                 }
-                else if(this.IsVariableDeclaration())
+                else if (this.IsVariableDeclaration())
                 {
                     this.CompileVariableDeclaration(subRoutineBody);
                 }
             }
-            
+
             // add closing curely of methodBody
             this.CompileTerm(subRoutineBody);
         }
@@ -164,7 +168,7 @@ namespace Compiler
             this.CompileTerm(varDec);
 
             // check for comma
-            if(this.classTokens.Peek().Value2 == ",")
+            if (this.classTokens.Peek().Value2 == ",")
             {
                 // compile the comma
                 this.CompileTerm(varDec);
@@ -182,7 +186,7 @@ namespace Compiler
             // compile the ending ;
             this.CompileTerm(varDec);
 
-            
+
         }
 
         /// <summary>
@@ -208,7 +212,7 @@ namespace Compiler
         /// </summary>
         private void CompileStatements(XElement parentElement)
         {
-            if(this.IsStatement())
+            if (this.IsStatement())
             {
                 XElement statementsElement = new XElement("statements");
                 parentElement.Add(statementsElement);
@@ -360,7 +364,10 @@ namespace Compiler
             this.CompileTerm(returnElement);
 
             // compile return expression
-            this.CompileExpression(returnElement);
+            if (this.classTokens.Peek().Value2 != ";")
+            {
+                this.CompileExpression(returnElement);
+            }
 
             // compile the ;
             this.CompileTerm(returnElement);
