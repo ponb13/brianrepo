@@ -51,6 +51,7 @@ namespace Compiler
 
             while (this.IsSubRourtineDeclaration())
             {
+                
                 this.CompileSubRoutine(classXml);
             }
 
@@ -371,9 +372,12 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileTerm(XElement parent)
         {
-            // TODO see page 216 for look ahead on array handling etc (peek!).
-            Pair<string, string> terminal = this.classTokens.Pop();
-            parent.Add(new XElement(terminal.Value1, terminal.Value2));
+            if (this.classTokens.Count > 0)
+            {
+                // TODO see page 216 for look ahead on array handling etc (peek!).
+                Pair<string, string> terminal = this.classTokens.Pop();
+                parent.Add(new XElement(terminal.Value1, terminal.Value2));
+            }
         }
 
         /// <summary>
@@ -421,8 +425,13 @@ namespace Compiler
         /// </returns>
         private bool IsSubRourtineDeclaration()
         {
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-            return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "function" || peekedToken.Value2 == "constructor" || peekedToken.Value2 == "method");
+            bool result = false;
+            if (this.classTokens.Count > 0)
+            {
+                Pair<string, string> peekedToken = this.classTokens.Peek();
+                result = peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "function" || peekedToken.Value2 == "constructor" || peekedToken.Value2 == "method");
+            }
+            return result;
         }
 
         private bool IsExpression()

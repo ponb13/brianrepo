@@ -17,7 +17,7 @@ namespace Compiler
             this.inputPath = inputPath;
         }
 
-        public void Compile()
+        public XElement Compile()
         {
             IList<Pair<string, string>> tokens = null;
             
@@ -29,8 +29,9 @@ namespace Compiler
             tokens=  tokens.Where(t => t.Value1 != "Comment").ToList();
 
             CompilationEngine compilationEngine = new CompilationEngine(tokens);
-            XElement xml = compilationEngine.CompileClass();
-            Console.WriteLine(xml.ToString());
+            XElement xmlCompiledClass = compilationEngine.CompileClass();
+           
+            return xmlCompiledClass;
         }
 
     }

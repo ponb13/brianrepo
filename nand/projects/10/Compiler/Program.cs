@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Xml.Linq;
+
 
 namespace Compiler
 {
@@ -12,14 +14,19 @@ namespace Compiler
         {
             try
             {
-                string inputPath = @"../../../TestFiles/ExpressionlessSquare/";
                 //string inputPath = @"../../../TestFiles/UnitTestFiles/";
+                
+                string inputPath = @"../../../TestFiles/ExpressionlessSquare/";
+                
 
                 foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
                 {
+                    string outputPath = Program.GetOutputFilePath(inputPath, filepath);
                     Compiler compiler = new Compiler(filepath);
-                    compiler.Compile();
+                    Program.WriteOuput(compiler.Compile(), outputPath);
                 }
+
+
             }
             catch (Exception ex)
             {
@@ -28,5 +35,20 @@ namespace Compiler
             }
 
         }
+
+        private static string GetOutputFilePath(string inputPath, string filepath)
+        {
+            string outputPath = inputPath + @"/Output";
+            return outputPath + @"/"+Path.GetFileName(filepath);
+        }
+
+        private static void WriteOuput(XElement compiledClass, string outputPath)
+        {
+            using (StreamWriter sw = new StreamWriter(File.Create(outputPath)))
+            {
+                sw.Write(compiledClass.ToString());
+            }
+        }
+
     }
 }
