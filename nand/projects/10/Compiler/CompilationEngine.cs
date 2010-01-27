@@ -429,10 +429,16 @@ namespace Compiler
             parent.Add(expressionListElement);
 
             // if not empty brackets
-            if (this.classTokens.Peek().Value2 != ")")
+            while (this.classTokens.Peek().Value2 != ")")
             {
                 this.CompileExpression(expressionListElement);
-                //TODO must compile comma separate expression list
+                //TODO must 
+
+                //compile comma - comma separated expression list
+                if (this.classTokens.Peek().Value2 == ",")
+                {
+                    this.CompileTerm(expressionListElement);
+                }
             }
             
         }
