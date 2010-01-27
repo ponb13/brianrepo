@@ -157,36 +157,40 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileVariableDeclaration(XElement parent)
         {
-            XElement varDec = new XElement("varDec");
-            parent.Add(varDec);
-
-            // compile the var keyword
-            this.CompileTerm(varDec);
-            // compile the type keyword
-            this.CompileTerm(varDec);
-            // compile the identifier
-            this.CompileTerm(varDec);
-
-            // check for comma
-            if (this.classTokens.Peek().Value2 == ",")
+            if (this.classTokens.Peek().Value2 == "var")
             {
-                // compile the comma
+                XElement varDec = new XElement("varDec");
+                parent.Add(varDec);
+
+                // compile the var keyword
+                this.CompileTerm(varDec);
+                // compile the type keyword
+                this.CompileTerm(varDec);
+                // compile the identifier
                 this.CompileTerm(varDec);
 
-                while (this.classTokens.Peek().Value2 != ";")
+                // check for comma
+                if (this.classTokens.Peek().Value2 == ",")
                 {
+                    // compile the comma
                     this.CompileTerm(varDec);
-                    if (this.classTokens.Peek().Value2 == ",")
+
+                    while (this.classTokens.Peek().Value2 != ";")
                     {
                         this.CompileTerm(varDec);
+                        if (this.classTokens.Peek().Value2 == ",")
+                        {
+                            this.CompileTerm(varDec);
+                        }
                     }
                 }
+
+                // compile the ending ;
+                this.CompileTerm(varDec);
+
+                // recursively call variable declaration
+                this.CompileVariableDeclaration(parent);
             }
-
-            // compile the ending ;
-            this.CompileTerm(varDec);
-
-
         }
 
         /// <summary>
@@ -266,12 +270,34 @@ namespace Compiler
             // compile opening brace of the expression
             this.CompileTerm(doElement);
             // compile the expression
-            this.CompileExpression(doElement);
+            this.CompileExpressionList(doElement);
             // compile clsoing brace of the expression
             this.CompileTerm(doElement);
             // compile ;
             this.CompileTerm(doElement);
         }
+
+        /// <summary>
+        /// Compiles a let statment.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileLet(XElement parent)
+        {
+            XElement letElement = new XElement("letStatement");
+            parent.Add(letElement);
+
+            // compile let keyword
+            this.CompileTerm(letElement);
+            // compile identifier
+            this.CompileTerm(letElement);
+            // compile =
+            this.CompileTerm(letElement);
+            // compile expression
+            this.CompileExpression(letElement);
+            //compile ;
+            this.CompileTerm(letElement);
+        }
+
 
         /// <summary>
         /// Compiles an if statement.
@@ -332,27 +358,8 @@ namespace Compiler
             this.CompileTerm(whileElement);
             //compile statements inside while 
             this.CompileStatements(whileElement);
-        }
-
-        /// <summary>
-        /// Compiles a let statment.
-        /// </summary>
-        /// <param name="parent">The parent.</param>
-        private void CompileLet(XElement parent)
-        {
-            XElement letElement = new XElement("letStatement");
-            parent.Add(letElement);
-
-            // compile let keyword
-            this.CompileTerm(letElement);
-            // compile identifier
-            this.CompileTerm(letElement);
-            // compile =
-            this.CompileTerm(letElement);
-            // compile expression
-            this.CompileExpression(letElement);
-            //compile ;
-            this.CompileTerm(letElement);
+            //compile the closing curly bracket
+            this.CompileTerm(whileElement);
         }
 
         private void CompileReturn(XElement parent)
@@ -410,6 +417,24 @@ namespace Compiler
 
             // TODO - this is just a placeholder - will on compile expressionless...
             //this.CompileTerm(expressionElement);
+        }
+
+        /// <summary>
+        /// Compiles an expression list.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private void CompileExpressionList(XElement parent)
+        {
+            XElement expressionListElement = new XElement("expressionList");
+            parent.Add(expressionListElement);
+
+            // if not empty brackets
+            if (this.classTokens.Peek().Value2 != ")")
+            {
+                this.CompileExpression(expressionListElement);
+                //TODO must compile comma separate expression list
+            }
+            
         }
 
         /// <summary>
