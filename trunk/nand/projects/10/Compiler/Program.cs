@@ -10,6 +10,10 @@ namespace Compiler
 {
     public class Program
     {
+        /// <summary>
+        /// Outputs parse tree as xml... for now...
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             try

@@ -312,7 +312,7 @@ namespace Compiler
             this.CompileTerm(ifElement);
             // compile  opening bracket
             this.CompileTerm(ifElement);
-            // compiler expression
+            // compile expression
             this.CompileExpression(ifElement);
             // compile closing bracket
             this.CompileTerm(ifElement);
