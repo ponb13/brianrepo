@@ -403,16 +403,30 @@ namespace Compiler
             // TODO this "term" element maybe it should be compile terminal????
             XElement expressionElement = new XElement("expression");
             parent.Add(expressionElement);
-            XElement termElement = new XElement("term");
-            expressionElement.Add(termElement);
 
             // ensure there is something between the brackets. i.e. not just closed brackets.
             if (this.classTokens.Peek().Value2 != ")")
             {
                 Pair<string, string> expressionTermToken = this.classTokens.Pop();
+                if (this.IsExpressionTerm())
+                {
+                    // no idea why but for some reason we have to wrap terminals that appear in expressions in <term>
+                    XElement termElement = new XElement("term");
+                    expressionElement.Add(termElement);
 
-                termElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
+                    termElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
+                }
+                else
+                {
+                    expressionElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
+                }
+
+                //check if next token is a symbol
+                // if it is compile it and its following term
+                //BRIAN start here!
             }
+
+            
 
 
             // TODO - this is just a placeholder - will on compile expressionless...
@@ -440,7 +454,20 @@ namespace Compiler
                     this.CompileTerm(expressionListElement);
                 }
             }
-            
+
+        }
+
+        /// <summary>
+        /// Determines whether [is expression term].
+        /// i.e. if the next token is a terminal in an expression
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if [is expression term]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsExpressionTerm()
+        {
+            Pair<string, string> token = this.classTokens.Peek();
+            return (token.Value1 == StringConstants.integerConstant) || (token.Value1 == StringConstants.stringConstant) || (token.Value1 == StringConstants.keyword) || (token.Value1 == StringConstants.indentifier);
         }
 
         /// <summary>
@@ -485,6 +512,7 @@ namespace Compiler
 
         private bool IsStatement()
         {
+            // this is probably wrong - variable declarations etc are statments?!
             return (IsLetStatement() || IsIfStatement() || IsDoStatement() || IsReturnStatement() || IsWhileStatement());
         }
 
