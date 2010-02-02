@@ -1,3 +1,4 @@
-CompileSubroutineBody -  add to while loop: IsExpresssion || Is VariableDeclaration 
-
-CompileTerm look ahead
+start with compile term!
+remove term from compile expression
+fix array look a head on compile terminal
+IsStatement() doesn't seem to be correct
