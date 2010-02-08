@@ -511,9 +511,10 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="C#" modifier="bplus" created="201001141315" modified="201001201014" changecount="3">
+<div title="C#" modifier="bplus" created="201001141315" modified="201002081043" changecount="4">
 <pre>[[Custom Controls Validation]]
-[[Using a reader with Sql IDataRecord]]</pre>
+[[Using a reader with Sql IDataRecord]]
+[[IHttpHandler]]</pre>
 </div>
 <div title="Css" modifier="bplus" created="200912070950" modified="200912070950" tags="forms css" changecount="2">
 <pre>[[Forms]]</pre>
@@ -693,6 +694,183 @@ wrap a text box in a div with the following class:
 * [[MainMenu]]: The menu (usually on the left)
 * [[DefaultTiddlers]]: Contains the names of the tiddlers that you want to appear when the TiddlyWiki is opened
 You'll also need to enter your username for signing your edits: &lt;&lt;option txtUserName&gt;&gt;</pre>
+</div>
+<div title="IHttpHandler" modifier="bplus" created="201002081044" changecount="1">
+<pre>using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Services;
+using System.Web.Services.Protocols;
+using System.Web.SessionState;
+using System.Xml.Linq;
+using System.Globalization;
+
+using blah.Core.Data;
+using blah.Pops.UI;
+using blah.Pops.DataAccess;
+using blah.Core.Text;
+
+
+namespace blah.Pops.Services
+{
+    /// &lt;summary&gt;
+    /// Summary description for $codebehindclassname$
+    /// &lt;/summary&gt;
+    [WebService(Namespace = &quot;http://tempuri.org/&quot;)]
+    [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
+    public class Reports : IHttpHandler, IReadOnlySessionState
+    {
+        /// &lt;summary&gt;
+        /// Enables processing of HTTP Web requests by a custom HttpHandler that implements the &lt;see cref=&quot;T:System.Web.IHttpHandler&quot;/&gt; interface.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;context&quot;&gt;An &lt;see cref=&quot;T:System.Web.HttpContext&quot;/&gt; object that provides references to the intrinsic server objects (for example, Request, Response, Session, and Server) used to service HTTP requests.&lt;/param&gt;
+        public void ProcessRequest(HttpContext context)
+        {
+            
+            this.GetReportParameters(context);
+
+            context.Response.BufferOutput = false;
+            context.Response.ContentType = &quot;text/csv&quot;;
+            context.Response.AddHeader(&quot;content-disposition&quot;, &quot;attachment; filename=\&quot;&quot; + this.reportType + this.labId + this.year + this.month + &quot;.csv\&quot;&quot;);
+
+            switch (this.reportType)
+            {
+                default:
+                    context.Response.StatusCode = 404;
+                    context.Response.Status = &quot;NOT FOUND&quot;;
+                    break;
+                case &quot;PurchaseInvoiceReport&quot; :
+                    SqlMapper.ProcessPurchaseInvoiceReport(this.year, this.labId, this.regionCode, record =&gt; this.OutputDataRecordAsCsv(context.Response, record), false);
+                    break;
+                case &quot;SupplierMonthlySpendReport&quot; :
+                    SqlMapper.ProcessSuppliersMonthlySpend(this.year, this.labId, this.regionCode, record =&gt; this.OutputDataRecordAsCsv(context.Response, record), false);
+                    break;
+                case &quot;GRNReport&quot;:
+                    SqlMapper.ProcessGRNReport(this.year, this.month, this.labId, this.regionCode, record =&gt; this.OutputDataRecordAsCsv(context.Response, record), false);
+                    break;
+                case &quot;PurchaseOrderReport&quot; :
+                    SqlMapper.ProcessPurchaseOrderReport(this.year, this.month, this.labId, this.regionCode, this.dept, this.statuses, this.nominalCode, record =&gt; this.OutputDataRecordAsCsv(context.Response, record), false);
+                    break;
+                case &quot;LabUsers&quot;:
+                    SqlMapper.ProcessUserLabsReport(this.labId, record =&gt; this.OutputDataRecordAsCsv(context.Response, record));
+                    break;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Gets a value indicating whether another request can use the &lt;see cref=&quot;T:System.Web.IHttpHandler&quot;/&gt; instance.
+        /// &lt;/summary&gt;
+        /// &lt;value&gt;&lt;/value&gt;
+        /// &lt;returns&gt;true if the &lt;see cref=&quot;T:System.Web.IHttpHandler&quot;/&gt; instance is reusable; otherwise, false.&lt;/returns&gt;
+        public bool IsReusable
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// Outputs the data record as CSV.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;response&quot;&gt;The response.&lt;/param&gt;
+        /// &lt;param name=&quot;record&quot;&gt;The record.&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        private bool OutputDataRecordAsCsv(HttpResponse response, IDataRecord record)
+        {
+            if (!this.headerLineHasBeenOutput)
+            {
+                response.Write(record.ToCsvHeader());
+                response.Write(Environment.NewLine);
+
+                this.headerLineHasBeenOutput = true;
+            }
+
+            this.RecordToRow(record, response);
+
+            return response.IsClientConnected;
+        }
+
+        /// &lt;summary&gt;
+        /// Records to row.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;record&quot;&gt;The record.&lt;/param&gt;
+        /// &lt;param name=&quot;response&quot;&gt;The response.&lt;/param&gt;
+        private void RecordToRow(IDataRecord record, HttpResponse response)
+        {
+            StringBuilder temp = new StringBuilder();
+
+            int numFields = record.FieldCount;
+
+            for (int i = 0; i &lt; numFields; i++)
+            {
+                if (temp.Length &gt; 0)
+                {
+                    temp.Append(',');
+                }
+
+                string value = record.GetValue(i).ToString();
+                Type type = record.GetValue(i).GetType();
+               
+                value = value.RemoveLineBreakCharacters(&quot; &quot;);
+
+                if (type == typeof(DateTime))
+                {
+                    temp.Append(DateTime.Parse(record.GetValue(i).ToString()).ToLocalTime());
+                }
+                else if (type == typeof(decimal))
+                {
+                    temp.Append(string.Format(CultureInfo.InvariantCulture, &quot;{0:00.00}&quot;, record.GetValue(i)));
+                }
+                else if(value.NeedsCsvQuoting())
+                {
+                    temp.Append('&quot;').Append(value.Replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;)).Append('&quot;');
+                }
+                else
+                {
+                    temp.Append(value);
+                }
+            }
+            temp.Append(Environment.NewLine);
+            response.Write(temp.ToString());
+
+        }
+
+        /// &lt;summary&gt;
+        /// Gets the query string variables.
+        /// &lt;/summary&gt;
+        private void GetReportParameters(HttpContext context)
+        {
+            NameValueCollection queryStringCollection = context.Request.QueryString;
+
+            this.year = queryStringCollection.GetValue&lt;int?&gt;(&quot;year&quot;);
+            this.month = queryStringCollection.GetValue&lt;int?&gt;(&quot;month&quot;);
+            this.labId = queryStringCollection.GetValue&lt;string&gt;(&quot;labId&quot;);
+            this.statuses = queryStringCollection.GetBarSeparatedValues(&quot;status&quot;);
+            this.dept = queryStringCollection.GetValue&lt;Guid?&gt;(&quot;dept&quot;);
+            this.nominalCode = queryStringCollection.GetValue&lt;string&gt;(&quot;nominalCode&quot;);
+            this.reportType = queryStringCollection.GetValue&lt;string&gt;(&quot;reportType&quot;);
+            this.regionCode = context.GetCurrentRegion();
+        }
+
+        private int? year;
+        private string labId;
+        private int? month;
+        private Guid? dept;
+        private IList&lt;string&gt; statuses;
+        private string nominalCode;
+        private string reportType;
+        private string regionCode;
+
+        private bool headerLineHasBeenOutput;
+    }
+}
+</pre>
 </div>
 <div title="Insert Using a SQL string" modifier="bplus" created="200912041612" modified="200912041616" changecount="3">
 <pre>        /// &lt;summary&gt;
