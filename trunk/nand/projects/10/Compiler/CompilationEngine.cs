@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using System.Text.RegularExpressions;
 using Interfaces;
 
 namespace Compiler
@@ -43,11 +44,11 @@ namespace Compiler
             XElement classXml = new XElement("class");
 
             // compile class keyword
-            this.CompileTerm(classXml);
+            this.CompileTerminal(classXml);
             // compiler class name
-            this.CompileTerm(classXml);
+            this.CompileTerminal(classXml);
             // compile opening curely of class
-            this.CompileTerm(classXml);
+            this.CompileTerminal(classXml);
 
             this.CompileClassVarDeclaration(classXml);
 
@@ -57,7 +58,7 @@ namespace Compiler
             }
 
             // compile class closing curely
-            this.CompileTerm(classXml);
+            this.CompileTerminal(classXml);
 
 
             return classXml;
@@ -81,8 +82,7 @@ namespace Compiler
                 }
 
                 // compile ;
-                this.CompileTerm(classVariableElement);
-
+                this.CompileTerminal(classVariableElement);
 
                 // recursively handle all class variables
                 this.CompileClassVarDeclaration(parentElement);
@@ -107,13 +107,13 @@ namespace Compiler
             }
 
             // add the opening braket of param list
-            this.CompileTerm(subRoutineElement);
+            this.CompileTerminal(subRoutineElement);
 
             // add the param list
             this.CompileParameterList(subRoutineElement);
 
             // add closing bracket of params
-            this.CompileTerm(subRoutineElement);
+            this.CompileTerminal(subRoutineElement);
 
             // compile sub routine body
             this.CompileSubroutineBody(subRoutineElement);
@@ -129,7 +129,7 @@ namespace Compiler
             parent.Add(subRoutineBody);
 
             // add opening curley of methodBody
-            this.CompileTerm(subRoutineBody);
+            this.CompileTerminal(subRoutineBody);
 
             this.CompileVariableDeclaration(subRoutineBody);
 
@@ -148,7 +148,7 @@ namespace Compiler
             }
 
             // add closing curely of methodBody
-            this.CompileTerm(subRoutineBody);
+            this.CompileTerminal(subRoutineBody);
         }
 
         /// <summary>
@@ -163,30 +163,30 @@ namespace Compiler
                 parent.Add(varDec);
 
                 // compile the var keyword
-                this.CompileTerm(varDec);
+                this.CompileTerminal(varDec);
                 // compile the type keyword
-                this.CompileTerm(varDec);
+                this.CompileTerminal(varDec);
                 // compile the identifier
-                this.CompileTerm(varDec);
+                this.CompileTerminal(varDec);
 
                 // check for comma
                 if (this.classTokens.Peek().Value2 == ",")
                 {
                     // compile the comma
-                    this.CompileTerm(varDec);
+                    this.CompileTerminal(varDec);
 
                     while (this.classTokens.Peek().Value2 != ";")
                     {
-                        this.CompileTerm(varDec);
+                        this.CompileTerminal(varDec);
                         if (this.classTokens.Peek().Value2 == ",")
                         {
-                            this.CompileTerm(varDec);
+                            this.CompileTerminal(varDec);
                         }
                     }
                 }
 
                 // compile the ending ;
-                this.CompileTerm(varDec);
+                this.CompileTerminal(varDec);
 
                 // recursively call variable declaration
                 this.CompileVariableDeclaration(parent);
@@ -258,23 +258,23 @@ namespace Compiler
             parent.Add(doElement);
 
             // compile do keyword
-            this.CompileTerm(doElement);
+            this.CompileTerminal(doElement);
 
             // this compile identifier, it can be in form of name.something.anotherThing(expression)  etc
             // so keep consuming until hit opening brace of expression
             while (this.classTokens.Peek().Value2 != "(")
             {
-                this.CompileTerm(doElement);
+                this.CompileTerminal(doElement);
             }
 
             // compile opening brace of the expression
-            this.CompileTerm(doElement);
+            this.CompileTerminal(doElement);
             // compile the expression
             this.CompileExpressionList(doElement);
             // compile clsoing brace of the expression
-            this.CompileTerm(doElement);
+            this.CompileTerminal(doElement);
             // compile ;
-            this.CompileTerm(doElement);
+            this.CompileTerminal(doElement);
         }
 
         /// <summary>
@@ -287,15 +287,15 @@ namespace Compiler
             parent.Add(letElement);
 
             // compile let keyword
-            this.CompileTerm(letElement);
+            this.CompileTerminal(letElement);
             // compile identifier
-            this.CompileTerm(letElement);
+            this.CompileTerminal(letElement);
             // compile =
-            this.CompileTerm(letElement);
+            this.CompileTerminal(letElement);
             // compile expression
             this.CompileExpression(letElement);
             //compile ;
-            this.CompileTerm(letElement);
+            this.CompileTerminal(letElement);
         }
 
 
@@ -309,32 +309,32 @@ namespace Compiler
             parent.Add(ifElement);
 
             // compile if keyword
-            this.CompileTerm(ifElement);
+            this.CompileTerminal(ifElement);
             // compile  opening bracket
-            this.CompileTerm(ifElement);
+            this.CompileTerminal(ifElement);
             // compile expression
             this.CompileExpression(ifElement);
             // compile closing bracket
-            this.CompileTerm(ifElement);
+            this.CompileTerminal(ifElement);
             // compile opening curly brace
-            this.CompileTerm(ifElement);
+            this.CompileTerminal(ifElement);
             //compile the statement inside the if
             this.CompileStatements(ifElement);
             // compile closing curly brace
-            this.CompileTerm(ifElement);
+            this.CompileTerminal(ifElement);
 
             // compile else statement if there is one
             if (this.classTokens.Peek().Value2 == "else")
             {
                 // this maybe incorrect, may should create elseStatement and add children??
                 // compile the else keyword
-                this.CompileTerm(ifElement);
+                this.CompileTerminal(ifElement);
                 // compile opening curly brace
-                this.CompileTerm(ifElement);
+                this.CompileTerminal(ifElement);
                 // compile statments
                 this.CompileStatements(ifElement);
                 // compile closing curly brace
-                this.CompileTerm(ifElement);
+                this.CompileTerminal(ifElement);
             }
         }
 
@@ -347,19 +347,19 @@ namespace Compiler
             parent.Add(whileElement);
 
             // compile the while keyword
-            this.CompileTerm(whileElement);
+            this.CompileTerminal(whileElement);
             // compile the opening bracket 
-            this.CompileTerm(whileElement);
+            this.CompileTerminal(whileElement);
             //compile the expression
             this.CompileExpression(whileElement);
             //compile the closing bracket
-            this.CompileTerm(whileElement);
+            this.CompileTerminal(whileElement);
             //compile the opening curly bracket
-            this.CompileTerm(whileElement);
+            this.CompileTerminal(whileElement);
             //compile statements inside while 
             this.CompileStatements(whileElement);
             //compile the closing curly bracket
-            this.CompileTerm(whileElement);
+            this.CompileTerminal(whileElement);
         }
 
         private void CompileReturn(XElement parent)
@@ -368,7 +368,7 @@ namespace Compiler
             parent.Add(returnElement);
 
             // compile return keyword
-            this.CompileTerm(returnElement);
+            this.CompileTerminal(returnElement);
 
             // compile return expression
             if (this.classTokens.Peek().Value2 != ";")
@@ -377,18 +377,17 @@ namespace Compiler
             }
 
             // compile the ;
-            this.CompileTerm(returnElement);
+            this.CompileTerminal(returnElement);
         }
 
         /// <summary>
         /// Compiles a terminal.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private void CompileTerm(XElement parent)
+        private void CompileTerminal(XElement parent)
         {
             if (this.classTokens.Count > 0)
             {
-                // TODO see page 216 for look ahead on array handling etc (peek!).
                 Pair<string, string> terminal = this.classTokens.Pop();
                 parent.Add(new XElement(terminal.Value1, terminal.Value2));
             }
@@ -400,37 +399,43 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileExpression(XElement parent)
         {
-            // TODO this "term" element maybe it should be compile terminal????
             XElement expressionElement = new XElement("expression");
             parent.Add(expressionElement);
 
-            // ensure there is something between the brackets. i.e. not just closed brackets.
-            if (this.classTokens.Peek().Value2 != ")")
+            XElement termElement = new XElement("term");
+            parent.Add(termElement);
+
+            this.CompileTerminal(expressionElement);
+
+           
+        }
+
+        private void CompileTerm(XElement parent)
+        {
+            // BRIAN -Start here!!!
+            // you have just writte is array accessor, now need to check if subroutine call see page 209
+            // you have written some sub routine check ing code at bottom of class its commented out.
+            
+            XElement termElement = new XElement("term");
+            parent.Add(termElement);
+            
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+
+            if (this.IsExpressionSimpleTerm())
             {
-                Pair<string, string> expressionTermToken = this.classTokens.Pop();
-                if (this.IsExpressionTerm())
-                {
-                    // no idea why but for some reason we have to wrap terminals that appear in expressions in <term>
-                    XElement termElement = new XElement("term");
-                    expressionElement.Add(termElement);
+                this.CompileTerminal(termElement);
+            }
+            else if (peekedToken.Value2 == "(")
+            {
+                // if is expression compile it (compile the opening bracker first).
+                this.CompileTerminal(termElement);
+                this.CompileExpression(termElement);
+            }
+            else if (this.IsArrayAccessor())
+            {
 
-                    termElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
-                }
-                else
-                {
-                    expressionElement.Add(new XElement(expressionTermToken.Value1, expressionTermToken.Value2));
-                }
-
-                //check if next token is a symbol
-                // if it is compile it and its following term
-                //BRIAN start here!
             }
 
-            
-
-
-            // TODO - this is just a placeholder - will on compile expressionless...
-            //this.CompileTerm(expressionElement);
         }
 
         /// <summary>
@@ -451,23 +456,19 @@ namespace Compiler
                 //compile comma - comma separated expression list
                 if (this.classTokens.Peek().Value2 == ",")
                 {
-                    this.CompileTerm(expressionListElement);
+                    this.CompileTerminal(expressionListElement);
                 }
             }
 
         }
 
-        /// <summary>
-        /// Determines whether [is expression term].
-        /// i.e. if the next token is a terminal in an expression
-        /// </summary>
-        /// <returns>
-        /// 	<c>true</c> if [is expression term]; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsExpressionTerm()
+        private bool IsExpressionSimpleTerm()
         {
             Pair<string, string> token = this.classTokens.Peek();
-            return (token.Value1 == StringConstants.integerConstant) || (token.Value1 == StringConstants.stringConstant) || (token.Value1 == StringConstants.keyword) || (token.Value1 == StringConstants.indentifier);
+            return ((token.Value1 == StringConstants.integerConstant) ||
+                (token.Value1 == StringConstants.stringConstant) ||
+                (token.Value1 == StringConstants.keyword) ||
+                (token.Value1 == StringConstants.indentifier));
         }
 
         /// <summary>
@@ -498,6 +499,44 @@ namespace Compiler
             }
             return result;
         }
+
+        private bool IsArrayAccessor()
+        {
+            bool result = false;
+            // need to read peek two deep into stack
+            // pop one token off, peek the next one , and push popped one back
+            Pair<string, string> poppedToken = this.classTokens.Pop();
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+
+            if (poppedToken.Value1 == StringConstants.indentifier && peekedToken.Value1=="[")
+            {
+                result = true;
+            }
+
+            this.classTokens.Push(poppedToken);
+
+            return result;
+        }
+
+        //private bool IsMethodCall()
+        //{
+        //    bool result = false;
+        //    // need to read peek three deep into stack
+        //    // pop two tokens off, peek the next one , and push popped two back
+        //    Pair<string, string> poppedToken1 = this.classTokens.Pop();
+        //    Pair<string, string> poppedToken2 = this.classTokens.Pop();
+        //    Pair<string, string> peekedToken = this.classTokens.Peek();
+
+        //    if (poppedToken.Value1 == StringConstants.indentifier && peekedToken.Value1 = "(")
+        //    {
+        //        result = true;
+        //    }
+
+        //    this.classTokens.Push(poppedToken2);
+        //    this.classTokens.Push(poppedToken1);
+
+        //    return result;
+        //}
 
         private bool IsExpression()
         {
@@ -540,17 +579,18 @@ namespace Compiler
             return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "return";
         }
 
-        /// <summary>
-        /// Determines whether the token is the beginning of a while statment
-        /// </summary>
-        /// <param name="token">The token.</param>
-        /// <returns>
-        /// 	<c>true</c> if [is while statement] [the specified token]; otherwise, <c>false</c>.
-        /// </returns>
         private bool IsWhileStatement()
         {
             Pair<string, string> peekedToken = this.classTokens.Peek();
             return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "while";
         }
+
+        //private bool IsOperator()
+        //{
+        //    Pair<string, string> peekedToken = this.classTokens.Peek();
+        //    Regex.Match(peekedToken.Value2, "[+|-|*|/|]", RegexOptions.Compiled);
+
+        //    return false;
+        //}
     }
 }

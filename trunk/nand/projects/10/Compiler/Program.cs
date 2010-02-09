@@ -18,7 +18,7 @@ namespace Compiler
         {
             try
             {
-                string inputPath = @"../../../TestFiles/ExpressionlessSquare/";
+                string inputPath = @"../../../TestFiles/Square";
                 //string inputPath = @"../../../TestFiles/UnitTestFiles";
 
 
