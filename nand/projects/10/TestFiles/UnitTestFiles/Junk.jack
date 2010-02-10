@@ -1,19 +1,16 @@
 
         
-        class SquareGame {
+    class SquareGame 
+    {
 
-    // The square
-    field Square square;
 
-    // The square's movement direction
-    field int direction; // 0=none,1=up,2=down,3=left,4=right
-
-    // Constructs a new Square Game.
-    constructor SquareGame new() {
-        let square = square;
-        let direction = direction;
+    constructor SquareGame new() 
+    {
+        
+        let a[i] = Keyboard.readInt("ENTER THE NEXT NUMBER: ");
 
         return square;
+    }
     }
         
         
