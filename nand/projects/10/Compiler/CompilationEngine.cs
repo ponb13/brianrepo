@@ -262,10 +262,14 @@ namespace Compiler
             // compile do keyword
             this.CompileTerminal(doElement);
 
+            // compile identifier
+            this.CompileTerminal(doElement);
+
             // compile the sub routine call
             this.CompileSubRoutineCall(doElement);
 
             //compile ;
+            this.CompileTerminal(doElement);
         }
 
         /// <summary>
@@ -417,6 +421,7 @@ namespace Compiler
 
             this.CompileTerm(expressionElement);
 
+
             if (this.IsOperator())
             {
                 this.CompileTerminal(expressionElement);
@@ -432,14 +437,9 @@ namespace Compiler
             // compile the first part no matter what
             this.CompileTerminal(termElement);
 
-            if (this.IsExpressionSimpleTerm())
+            if (this.classTokens.Peek().Value2== "[")
             {
-                this.CompileTerminal(termElement);
-            }
-            else if (this.IsArrayAccessor())
-            {
-                // compile the identifier
-                this.CompileTerminal(termElement);
+                // if array accessor
                 // compile the [
                 this.CompileTerminal(termElement);
                 // compile expression inside []
@@ -453,7 +453,6 @@ namespace Compiler
                 this.CompileExpression(termElement);
                 // compile closing )
                 this.CompileTerminal(termElement);
-
             }
             else if (this.IsSubRoutineCall())
             {
@@ -467,8 +466,7 @@ namespace Compiler
             // OR
             // classOrVarName.subname'('expressionList')' 
 
-            //compile subName Or ClassOrVarName
-            this.CompileTerminal(parent);
+            //subname or classOrVarName will have already been compiled
 
             if (this.classTokens.Peek().Value2 == "(")
             {
@@ -481,8 +479,6 @@ namespace Compiler
             }
             else if (this.classTokens.Peek().Value2 == ".")
             {
-                // compile the classOrVarName
-                this.CompileTerminal(parent);
                 // compile the dot
                 this.CompileTerminal(parent);
                 // compile subName
@@ -505,37 +501,21 @@ namespace Compiler
             XElement expressionListElement = new XElement("expressionList");
             parent.Add(expressionListElement);
 
-            this.CompileExpression(expressionListElement);
-            
-            while (this.classTokens.Peek().Value2 == ",")
+            // check for empty brackets
+            if (this.classTokens.Peek().Value2 != ")")
             {
-                // comile comma
-                this.CompileTerminal(expressionListElement);
 
-                //compile expression
                 this.CompileExpression(expressionListElement);
-            }
-        }
 
-        private bool IsExpressionSimpleTerm()
-        {
-            bool result = false;
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-
-            if(((peekedToken.Value1 == StringConstants.integerConstant) ||
-                (peekedToken.Value1 == StringConstants.stringConstant) ||
-                (peekedToken.Value1 == StringConstants.keyword) ||
-                (peekedToken.Value1 == StringConstants.identifier) ||
-                (peekedToken.Value2 == "~") ||
-                (peekedToken.Value2 == "-")))
-            {
-                if(!this.IsArrayAccessor() )
+                while (this.classTokens.Peek().Value2 == ",")
                 {
-                    result = true;
+                    // comile comma
+                    this.CompileTerminal(expressionListElement);
+
+                    //compile expression
+                    this.CompileExpression(expressionListElement);
                 }
             }
-
-            return result;
         }
 
         /// <summary>
@@ -572,24 +552,6 @@ namespace Compiler
                 Pair<string, string> peekedToken = this.classTokens.Peek();
                 result = peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "function" || peekedToken.Value2 == "constructor" || peekedToken.Value2 == "method");
             }
-            return result;
-        }
-
-        private bool IsArrayAccessor()
-        {
-            bool result = false;
-            // need to read two deep into stack
-            // pop one token off, peek the next one , and push popped one back
-            Pair<string, string> poppedToken = this.classTokens.Pop();
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-
-            if (poppedToken.Value1 == StringConstants.identifier && peekedToken.Value1=="[")
-            {
-                result = true;
-            }
-
-            this.classTokens.Push(poppedToken);
-
             return result;
         }
 
@@ -643,9 +605,9 @@ namespace Compiler
         private bool IsOperator()
         {
             Pair<string, string> peekedToken = this.classTokens.Peek();
-            Regex.Match(peekedToken.Value2, @"[+|\-|*|/|&|<|>|=|~]", RegexOptions.Compiled);
+            Match match = Regex.Match(peekedToken.Value2, @"[+|\-|*|/|&|<|>|=|~]", RegexOptions.Compiled);
 
-            return false;
+            return match.Success;
         }
 
         /// <summary>
