@@ -8,7 +8,7 @@ namespace Compiler
     public static class StringConstants
     {
         public const string comment = "Comment";
-        public const string indentifier = "Indentifier";
+        public const string identifier = "Identifier";
         public const string integerConstant = "IntegerConstant";
         public const string keyword = "Keyword";
         public const string stringConstant = "StringConstant";

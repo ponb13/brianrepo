@@ -21,7 +21,6 @@ namespace Compiler
                 string inputPath = @"../../../TestFiles/Square";
                 //string inputPath = @"../../../TestFiles/UnitTestFiles";
 
-
                 foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
                 {
                     string outputPath = Program.GetOutputFilePath(inputPath, filepath);
@@ -39,8 +38,14 @@ namespace Compiler
 
         private static string GetOutputFilePath(string inputPath, string filepath)
         {
-            string outputPath = inputPath + @"/Output";
-            return outputPath + @"/" + Path.GetFileNameWithoutExtension(filepath)+ ".xml";
+            string outputDir = inputPath + @"/Output";
+
+            if(!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            return outputDir + @"/" + Path.GetFileNameWithoutExtension(filepath) + ".xml";
         }
 
         private static void WriteOuput(XElement compiledClass, string outputPath)

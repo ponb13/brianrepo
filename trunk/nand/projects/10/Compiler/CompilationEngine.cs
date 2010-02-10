@@ -283,6 +283,8 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileLet(XElement parent)
         {
+            //'let' varName ('[' expression ']')? '=' expression ';'
+            
             XElement letElement = new XElement("letStatement");
             parent.Add(letElement);
 
@@ -290,14 +292,32 @@ namespace Compiler
             this.CompileTerminal(letElement);
             // compile identifier
             this.CompileTerminal(letElement);
+
+            // compile array accessor [ expression ] (if there is one)
+            if (this.CompileTokenIfExists(letElement, "["))
+            {
+                this.CompileExpression(letElement);
+                //compile closing ]
+                this.CompileTerminal(letElement);
+            }
+
             // compile =
             this.CompileTerminal(letElement);
+            
+            // compile opening bracket of expression if there is one
+            // in this instance unlike array accessor above we might have an expression even if there
+            // isn't any brackets
+            this.CompileTokenIfExists(parent, "(");
+
             // compile expression
             this.CompileExpression(letElement);
+
+            // compile closing bracket of expression if there is one
+            this.CompileTokenIfExists(parent, ")");
+
             //compile ;
             this.CompileTerminal(letElement);
         }
-
 
         /// <summary>
         /// Compiles an if statement.
@@ -373,7 +393,9 @@ namespace Compiler
             // compile return expression
             if (this.classTokens.Peek().Value2 != ";")
             {
+                this.CompileTokenIfExists(returnElement, "(");
                 this.CompileExpression(returnElement);
+                this.CompileTokenIfExists(returnElement, ")");
             }
 
             // compile the ;
@@ -402,40 +424,35 @@ namespace Compiler
             XElement expressionElement = new XElement("expression");
             parent.Add(expressionElement);
 
-            XElement termElement = new XElement("term");
-            parent.Add(termElement);
-
-            this.CompileTerminal(expressionElement);
-
-           
+            this.CompileTerm(expressionElement);
         }
 
         private void CompileTerm(XElement parent)
-        {
-            // BRIAN -Start here!!!
-            // you have just writte is array accessor, now need to check if subroutine call see page 209
-            // you have written some sub routine check ing code at bottom of class its commented out.
-            
+        {   
             XElement termElement = new XElement("term");
             parent.Add(termElement);
-            
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-
+           
             if (this.IsExpressionSimpleTerm())
             {
                 this.CompileTerminal(termElement);
             }
-            else if (peekedToken.Value2 == "(")
+            else if (this.classTokens.Peek().Value2 == "(")
             {
-                // if is expression compile it (compile the opening bracker first).
+                // if is expression compile it (compile the opening bracke first).
                 this.CompileTerminal(termElement);
                 this.CompileExpression(termElement);
             }
             else if (this.IsArrayAccessor())
             {
-
+                // compile the identifier
+                this.CompileTerminal(termElement);
+                // compile the [
+                this.CompileTerminal(termElement);
+                // compile expression inside []
+                this.CompileExpression(termElement);
+                // compile closing ]
+                this.CompileTerminal(termElement);
             }
-
         }
 
         /// <summary>
@@ -459,16 +476,16 @@ namespace Compiler
                     this.CompileTerminal(expressionListElement);
                 }
             }
-
         }
 
         private bool IsExpressionSimpleTerm()
         {
             Pair<string, string> token = this.classTokens.Peek();
+
             return ((token.Value1 == StringConstants.integerConstant) ||
                 (token.Value1 == StringConstants.stringConstant) ||
                 (token.Value1 == StringConstants.keyword) ||
-                (token.Value1 == StringConstants.indentifier));
+                (token.Value1 == StringConstants.identifier));
         }
 
         /// <summary>
@@ -483,12 +500,6 @@ namespace Compiler
             return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "field" || peekedToken.Value2 == "static");
         }
 
-        /// <summary>
-        /// Determines whether [is sub rourtine declaration].
-        /// </summary>
-        /// <returns>
-        /// 	<c>true</c> if [is sub rourtine declaration]; otherwise, <c>false</c>.
-        /// </returns>
         private bool IsSubRourtineDeclaration()
         {
             bool result = false;
@@ -503,12 +514,12 @@ namespace Compiler
         private bool IsArrayAccessor()
         {
             bool result = false;
-            // need to read peek two deep into stack
+            // need to read two deep into stack
             // pop one token off, peek the next one , and push popped one back
             Pair<string, string> poppedToken = this.classTokens.Pop();
             Pair<string, string> peekedToken = this.classTokens.Peek();
 
-            if (poppedToken.Value1 == StringConstants.indentifier && peekedToken.Value1=="[")
+            if (poppedToken.Value1 == StringConstants.identifier && peekedToken.Value1=="[")
             {
                 result = true;
             }
@@ -517,26 +528,6 @@ namespace Compiler
 
             return result;
         }
-
-        //private bool IsMethodCall()
-        //{
-        //    bool result = false;
-        //    // need to read peek three deep into stack
-        //    // pop two tokens off, peek the next one , and push popped two back
-        //    Pair<string, string> poppedToken1 = this.classTokens.Pop();
-        //    Pair<string, string> poppedToken2 = this.classTokens.Pop();
-        //    Pair<string, string> peekedToken = this.classTokens.Peek();
-
-        //    if (poppedToken.Value1 == StringConstants.indentifier && peekedToken.Value1 = "(")
-        //    {
-        //        result = true;
-        //    }
-
-        //    this.classTokens.Push(poppedToken2);
-        //    this.classTokens.Push(poppedToken1);
-
-        //    return result;
-        //}
 
         private bool IsExpression()
         {
@@ -583,6 +574,24 @@ namespace Compiler
         {
             Pair<string, string> peekedToken = this.classTokens.Peek();
             return peekedToken.Value1 == StringConstants.keyword && peekedToken.Value2 == "while";
+        }
+
+        /// <summary>
+        /// Checks if the character matches the next token in the stack
+        /// if it does it pops it and compiles it.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        /// <param name="characterToLookFor">The character to look for.</param>
+        /// <returns></returns>
+        private bool CompileTokenIfExists(XElement parent, string characterToLookFor)
+        {
+            bool result = false;
+            if (this.classTokens.Peek().Value2 == characterToLookFor)
+            {
+                this.CompileTerminal(parent);
+                result = true;
+            }
+            return result;
         }
 
         //private bool IsOperator()
