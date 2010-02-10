@@ -504,7 +504,6 @@ namespace Compiler
             // check for empty brackets
             if (this.classTokens.Peek().Value2 != ")")
             {
-
                 this.CompileExpression(expressionListElement);
 
                 while (this.classTokens.Peek().Value2 == ",")
