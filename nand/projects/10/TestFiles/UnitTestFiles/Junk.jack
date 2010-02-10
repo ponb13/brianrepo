@@ -7,7 +7,11 @@
     constructor SquareGame new() 
     {
         
-        let a[i] = Keyboard.readInt("ENTER THE NEXT NUMBER: ");
+       while (i < length) 
+       {
+	    let a[i] = Keyboard.readInt("ENTER THE NEXT NUMBER: ");
+	    let i = i + 1;
+	}
 
         return square;
     }
