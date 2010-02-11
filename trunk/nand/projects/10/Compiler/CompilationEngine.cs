@@ -435,9 +435,9 @@ namespace Compiler
             parent.Add(termElement);
 
             // compile the first part no matter what
+            Pair<string, string> peekedToken = this.classTokens.Peek();
             this.CompileTerminal(termElement);
-
-            if (this.classTokens.Peek().Value2== "[")
+            if (peekedToken.Value2 == "[")
             {
                 // if array accessor
                 // compile the [
@@ -448,7 +448,7 @@ namespace Compiler
                 this.CompileTerminal(termElement);
             }
             //check and compile '('expression')'
-            else if (this.CompileTokenIfExists(termElement, "("))
+            else if (peekedToken.Value2 == "(")
             {
                 this.CompileExpression(termElement);
                 // compile closing )
