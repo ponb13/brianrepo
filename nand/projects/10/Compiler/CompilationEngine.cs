@@ -421,7 +421,6 @@ namespace Compiler
 
             this.CompileTerm(expressionElement);
 
-
             if (this.IsOperator())
             {
                 this.CompileTerminal(expressionElement);
@@ -433,6 +432,8 @@ namespace Compiler
         {   
             XElement termElement = new XElement("term");
             parent.Add(termElement);
+
+            
 
             // compile the first part no matter what
             Pair<string, string> peekedToken = this.classTokens.Peek();
@@ -453,6 +454,10 @@ namespace Compiler
                 this.CompileExpression(termElement);
                 // compile closing )
                 this.CompileTerminal(termElement);
+            }
+            else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
+            {
+                this.CompileTerm(termElement);
             }
             else if (this.IsSubRoutineCall())
             {
