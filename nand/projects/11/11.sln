@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "States", "States\States.csproj", "{32CA2274-BA61-49E1-A158-F43C1968D3E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "Interfaces\Interfaces.csproj", "{FAA02F40-0CA5-4F48-A340-4A014DA9D56C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{70CB7CDA-62DE-41E8-9B4E-50B99503E35C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32CA2274-BA61-49E1-A158-F43C1968D3E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32CA2274-BA61-49E1-A158-F43C1968D3E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32CA2274-BA61-49E1-A158-F43C1968D3E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32CA2274-BA61-49E1-A158-F43C1968D3E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAA02F40-0CA5-4F48-A340-4A014DA9D56C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAA02F40-0CA5-4F48-A340-4A014DA9D56C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAA02F40-0CA5-4F48-A340-4A014DA9D56C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAA02F40-0CA5-4F48-A340-4A014DA9D56C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70CB7CDA-62DE-41E8-9B4E-50B99503E35C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70CB7CDA-62DE-41E8-9B4E-50B99503E35C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70CB7CDA-62DE-41E8-9B4E-50B99503E35C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70CB7CDA-62DE-41E8-9B4E-50B99503E35C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
