@@ -18,15 +18,21 @@ namespace Compiler
         {
             try
             {
-                string inputPath = @"../../../TestFiles/Square";
-                //string inputPath = @"../../../TestFiles/UnitTestFiles";
-
-                foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
+                if (args != null && args.Length > 0)
                 {
-                    string outputPath = Program.GetOutputFilePath(inputPath, filepath);
-                    Compiler compiler = new Compiler(filepath);
-                    Program.WriteOuput(compiler.Compile(), outputPath);
+                    string inputPath = args[1];
+                    foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
+                    {
+                        string outputPath = Program.GetOutputFilePath(inputPath, filepath);
+                        Compiler compiler = new Compiler(filepath);
+                        Program.WriteOuput(compiler.Compile(), outputPath);
+                    }
                 }
+                else
+                {
+                    Console.WriteLine("Please specify a directory or file path.");
+                }
+
             }
             catch (Exception ex)
             {
