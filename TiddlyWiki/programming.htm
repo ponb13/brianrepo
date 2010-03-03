@@ -511,10 +511,11 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="C#" modifier="bplus" created="201001141315" modified="201002081043" changecount="4">
+<div title="C#" modifier="bplus" created="201001141315" modified="201003031522" changecount="5">
 <pre>[[Custom Controls Validation]]
 [[Using a reader with Sql IDataRecord]]
-[[IHttpHandler]]</pre>
+[[IHttpHandler]]
+[[Regex]]</pre>
 </div>
 <div title="Css" modifier="bplus" created="200912070950" modified="200912070950" tags="forms css" changecount="2">
 <pre>[[Forms]]</pre>
@@ -930,6 +931,12 @@ command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentif
 <pre>[[Sql]]
 [[C#]]
 [[Css]]</pre>
+</div>
+<div title="Regex" modifier="bplus" created="201003031523" changecount="1">
+<pre>Remove illegal file characters from a string:
+
+Regex regex = new Regex(@&quot;[/:*?&quot;&quot;&lt;&gt;|\\]&quot;);
+            foo = regex.Replace(foo, &quot;&quot;);</pre>
 </div>
 <div title="SiteSubtitle" modifier="bplus" created="200912031656" modified="200912031657" changecount="2">
 <pre></pre>
