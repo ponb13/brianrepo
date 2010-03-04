@@ -511,11 +511,12 @@ Also see [[AdvancedOptions]]</pre>
 </div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="C#" modifier="bplus" created="201001141315" modified="201003031522" changecount="5">
+<div title="C#" modifier="bplus" created="201001141315" modified="201003041443" changecount="6">
 <pre>[[Custom Controls Validation]]
 [[Using a reader with Sql IDataRecord]]
 [[IHttpHandler]]
-[[Regex]]</pre>
+[[Regex]]
+[[Pinvoke]]</pre>
 </div>
 <div title="Css" modifier="bplus" created="200912070950" modified="200912070950" tags="forms css" changecount="2">
 <pre>[[Forms]]</pre>
@@ -931,6 +932,17 @@ command.AddParameter(&quot;@TestIdentificationKey&quot;, SqlDbType.UniqueIdentif
 <pre>[[Sql]]
 [[C#]]
 [[Css]]</pre>
+</div>
+<div title="Pinvoke" modifier="bplus" created="201003041444" changecount="1">
+<pre>using System.Runtime.InteropServices;
+
+[DllImport(&quot;kernel32.dll&quot;)]
+ static extern bool SetThreadPriority(IntPtr hThread, int nPriority);
+
+[DllImport(&quot;kernel32.dll&quot;)]
+static extern IntPtr GetCurrentThread();
+
+SetThreadPriority(GetCurrentThread(), -15);</pre>
 </div>
 <div title="Regex" modifier="bplus" created="201003031523" changecount="1">
 <pre>Remove illegal file characters from a string:
