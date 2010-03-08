@@ -10,6 +10,6 @@ namespace Compiler
     /// </summary>
     public enum Kind
     {
-        Static, Field, Arg, Var
+        Static, Field, Arg, Var, None
     }
 }
