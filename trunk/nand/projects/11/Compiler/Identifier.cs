@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Compiler
 {
-    public struct Identifier
+    public class Identifier
     {
         /// <summary>
         /// Gets or sets the name.
