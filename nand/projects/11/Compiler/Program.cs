@@ -20,7 +20,7 @@ namespace Compiler
             {
                 if (args != null && args.Length > 0)
                 {
-                    string inputPath = args[1];
+                    string inputPath = args[0];
                     foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
                     {
                         string outputPath = Program.GetOutputFilePath(inputPath, filepath);
