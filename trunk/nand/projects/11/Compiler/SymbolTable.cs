@@ -107,19 +107,10 @@ namespace Compiler
         /// <returns></returns>
         public Kind KindOf(string name)
         {
-            // TODO - warning should we be searching both scopes here?
             Kind result = Kind.None;
-            Identifier identifier = null;
 
-            // look in inner most scope first
-            identifier = this.subRoutineScope[name];
+            Identifier identifier = this.GetIdentifierByName(name);
 
-            // if not found look in class scope
-            if (identifier == null)
-            {
-                identifier = this.classScope[name];
-            }
-            
             // check if found
             if (identifier != null)
             {
@@ -127,6 +118,62 @@ namespace Compiler
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Returns the type of the named identifier in the current scope.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
+        public string TypeOf(string name)
+        {
+            string result = String.Empty;
+
+            Identifier identifier = this.GetIdentifierByName(name);
+
+            if (identifier != null)
+            {
+                result = identifier.Type;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the index assigned to named identifier.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public int IndexOf(string name)
+        {
+            int result = -1;
+
+            Identifier identifier = this.GetIdentifierByName(name);
+
+            if (identifier != null)
+            {
+                result = identifier.Index;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Looks up the identifier.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
+        private Identifier GetIdentifierByName(string name)
+        {
+            // TODO - warning should we be searching both scopes here?
+            Identifier identifier = this.subRoutineScope[name];
+
+            if (identifier == null)
+            {
+                identifier = this.classScope[name];
+            }
+
+            return identifier;
         }
 
         /// <summary>
