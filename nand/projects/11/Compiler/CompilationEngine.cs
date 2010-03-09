@@ -279,7 +279,7 @@ namespace Compiler
         private void CompileLet(XElement parent)
         {
             //'let' varName ('[' expression ']')? '=' expression ';'
-            
+
             XElement letElement = new XElement("letStatement");
             parent.Add(letElement);
 
@@ -298,7 +298,7 @@ namespace Compiler
 
             // compile =
             this.CompileTerminal(letElement);
-            
+
             // compile opening bracket of expression if there is one
             // in this instance unlike array accessor above we might have an expression even if there
             // isn't any brackets
@@ -421,7 +421,6 @@ namespace Compiler
 
             this.CompileTerm(expressionElement);
 
-
             if (this.IsOperator())
             {
                 this.CompileTerminal(expressionElement);
@@ -430,14 +429,14 @@ namespace Compiler
         }
 
         private void CompileTerm(XElement parent)
-        {   
+        {
             XElement termElement = new XElement("term");
             parent.Add(termElement);
 
             // compile the first part no matter what
+            Pair<string, string> peekedToken = this.classTokens.Peek();
             this.CompileTerminal(termElement);
-
-            if (this.classTokens.Peek().Value2== "[")
+            if (peekedToken.Value2 == "[")
             {
                 // if array accessor
                 // compile the [
@@ -448,11 +447,15 @@ namespace Compiler
                 this.CompileTerminal(termElement);
             }
             //check and compile '('expression')'
-            else if (this.CompileTokenIfExists(termElement, "("))
+            else if (peekedToken.Value2 == "(")
             {
                 this.CompileExpression(termElement);
                 // compile closing )
                 this.CompileTerminal(termElement);
+            }
+            else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
+            {
+                this.CompileTerm(termElement);
             }
             else if (this.IsSubRoutineCall())
             {
@@ -491,7 +494,7 @@ namespace Compiler
                 this.CompileTerminal(parent);
             }
         }
-       
+
         /// <summary>
         /// Compiles an expression list.
         /// </summary>
