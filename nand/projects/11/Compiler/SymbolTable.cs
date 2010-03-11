@@ -53,7 +53,7 @@ namespace Compiler
         /// <param name="name">The name.</param>
         /// <param name="type">The type.</param>
         /// <param name="kind">The kind.</param>
-        public void Define(string name, string type, Kind kind)
+        public Identifier Define(string name, string type, Kind kind)
         {
             Identifier identifier = new Identifier
             {
@@ -72,6 +72,8 @@ namespace Compiler
             {
                 this.subRoutineScope.Add(name, identifier);
             }
+
+            return identifier;
         }
 
         /// <summary>
@@ -163,12 +165,17 @@ namespace Compiler
         /// </summary>
         /// <param name="name">The name.</param>
         /// <returns></returns>
-        private Identifier GetIdentifierByName(string name)
+        public Identifier GetIdentifierByName(string name)
         {
+            // warning this shouldn't be part of the API, probably should be private
             // TODO - warning should we be searching both scopes here?
-            Identifier identifier = this.subRoutineScope[name];
-
-            if (identifier == null)
+            Identifier identifier = null;
+            
+            if (this.subRoutineScope.ContainsKey(name))
+            {
+                identifier = this.subRoutineScope[name];
+            }
+            else if(this.classScope.ContainsKey(name))
             {
                 identifier = this.classScope[name];
             }
