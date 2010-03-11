@@ -98,15 +98,14 @@ namespace Compiler
         /// <param name="parentElement">The parent element.</param>
         private void CompileSubRoutine(XElement parentElement)
         {
-            this.symbolTable.StartNewSubroutine();
-
             XElement subRoutineElement = new XElement("subroutineDec");
             parentElement.Add(subRoutineElement);
 
             // while not the opening bracked of the method/constructor/function params
             while (this.classTokens.Peek().Value2 != "(")
             {
-                this.CompileTerminal(subRoutineElement);
+                Pair<string, string> token = this.classTokens.Pop();
+                subRoutineElement.Add(new XElement(token.Value1, token.Value2));
             }
 
             // add the opening braket of param list
@@ -207,11 +206,79 @@ namespace Compiler
             parentElement.Add(parameterList);
 
             // add the params
+
             while (this.classTokens.Peek().Value2 != ")")
             {
-                Pair<string, string> token = this.classTokens.Pop();
-                parameterList.Add(new XElement(token.Value1, token.Value2));
+                Pair<string, string> token = null;
+
+                Identifier identifier = new Identifier();
+                identifier.Kind = Kind.Arg;
+                for (int i = 0; i <= 2; i++)
+                {
+                    if (this.classTokens.Peek().Value2 != ")")
+                    {
+                        token = this.classTokens.Pop();
+                        if (i == 0)
+                        {
+                            identifier.Type = token.Value2;
+                            parameterList.Add(new XElement(token.Value1, token.Value2));
+                        }
+                        else if (i == 1)
+                        {
+                            identifier.Name = token.Value2;
+                            parameterList.Add(new XElement(token.Value1, token.Value2,
+                              new XAttribute("type", identifier.Type),
+                              new XAttribute("usedOrDefined", "defined")));
+                            // add to symbol table
+                            this.symbolTable.Define(identifier.Name, identifier.Type, identifier.Kind);
+                        }
+                        else if (i == 2)
+                        {
+                            //add the comma
+                            parameterList.Add(new XElement(token.Value1, token.Value2));
+                        }
+                    }
+                }
             }
+        }
+
+        /// <summary>
+        /// Adds the variable declaration to symbol table.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="token">The token.</param>
+        private void AddVariableDeclarationToSymbolTable(XElement parent, XElement element, Pair<string, string> token)
+        {
+            //      <varDec>
+            //  <Keyword>var</Keyword>
+            //  <Keyword>char</Keyword>
+            //  <Identifier>key</Identifier>
+            //  <Symbol>;</Symbol>
+            //</varDec>
+
+            //        <parameterList>
+            //  <Keyword>int</Keyword>
+            //  <Identifier>Ax</Identifier>
+            //  <Symbol>,</Symbol>
+            //  <Keyword>int</Keyword>
+            //  <Identifier>Ay</Identifier>
+            //  <Symbol>,</Symbol>
+            //  <Keyword>int</Keyword>
+            //  <Identifier>Asize</Identifier>
+            //</parameterList>
+
+            //           <classVarDec>
+            //  <Keyword>field</Keyword>
+            //  <Keyword>int</Keyword>
+            //  <Identifier>x</Identifier>
+            //  <Symbol>,</Symbol>
+            //  <Identifier>y</Identifier>
+            //  <Symbol>;</Symbol>
+            //</classVarDec
+
+
+
         }
 
         /// <summary>
@@ -409,53 +476,8 @@ namespace Compiler
             if (this.classTokens.Count > 0)
             {
                 Pair<string, string> terminal = this.classTokens.Pop();
-                XElement element = null;
-
-                // add identifier attirbute info to element (don't add for class or subroutine names)
-                if (parent.Name == "varDec" || parent.Name == "classVarDec" || parent.Name == "parameterList")
-                {
-                    element = this.BuildIdentifierElement(parent, terminal);
-                }
-                else
-                {
-                    element = new XElement(terminal.Value1, terminal.Value2);
-                }
-
-                parent.Add(element);
+                parent.Add(new XElement(terminal.Value1, terminal.Value2));
             }
-        }
-
-        /// <summary>
-        /// Gets the identifier element.
-        /// </summary>
-        /// <param name="terminal">The terminal.</param>
-        /// <returns></returns>
-        private XElement BuildIdentifierElement(XElement parent, Pair<string, string> terminal)
-        {
-            Identifier identifier = this.AddIdentifierToSymbolTableIfNecessary(parent, terminal);
-
-            return new XElement(terminal.Value1, terminal.Value2,
-                new XAttribute("name", identifier.Name),
-                new XAttribute("type", identifier.Type),
-                new XAttribute("kind", identifier.Kind),
-                new XAttribute("index", identifier.Index));
-
-        }
-
-        private Identifier AddIdentifierToSymbolTableIfNecessary(XElement parent, Pair<string, string> terminal)
-        {
-            Identifier identifier = this.symbolTable.GetIdentifierByName(terminal.Value1);
-
-            if (identifier == null)
-            {
-                    XElement firstChild = parent.Descendants().ElementAt(0);
-                    string name = terminal.Value1;
-                    string type = firstChild.Value;
-                    Kind kind = Kind.None;
-                    identifier = this.symbolTable.Define(name, type, kind);
-            }
-            
-            return identifier;
         }
 
         /// <summary>
