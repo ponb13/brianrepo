@@ -20,6 +20,8 @@ namespace Compiler
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
+        private SymbolTable symbolTable = new SymbolTable();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationEngine"/> class.
         /// </summary>
@@ -96,14 +98,15 @@ namespace Compiler
         /// <param name="parentElement">The parent element.</param>
         private void CompileSubRoutine(XElement parentElement)
         {
+            this.symbolTable.StartNewSubroutine();
+
             XElement subRoutineElement = new XElement("subroutineDec");
             parentElement.Add(subRoutineElement);
 
             // while not the opening bracked of the method/constructor/function params
             while (this.classTokens.Peek().Value2 != "(")
             {
-                Pair<string, string> token = this.classTokens.Pop();
-                subRoutineElement.Add(new XElement(token.Value1, token.Value2));
+                this.CompileTerminal(subRoutineElement);
             }
 
             // add the opening braket of param list
@@ -406,8 +409,53 @@ namespace Compiler
             if (this.classTokens.Count > 0)
             {
                 Pair<string, string> terminal = this.classTokens.Pop();
-                parent.Add(new XElement(terminal.Value1, terminal.Value2));
+                XElement element = null;
+
+                // add identifier attirbute info to element (don't add for class or subroutine names)
+                if (parent.Name == "varDec" || parent.Name == "classVarDec" || parent.Name == "parameterList")
+                {
+                    element = this.BuildIdentifierElement(parent, terminal);
+                }
+                else
+                {
+                    element = new XElement(terminal.Value1, terminal.Value2);
+                }
+
+                parent.Add(element);
             }
+        }
+
+        /// <summary>
+        /// Gets the identifier element.
+        /// </summary>
+        /// <param name="terminal">The terminal.</param>
+        /// <returns></returns>
+        private XElement BuildIdentifierElement(XElement parent, Pair<string, string> terminal)
+        {
+            Identifier identifier = this.AddIdentifierToSymbolTableIfNecessary(parent, terminal);
+
+            return new XElement(terminal.Value1, terminal.Value2,
+                new XAttribute("name", identifier.Name),
+                new XAttribute("type", identifier.Type),
+                new XAttribute("kind", identifier.Kind),
+                new XAttribute("index", identifier.Index));
+
+        }
+
+        private Identifier AddIdentifierToSymbolTableIfNecessary(XElement parent, Pair<string, string> terminal)
+        {
+            Identifier identifier = this.symbolTable.GetIdentifierByName(terminal.Value1);
+
+            if (identifier == null)
+            {
+                    XElement firstChild = parent.Descendants().ElementAt(0);
+                    string name = terminal.Value1;
+                    string type = firstChild.Value;
+                    Kind kind = Kind.None;
+                    identifier = this.symbolTable.Define(name, type, kind);
+            }
+            
+            return identifier;
         }
 
         /// <summary>
