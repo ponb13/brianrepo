@@ -243,45 +243,6 @@ namespace Compiler
         }
 
         /// <summary>
-        /// Adds the variable declaration to symbol table.
-        /// </summary>
-        /// <param name="parent">The parent.</param>
-        /// <param name="element">The element.</param>
-        /// <param name="token">The token.</param>
-        private void AddVariableDeclarationToSymbolTable(XElement parent, XElement element, Pair<string, string> token)
-        {
-            //      <varDec>
-            //  <Keyword>var</Keyword>
-            //  <Keyword>char</Keyword>
-            //  <Identifier>key</Identifier>
-            //  <Symbol>;</Symbol>
-            //</varDec>
-
-            //        <parameterList>
-            //  <Keyword>int</Keyword>
-            //  <Identifier>Ax</Identifier>
-            //  <Symbol>,</Symbol>
-            //  <Keyword>int</Keyword>
-            //  <Identifier>Ay</Identifier>
-            //  <Symbol>,</Symbol>
-            //  <Keyword>int</Keyword>
-            //  <Identifier>Asize</Identifier>
-            //</parameterList>
-
-            //           <classVarDec>
-            //  <Keyword>field</Keyword>
-            //  <Keyword>int</Keyword>
-            //  <Identifier>x</Identifier>
-            //  <Symbol>,</Symbol>
-            //  <Identifier>y</Identifier>
-            //  <Symbol>;</Symbol>
-            //</classVarDec
-
-
-
-        }
-
-        /// <summary>
         /// Compiles statments.
         /// </summary>
         private void CompileStatements(XElement parentElement)
