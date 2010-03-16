@@ -53,24 +53,17 @@ namespace Compiler
         /// <param name="name">The name.</param>
         /// <param name="type">The type.</param>
         /// <param name="kind">The kind.</param>
-        public Identifier Define(string name, string type, Kind kind)
+        public Identifier Define(Identifier identifier)
         {
-            Identifier identifier = new Identifier
-            {
-                Name = name,
-                Type = type,
-                Kind = kind
-            };
-
             this.SetIdentifierIndex(identifier);
 
-            if (kind == Kind.Static || kind == Kind.Field)
+            if (identifier.Kind == Kind.Static || identifier.Kind == Kind.Field)
             {
-                this.classScope.Add(name, identifier);
+                this.classScope.Add(identifier.Name, identifier);
             }
-            else if (kind == Kind.Var || kind == Kind.Arg)
+            else if (identifier.Kind == Kind.Var || identifier.Kind == Kind.Arg)
             {
-                this.subRoutineScope.Add(name, identifier);
+                this.subRoutineScope.Add(identifier.Name, identifier);
             }
 
             return identifier;

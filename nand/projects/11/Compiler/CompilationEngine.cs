@@ -167,9 +167,21 @@ namespace Compiler
                 // compile the var keyword
                 this.CompileTerminal(varDec);
                 // compile the type keyword
-                this.CompileTerminal(varDec);
-                // compile the identifier
-                this.CompileTerminal(varDec);
+                Pair<string,string> typeToken = this.CompileTerminal(varDec);
+                // get the identifier
+                Pair<string, string> identifierToken = this.classTokens.Pop();
+
+                Identifier identifier = new Identifier();
+                identifier.Kind = Kind.Var;
+                identifier.Name = identifierToken.Value2;
+                identifier.Type = typeToken.Value2;
+
+                this.symbolTable.Define(identifier);
+
+                varDec.Add(new XElement(identifierToken.Value1, identifierToken.Value2,
+                            new XAttribute("type", identifier.Type),
+                            new XAttribute("usedOrDefined", "defined"),
+                            new XAttribute("kind", identifier.Kind)));
 
                 // check for comma
                 if (this.classTokens.Peek().Value2 == ",")
@@ -179,9 +191,24 @@ namespace Compiler
 
                     while (this.classTokens.Peek().Value2 != ";")
                     {
-                        this.CompileTerminal(varDec);
+                        Pair<string, string> commaSeparatedIdentifierToken = this.classTokens.Pop();
+                        
+                        // set the next identifier in comma separated list to same type kind etc as fisrt
+                        Identifier commaSeparatedIdentier = new Identifier();
+                        commaSeparatedIdentier.Kind = Kind.Var;
+                        commaSeparatedIdentier.Type = identifier.Type;
+                        commaSeparatedIdentier.Name = commaSeparatedIdentifierToken.Value2;
+
+                        this.symbolTable.Define(commaSeparatedIdentier);
+
+                        varDec.Add(new XElement(commaSeparatedIdentifierToken.Value1, commaSeparatedIdentifierToken.Value2,
+                            new XAttribute("type", commaSeparatedIdentier.Type),
+                            new XAttribute("usedOrDefined", "defined"),
+                            new XAttribute("kind", commaSeparatedIdentier.Kind)));
+                        
                         if (this.classTokens.Peek().Value2 == ",")
                         {
+                            // compile comma
                             this.CompileTerminal(varDec);
                         }
                     }
@@ -230,7 +257,7 @@ namespace Compiler
                               new XAttribute("type", identifier.Type),
                               new XAttribute("usedOrDefined", "defined")));
                             // add to symbol table
-                            this.symbolTable.Define(identifier.Name, identifier.Type, identifier.Kind);
+                            this.symbolTable.Define(identifier);
                         }
                         else if (i == 2)
                         {
@@ -432,13 +459,15 @@ namespace Compiler
         /// Compiles a terminal.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private void CompileTerminal(XElement parent)
+        private Pair<string,string> CompileTerminal(XElement parent)
         {
+            Pair<string, string> terminal = null;
             if (this.classTokens.Count > 0)
             {
-                Pair<string, string> terminal = this.classTokens.Pop();
+                terminal = this.classTokens.Pop();
                 parent.Add(new XElement(terminal.Value1, terminal.Value2));
             }
+            return terminal;
         }
 
         /// <summary>
