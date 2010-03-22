@@ -67,32 +67,6 @@ namespace Compiler
         }
 
         /// <summary>
-        /// Compile a class variable declaration
-        /// </summary>
-        /// <param name="parentElement">The parent element.</param>
-        private void CompileClassVarDeclaration(XElement parentElement)
-        {
-            if (IsClassVariableDeclaration())
-            {
-                XElement classVariableElement = new XElement("classVarDec");
-                parentElement.Add(classVariableElement);
-
-                while (this.classTokens.Peek().Value2 != ";")
-                {
-                    Pair<string, string> token = this.classTokens.Pop();
-                    classVariableElement.Add(new XElement(token.Value1, token.Value2));
-                }
-
-                // compile ;
-                this.CompileTerminal(classVariableElement);
-
-                // recursively handle all class variables
-                this.CompileClassVarDeclaration(parentElement);
-
-            }
-        }
-
-        /// <summary>
         /// Compiles the sub routine.
         /// </summary>
         /// <param name="parentElement">The parent element.</param>
@@ -154,6 +128,24 @@ namespace Compiler
         }
 
         /// <summary>
+        /// Compile a class variable declaration
+        /// </summary>
+        /// <param name="parentElement">The parent element.</param>
+        private void CompileClassVarDeclaration(XElement parentElement)
+        {
+            if (IsClassVariableDeclaration())
+            {
+                XElement classVariableElement = new XElement("classVarDec");
+                parentElement.Add(classVariableElement);
+
+                this.CompileIdentifierDeclarationAndAddToSymbolTable(classVariableElement);
+
+                // recursively handle all class variables
+                this.CompileClassVarDeclaration(parentElement);
+            }
+        }
+
+        /// <summary>
         /// Compiles the variable declaration.
         /// </summary>
         /// <param name="parent">The parent.</param>
@@ -164,62 +156,71 @@ namespace Compiler
                 XElement varDec = new XElement("varDec");
                 parent.Add(varDec);
 
-                // compile the var keyword
-                this.CompileTerminal(varDec);
-                // compile the type keyword
-                Pair<string,string> typeToken = this.CompileTerminal(varDec);
-                // get the identifier
-                Pair<string, string> identifierToken = this.classTokens.Pop();
-
-                Identifier identifier = new Identifier();
-                identifier.Kind = Kind.Var;
-                identifier.Name = identifierToken.Value2;
-                identifier.Type = typeToken.Value2;
-
-                this.symbolTable.Define(identifier);
-
-                varDec.Add(new XElement(identifierToken.Value1, identifierToken.Value2,
-                            new XAttribute("type", identifier.Type),
-                            new XAttribute("usedOrDefined", "defined"),
-                            new XAttribute("kind", identifier.Kind)));
-
-                // check for comma
-                if (this.classTokens.Peek().Value2 == ",")
-                {
-                    // compile the comma
-                    this.CompileTerminal(varDec);
-
-                    while (this.classTokens.Peek().Value2 != ";")
-                    {
-                        Pair<string, string> commaSeparatedIdentifierToken = this.classTokens.Pop();
-                        
-                        // set the next identifier in comma separated list to same type kind etc as fisrt
-                        Identifier commaSeparatedIdentier = new Identifier();
-                        commaSeparatedIdentier.Kind = Kind.Var;
-                        commaSeparatedIdentier.Type = identifier.Type;
-                        commaSeparatedIdentier.Name = commaSeparatedIdentifierToken.Value2;
-
-                        this.symbolTable.Define(commaSeparatedIdentier);
-
-                        varDec.Add(new XElement(commaSeparatedIdentifierToken.Value1, commaSeparatedIdentifierToken.Value2,
-                            new XAttribute("type", commaSeparatedIdentier.Type),
-                            new XAttribute("usedOrDefined", "defined"),
-                            new XAttribute("kind", commaSeparatedIdentier.Kind)));
-                        
-                        if (this.classTokens.Peek().Value2 == ",")
-                        {
-                            // compile comma
-                            this.CompileTerminal(varDec);
-                        }
-                    }
-                }
-
-                // compile the ending ;
-                this.CompileTerminal(varDec);
+                this.CompileIdentifierDeclarationAndAddToSymbolTable(varDec);
 
                 // recursively call variable declaration
                 this.CompileVariableDeclaration(parent);
             }
+        }
+
+        /// <summary>
+        /// Builds an identifer obj and also identifier.
+        /// Only use this method for compiling class variables and subroutine variables
+        /// Not parameter lists!
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        /// <returns></returns>
+        private void CompileIdentifierDeclarationAndAddToSymbolTable(XElement parent)
+        {
+            Pair<string, string> kindToken = this.CompileTerminal(parent);
+            Pair<string, string> typeToken = this.CompileTerminal(parent);
+            Pair<string, string> nameToken = this.classTokens.Pop();
+
+            Identifier identifier = new Identifier();
+            identifier.Kind = (Kind)Enum.Parse(typeof(Kind), kindToken.Value2, true);
+            identifier.Name = nameToken.Value2;
+            identifier.Type = typeToken.Value2;
+
+            this.symbolTable.Define(identifier);
+
+            parent.Add(new XElement(nameToken.Value1, nameToken.Value2,
+                           new XAttribute("type", identifier.Type),
+                           new XAttribute("usedOrDefined", "defined"),
+                           new XAttribute("kind", identifier.Kind)));
+
+            // check for comma, i.e comma separated list of variables
+            if (this.classTokens.Peek().Value2 == ",")
+            {
+                // compile the comma
+                this.CompileTerminal(parent);
+
+                while (this.classTokens.Peek().Value2 != ";")
+                {
+                    Pair<string, string> commaSeparatedIdentifierToken = this.classTokens.Pop();
+
+                    // set the next identifier in comma separated list to same type kind etc as fisrt
+                    Identifier commaSeparatedIdentier = new Identifier();
+                    commaSeparatedIdentier.Kind = identifier.Kind;
+                    commaSeparatedIdentier.Type = identifier.Type;
+                    commaSeparatedIdentier.Name = commaSeparatedIdentifierToken.Value2;
+
+                    this.symbolTable.Define(commaSeparatedIdentier);
+
+                    parent.Add(new XElement(commaSeparatedIdentifierToken.Value1, commaSeparatedIdentifierToken.Value2,
+                        new XAttribute("type", commaSeparatedIdentier.Type),
+                        new XAttribute("usedOrDefined", "defined"),
+                        new XAttribute("kind", commaSeparatedIdentier.Kind)));
+
+                    if (this.classTokens.Peek().Value2 == ",")
+                    {
+                        // compile comma
+                        this.CompileTerminal(parent);
+                    }
+                }
+            }
+
+            // compile the ending ;
+            this.CompileTerminal(parent);
         }
 
         /// <summary>
@@ -255,7 +256,8 @@ namespace Compiler
                             identifier.Name = token.Value2;
                             parameterList.Add(new XElement(token.Value1, token.Value2,
                               new XAttribute("type", identifier.Type),
-                              new XAttribute("usedOrDefined", "defined")));
+                              new XAttribute("usedOrDefined", "defined"),
+                              new XAttribute("kind",identifier.Kind)));
                             // add to symbol table
                             this.symbolTable.Define(identifier);
                         }
