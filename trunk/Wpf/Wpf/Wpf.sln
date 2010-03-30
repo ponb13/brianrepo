@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{DBEC688C-183C-453F-9C11-4FA77797BA6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockProvider", "StockProvider\StockProvider.csproj", "{CF6C2D53-A588-4E11-B0B1-FE5B41897501}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DBEC688C-183C-453F-9C11-4FA77797BA6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBEC688C-183C-453F-9C11-4FA77797BA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBEC688C-183C-453F-9C11-4FA77797BA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBEC688C-183C-453F-9C11-4FA77797BA6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF6C2D53-A588-4E11-B0B1-FE5B41897501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF6C2D53-A588-4E11-B0B1-FE5B41897501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF6C2D53-A588-4E11-B0B1-FE5B41897501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF6C2D53-A588-4E11-B0B1-FE5B41897501}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
