@@ -22,27 +22,13 @@ namespace Client
     public partial class Window1 : Window
     {
         RandomQuoteSource quoteSource = new RandomQuoteSource();
-        ObservableCollection<Quote> observableCollection = new ObservableCollection<Quote>();
-        
         
         public Window1()
         {
             InitializeComponent();
-
-            quoteSource.QuoteArrived += new Action<Quote>(quoteSource_QuoteArrived);
+            this.DataContext = this.quotes;
         }
 
-        private void quoteSource_QuoteArrived(Quote quote)
-        {
-
-        }
-
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            string symbol = this._symbolText.Text;
-            quoteSource.Subscribe(symbol);
-
-            this._lastSymbolText.Text = symbol;
-        }
+        
     }
 }
