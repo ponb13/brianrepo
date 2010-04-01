@@ -27,13 +27,13 @@ namespace Client
         public Window1()
         {
             InitializeComponent();
-
-            this.DataContext = this.quotes;
-            vm = new WatchListViewModel(quoteSource);
+            this.vm = new WatchListViewModel(this.quoteSource);
+            this.DataContext = this.vm;
         }
 
-
-
-        
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            vm.Subscribe();
+        }
     }
 }
