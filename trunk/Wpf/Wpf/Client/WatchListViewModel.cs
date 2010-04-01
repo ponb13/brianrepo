@@ -11,9 +11,14 @@ namespace Client
 {
     public class WatchListViewModel : DependencyObject
     {
-        ObservableCollection<Quote> quotes = new ObservableCollection<Quote>();
         private IQuoteSource source;
         private Dispatcher currentDispatcher;
+
+        public ObservableCollection<Quote> Quotes
+        {
+            get;
+            set;
+        }
 
         public string Symbol
         {
@@ -29,26 +34,27 @@ namespace Client
 
         // Using a DependencyProperty as the backing store for LastSymbol.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty LastSymbolProperty =
-            DependencyProperty.Register("LastSymbol", typeof(string), typeof(WatchListViewModel), new UIPropertyMetadata(0));
+            DependencyProperty.Register("LastSymbol", typeof(string), typeof(WatchListViewModel),new UIPropertyMetadata(""));
 
 
         public WatchListViewModel(IQuoteSource source)
         {
+            this.Quotes = new ObservableCollection<Quote>();
             this.currentDispatcher = Dispatcher.CurrentDispatcher;
             this.source = source;
             this.source.QuoteArrived += new Action<Quote>(source_QuoteArrived);
         }
 
+        public void Subscribe()
+        {
+            this.LastSymbol = this.Symbol;            
+            source.Subscribe(this.Symbol);
+        }
+
         private void source_QuoteArrived(Quote quote)
         {
-            Action dispatchAction = () => this.quotes.Add(quote);
+            Action dispatchAction = () => this.Quotes.Add(quote);
             this.currentDispatcher.BeginInvoke(dispatchAction);
-        }
-        
-        private void Subscribe()
-        {
-            source.Subscribe(this.Symbol);
-            this.LastSymbol = this.Symbol;
         }
     }
 }

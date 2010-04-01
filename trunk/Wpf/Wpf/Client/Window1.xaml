@@ -4,9 +4,9 @@
     Title="Window1" Height="687.349" Width="647.337">
     <Grid Height="348" Width="587">
         <Button Click="button1_Click" HorizontalAlignment="Right" Margin="0,22,39,0" Name="button1" Width="75" Height="23" VerticalAlignment="Top">Subscribe</Button>
-        <TextBox Height="23" Margin="21,22,137,0" x:Name="_symbolText" VerticalAlignment="Top" />
-        <TextBlock x:Name="_lastSymbolText" FontSize="16" Margin="21,58,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="21.28" Width="84.943">Last  Symbol</TextBlock>
-       <ListView Height="100" x:Name="_watchlist" Background="#2FFFFFFF" ItemsSource="{Binding}">
+        <TextBox Text="{Binding Symbol}"  Height="23" Margin="21,22,137,0" VerticalAlignment="Top" />
+        <TextBlock Text="{Binding LastSymbol}" FontSize="16" Margin="21,58,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Height="21.28" Width="84.943">Last  Symbol</TextBlock>
+       <ListView Height="100" x:Name="_watchlist" Background="#2FFFFFFF" ItemsSource="{Binding Quotes}">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Symbol" DisplayMemberBinding="{Binding Path=Symbol}" Width="80"></GridViewColumn>

@@ -8,7 +8,7 @@ using System.Windows.Threading;
 
 namespace StockProvider
 {
-    public class RandomQuoteSource
+    public class RandomQuoteSource : IQuoteSource
     {
         DispatcherTimer timer;
         private const int TIMER_INTERVAL = 100;
