@@ -22,12 +22,17 @@ namespace Client
     public partial class Window1 : Window
     {
         RandomQuoteSource quoteSource = new RandomQuoteSource();
+        private WatchListViewModel vm;
         
         public Window1()
         {
             InitializeComponent();
+
             this.DataContext = this.quotes;
+            vm = new WatchListViewModel(quoteSource);
         }
+
+
 
         
     }
