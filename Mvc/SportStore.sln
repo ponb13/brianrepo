@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainModel", "DomainModel\DomainModel.csproj", "{1870C808-B492-4C26-9FF0-2413C6809622}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUI", "WebUI\WebUI.csproj", "{48A1AAB5-9C33-4573-83CC-FB022C8160B0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{402EA358-89D6-4B6D-B6F4-98E6A34377D1}"
+	ProjectSection(SolutionItems) = preProject
+		lib\Castle.Core.dll = lib\Castle.Core.dll
+		lib\Castle.DynamicProxy2.dll = lib\Castle.DynamicProxy2.dll
+		lib\Castle.Facilities.Logging.dll = lib\Castle.Facilities.Logging.dll
+		lib\Castle.MicroKernel.dll = lib\Castle.MicroKernel.dll
+		lib\Castle.Services.Logging.log4netIntegration.dll = lib\Castle.Services.Logging.log4netIntegration.dll
+		lib\Castle.Services.Logging.NLogIntegration.dll = lib\Castle.Services.Logging.NLogIntegration.dll
+		lib\Castle.Windsor.dll = lib\Castle.Windsor.dll
+		lib\log4net.dll = lib\log4net.dll
+		lib\Moq.dll = lib\Moq.dll
+		lib\NLog.dll = lib\NLog.dll
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{987C8B90-F718-44C6-8C4B-2F7155FEB3BF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1870C808-B492-4C26-9FF0-2413C6809622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1870C808-B492-4C26-9FF0-2413C6809622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1870C808-B492-4C26-9FF0-2413C6809622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1870C808-B492-4C26-9FF0-2413C6809622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48A1AAB5-9C33-4573-83CC-FB022C8160B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48A1AAB5-9C33-4573-83CC-FB022C8160B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48A1AAB5-9C33-4573-83CC-FB022C8160B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48A1AAB5-9C33-4573-83CC-FB022C8160B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987C8B90-F718-44C6-8C4B-2F7155FEB3BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987C8B90-F718-44C6-8C4B-2F7155FEB3BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987C8B90-F718-44C6-8C4B-2F7155FEB3BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987C8B90-F718-44C6-8C4B-2F7155FEB3BF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
