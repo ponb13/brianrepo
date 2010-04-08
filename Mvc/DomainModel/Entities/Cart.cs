@@ -8,10 +8,16 @@ namespace DomainModel.Entities
     public class Cart
     {
         private List<CartLine> _lines = new List<CartLine>();
+        private ShippingDetails _shippingDetails = new ShippingDetails();
 
-        public List<CartLine> Lines
+        public ShippingDetails ShippingDetails
         {
-            get { return _lines; }
+            get { return _shippingDetails; }
+        }
+
+        public IList<CartLine> Lines
+        {
+            get { return _lines.AsReadOnly(); }
         }
 
         public void AddItem(Product product, int quantity)
@@ -42,6 +48,7 @@ namespace DomainModel.Entities
         {
             _lines.Clear();
         }
+
     }
 
     public class CartLine

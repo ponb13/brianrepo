@@ -5,16 +5,19 @@ using System.Web;
 using System.Web.Mvc;
 using DomainModel.Entities;
 using DomainModel.Abstract;
+using DomainModel.Services;
 
 namespace WebUI.Controllers
 {
     public class CartController : Controller
     {
         private IProductsRepository _productsRepository;
+        private IOrderSubmitter _orderSubmitter;
 
-        public CartController(IProductsRepository repo)
+        public CartController(IProductsRepository repo, IOrderSubmitter orderSubmitter)
         {
             _productsRepository = repo;
+            _orderSubmitter = orderSubmitter;
         }
 
         public ViewResult Index(Cart cart, string returnUrl)
@@ -39,6 +42,17 @@ namespace WebUI.Controllers
             cart.RemoveLine(product);
 
             return RedirectToAction("Index", new { returnUrl });
+        }
+
+        public ViewResult Summary(Cart cart)
+        {
+            return View(cart);
+        }
+
+        [AcceptVerbs(HttpVerbs.Get)]
+        public ViewResult CheckOut(Cart cart)
+        {
+            return View(cart);
         }
 
     }

@@ -9,6 +9,13 @@
 </head>
 <body>
     <div>
+    <div class="cartSummary" style="border: solid 1px black" >
+    <%if (!(ViewContext.Controller is WebUI.Controllers.CartController))
+      {
+          Html.RenderAction("Summary", "Cart");
+      }%>
+    
+    </div>
         <div class="categories" style="border: solid 1px black" >
             <%Html.RenderAction("Menu", "Nav"); %>
         </div>
