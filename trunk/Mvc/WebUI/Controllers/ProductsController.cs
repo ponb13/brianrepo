@@ -25,13 +25,18 @@ namespace WebUI.Controllers
         //    set;
         //}
 
-        public ViewResult List(int page)
+        public ViewResult List(string category, int page)
         {
+            var productsInCategory = (category == null)
+                                         ? productsRepository.Products
+                                         : productsRepository.Products.Where(p => p.Category == category);
+
             int numProducts = productsRepository.Products.Count();
             ViewData["TotalPages"] = (int)Math.Ceiling((double)numProducts / this.PageSize);
             ViewData["CurrentPage"] = page;
+            ViewData["Category"] = category;
 
-            return View(this.productsRepository.Products.Skip(((page-1)* this.PageSize))
+            return View(productsInCategory.Skip(((page - 1) * this.PageSize))
                                                         .Take(PageSize)
                                                         .ToList());
         }
