@@ -53,6 +53,7 @@
     <Compile Include="Concrete\FakeOrderRepository.cs" />
     <Compile Include="Concrete\FakeRepository.cs" />
     <Compile Include="Concrete\SqlProductsRepository.cs" />
+    <Compile Include="Entities\Cart.cs" />
     <Compile Include="Entities\Order.cs" />
     <Compile Include="Entities\Product.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
