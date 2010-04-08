@@ -28,4 +28,6 @@
     <% }
         } %>
     <a href="<%= Html.Encode(ViewData["returnUrl"])%>">Continue Shopping</a>
+    
+    <%=Html.ActionLink("Check out now", "CheckOut") %>
 </asp:Content>
