@@ -25,7 +25,7 @@ namespace Tests
             
             ProductsController controller = new ProductsController(repository);
             controller.PageSize = 3;
-            var result = controller.List(2);
+            var result = controller.List(null,2);
             var products = result.ViewData.Model as IList<Product>;
 
             Assert.IsNotNull(result, "should not be null");

@@ -35,13 +35,41 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Castle.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Castle.DynamicProxy2, Version=2.2.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.DynamicProxy2.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Facilities.Logging, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.Facilities.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="Castle.MicroKernel, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Castle.MicroKernel.dll</HintPath>
     </Reference>
+    <Reference Include="Castle.Services.Logging.log4netIntegration, Version=1.2.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.Services.Logging.log4netIntegration.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Services.Logging.NLogIntegration, Version=1.2.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Castle.Services.Logging.NLogIntegration.dll</HintPath>
+    </Reference>
     <Reference Include="Castle.Windsor, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Castle.Windsor.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq, Version=3.1.416.3, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=1.0.0.505, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -73,6 +101,9 @@
     <Reference Include="System.Web.Mobile" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CartModelBinder.cs" />
+    <Compile Include="Controllers\CartController.cs" />
+    <Compile Include="Controllers\NavController.cs" />
     <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Global.asax.cs">
@@ -108,7 +139,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Views\Cart\Index.aspx" />
+    <Content Include="Views\Nav\Menu.ascx" />
+    <Content Include="Views\Orders\List.aspx" />
     <Content Include="Views\Products\List.aspx" />
+    <Content Include="Views\Shared\OrderSummary.ascx" />
     <Content Include="Views\Shared\ProductSummary.ascx" />
     <Content Include="Views\Shared\SiteMaster.Master" />
   </ItemGroup>
