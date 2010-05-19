@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml.Linq;
-
+using System.Diagnostics;
 
 namespace Compiler
 {
@@ -26,6 +26,7 @@ namespace Compiler
                         string outputPath = Program.GetOutputFilePath(inputPath, filepath);
                         Compiler compiler = new Compiler(filepath);
                         Program.WriteOuput(compiler.Compile(), outputPath);
+                        Console.WriteLine("output written to: " + outputPath);
                     }
                 }
                 else

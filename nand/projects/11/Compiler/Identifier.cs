@@ -47,6 +47,15 @@ namespace Compiler
             get;
             set;
         }
+
+        /// <summary>
+        /// currently in use or being defined
+        /// </summary>
+        public IdentifierUsage Usage
+        {
+            get;
+            set;
+        }
     }
 
 }
