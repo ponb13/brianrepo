@@ -38,6 +38,7 @@ namespace Compiler
             set;
         }
 
+
         /// <summary>
         /// Gets or sets the index.
         /// </summary>

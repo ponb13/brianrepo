@@ -23,10 +23,13 @@ namespace Compiler
         /// Index is zero based, hack start at -1 
         /// so first increment sets to zero
         /// </summary>
-        private int classStaticCount = -1;
-        private int classFieldCount = -1;
-        private int localArgCount = -1;
-        private int localVarCount = -1;
+        private int staticCount = 0;
+        private int fieldCount = 0;
+        private int argCount = 0;
+        private int varCount = 0;
+
+        private int classScopeIdentifierIndex = 0;
+        private int subRoutineScopeIdentifierIndex = 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolTable"/> class.
@@ -43,7 +46,8 @@ namespace Compiler
         /// </summary>
         public void StartNewSubroutine()
         {
-            this.ResetLocalVariableIndexes();
+            this.ResetSubRoutineVarCountsIndex();
+
             this.subRoutineScope = new Dictionary<string, Identifier>();
         }
 
@@ -55,16 +59,18 @@ namespace Compiler
         /// <param name="kind">The kind.</param>
         public Identifier Define(Identifier identifier)
         {
-            // Brian start here - decide how
-            
-            this.SetIdentifierIndex(identifier);
+            this.IncrementVarKindCount(identifier);
 
             if (identifier.Kind == Kind.Static || identifier.Kind == Kind.Field)
             {
+                identifier.Index = this.classScopeIdentifierIndex;
+                this.classScopeIdentifierIndex++;
                 this.classScope.Add(identifier.Name, identifier);
             }
             else if (identifier.Kind == Kind.Var || identifier.Kind == Kind.Arg)
             {
+                identifier.Index = this.subRoutineScopeIdentifierIndex;
+                this.subRoutineScopeIdentifierIndex++;
                 this.subRoutineScope.Add(identifier.Name, identifier);
             }
 
@@ -82,13 +88,13 @@ namespace Compiler
             switch (kind)
             {
                 case Kind.Static:
-                    return this.classStaticCount;
+                    return this.staticCount;
                 case Kind.Field:
-                    return this.classFieldCount;
+                    return this.fieldCount;
                 case Kind.Arg:
-                    return this.localArgCount;
+                    return this.argCount;
                 case Kind.Var:
-                    return this.localVarCount;
+                    return this.varCount;
                 case Kind.None:
                     return -1;
                 default:
@@ -184,25 +190,25 @@ namespace Compiler
         /// </summary>
         /// <param name="identifier">The identifier.</param>
         /// <returns></returns>
-        private void SetIdentifierIndex(Identifier identifier)
+        private void IncrementVarKindCount(Identifier identifier)
         {
             switch (identifier.Kind)
             {
                 case Kind.Static:
-                    this.classStaticCount++;
-                    identifier.Index = this.classStaticCount;
+                    this.staticCount++;
+                    identifier.Index = this.staticCount;
                     break;
                 case Kind.Field:
-                    this.classFieldCount++;
-                    identifier.Index = this.classFieldCount;
+                    this.fieldCount++;
+                    identifier.Index = this.fieldCount;
                     break;
                 case Kind.Arg:
-                    this.localArgCount++;
-                    identifier.Index = this.localArgCount;
+                    this.argCount++;
+                    identifier.Index = this.argCount;
                     break;
                 case Kind.Var:
-                    this.localVarCount++;
-                    identifier.Index = this.localVarCount;
+                    this.varCount++;
+                    identifier.Index = this.varCount;
                     break;
                 default:
                     break;
@@ -212,10 +218,12 @@ namespace Compiler
         /// <summary>
         /// Resets the local variable indexes.
         /// </summary>
-        private void ResetLocalVariableIndexes()
+        private void ResetSubRoutineVarCountsIndex()
         {
-            this.localArgCount = -1;
-            this.localVarCount = -1;
+            this.argCount = 0;
+            this.varCount = 0;
+            this.subRoutineScopeIdentifierIndex = 0;
+            
         }
     }
 }
