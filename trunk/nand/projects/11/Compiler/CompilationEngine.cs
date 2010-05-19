@@ -48,7 +48,10 @@ namespace Compiler
             // compile class keyword
             this.CompileTerminal(classXml);
             // compiler class name
-            this.CompileTerminal(classXml);
+            Pair<string, string> token = this.classTokens.Pop();
+            classXml.Add(new XElement(token.Value1, token.Value2,
+                        new XAttribute("category", "Class")));
+
             // compile opening curely of class
             this.CompileTerminal(classXml);
 
@@ -79,7 +82,19 @@ namespace Compiler
             while (this.classTokens.Peek().Value2 != "(")
             {
                 Pair<string, string> token = this.classTokens.Pop();
-                subRoutineElement.Add(new XElement(token.Value1, token.Value2));
+
+                // finds method name i.e. if the next token is an opening bracket
+                // we must be on the method name
+                if (this.classTokens.Peek().Value2 == "(")
+                {
+                    // see page 238 - don't bother adding method or class names to symbol table
+                    subRoutineElement.Add(new XElement(token.Value1, token.Value2, 
+                        new XAttribute("category", "Subroutine")));
+                }
+                else
+                {
+                    subRoutineElement.Add(new XElement(token.Value1, token.Value2));
+                }
             }
 
             // add the opening braket of param list
@@ -139,7 +154,6 @@ namespace Compiler
             {
                 XElement classVariableElement = new XElement("classVarDec");
                 parentElement.Add(classVariableElement);
-
                 this.CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(classVariableElement);
 
                 // recursively handle all class variables
@@ -253,8 +267,8 @@ namespace Compiler
                         {
                             identifier.Name = token.Value2;
                             identifier.Usage = IdentifierUsage.Defined;
-                            this.CreateIdentifierElementWithAttributes(parameterList, identifier, token);
                             this.symbolTable.Define(identifier);
+                            this.CreateIdentifierElementWithAttributes(parameterList, identifier, token);
                         }
                         else if (i == 2)
                         {
@@ -270,8 +284,9 @@ namespace Compiler
         {
             parent.Add(new XElement(identifierToken.Value1, identifierToken.Value2,
                               new XAttribute("type", identifier.Type),
-                              new XAttribute("identifierUsage", identifier.Usage.ToString()),
-                              new XAttribute("kind", identifier.Kind)));
+                              new XAttribute("identifierUsage", identifier.Usage),
+                              new XAttribute("kind", identifier.Kind),
+                              new XAttribute("index", identifier.Index)));
         }
 
         /// <summary>
