@@ -101,6 +101,9 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileSubroutineBody(XElement parent)
         {
+            // clears subroutine scope
+            this.symbolTable.StartNewSubroutine();
+            
             XElement subRoutineBody = new XElement("subroutineBody");
             parent.Add(subRoutineBody);
 
@@ -109,7 +112,6 @@ namespace Compiler
 
             this.CompileVariableDeclaration(subRoutineBody);
 
-            // while is statement || expression || variableDeclaration
             while (this.IsStatement() || this.IsVariableDeclaration()) // TODO or is expression or variable declaraiotn
             {
                 if (this.IsStatement())
@@ -138,7 +140,7 @@ namespace Compiler
                 XElement classVariableElement = new XElement("classVarDec");
                 parentElement.Add(classVariableElement);
 
-                this.CompileIdentifierDeclarationAndAddToSymbolTable(classVariableElement);
+                this.CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(classVariableElement);
 
                 // recursively handle all class variables
                 this.CompileClassVarDeclaration(parentElement);
@@ -156,7 +158,7 @@ namespace Compiler
                 XElement varDec = new XElement("varDec");
                 parent.Add(varDec);
 
-                this.CompileIdentifierDeclarationAndAddToSymbolTable(varDec);
+                this.CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(varDec);
 
                 // recursively call variable declaration
                 this.CompileVariableDeclaration(parent);
@@ -170,7 +172,7 @@ namespace Compiler
         /// </summary>
         /// <param name="parent">The parent.</param>
         /// <returns></returns>
-        private void CompileIdentifierDeclarationAndAddToSymbolTable(XElement parent)
+        private void CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(XElement parent)
         {
             Pair<string, string> kindToken = this.CompileTerminal(parent);
             Pair<string, string> typeToken = this.CompileTerminal(parent);
@@ -180,13 +182,11 @@ namespace Compiler
             identifier.Kind = (Kind)Enum.Parse(typeof(Kind), kindToken.Value2, true);
             identifier.Name = nameToken.Value2;
             identifier.Type = typeToken.Value2;
+            identifier.Usage = IdentifierUsage.Defined;
 
             this.symbolTable.Define(identifier);
 
-            parent.Add(new XElement(nameToken.Value1, nameToken.Value2,
-                           new XAttribute("type", identifier.Type),
-                           new XAttribute("usedOrDefined", "defined"),
-                           new XAttribute("kind", identifier.Kind)));
+            this.CreateIdentifierElementWithAttributes(parent, identifier, nameToken);
 
             // check for comma, i.e comma separated list of variables
             if (this.classTokens.Peek().Value2 == ",")
@@ -203,13 +203,11 @@ namespace Compiler
                     commaSeparatedIdentier.Kind = identifier.Kind;
                     commaSeparatedIdentier.Type = identifier.Type;
                     commaSeparatedIdentier.Name = commaSeparatedIdentifierToken.Value2;
+                    commaSeparatedIdentier.Usage = IdentifierUsage.Defined;
 
                     this.symbolTable.Define(commaSeparatedIdentier);
 
-                    parent.Add(new XElement(commaSeparatedIdentifierToken.Value1, commaSeparatedIdentifierToken.Value2,
-                        new XAttribute("type", commaSeparatedIdentier.Type),
-                        new XAttribute("usedOrDefined", "defined"),
-                        new XAttribute("kind", commaSeparatedIdentier.Kind)));
+                    this.CreateIdentifierElementWithAttributes(parent, commaSeparatedIdentier, commaSeparatedIdentifierToken);
 
                     if (this.classTokens.Peek().Value2 == ",")
                     {
@@ -254,11 +252,8 @@ namespace Compiler
                         else if (i == 1)
                         {
                             identifier.Name = token.Value2;
-                            parameterList.Add(new XElement(token.Value1, token.Value2,
-                              new XAttribute("type", identifier.Type),
-                              new XAttribute("usedOrDefined", "defined"),
-                              new XAttribute("kind",identifier.Kind)));
-                            // add to symbol table
+                            identifier.Usage = IdentifierUsage.Defined;
+                            this.CreateIdentifierElementWithAttributes(parameterList, identifier, token);
                             this.symbolTable.Define(identifier);
                         }
                         else if (i == 2)
@@ -269,6 +264,14 @@ namespace Compiler
                     }
                 }
             }
+        }
+
+        private void CreateIdentifierElementWithAttributes(XElement parent, Identifier identifier, Pair<string, string> identifierToken)
+        {
+            parent.Add(new XElement(identifierToken.Value1, identifierToken.Value2,
+                              new XAttribute("type", identifier.Type),
+                              new XAttribute("identifierUsage", identifier.Usage.ToString()),
+                              new XAttribute("kind", identifier.Kind)));
         }
 
         /// <summary>
@@ -461,15 +464,45 @@ namespace Compiler
         /// Compiles a terminal.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private Pair<string,string> CompileTerminal(XElement parent)
+        private Pair<string, string> CompileTerminal(XElement parent)
         {
             Pair<string, string> terminal = null;
             if (this.classTokens.Count > 0)
             {
-                terminal = this.classTokens.Pop();
-                parent.Add(new XElement(terminal.Value1, terminal.Value2));
+                // handle tagging in use identifiers
+                if (this.classTokens.Peek().Value1 == "Identifier" && 
+                    (this.symbolTable.GetIdentifierByName(this.classTokens.Peek().Value2) != null))
+                {
+                    terminal = this.CompileInUseIdentifier(parent);
+                }
+                else
+                {
+                    terminal = this.classTokens.Pop();
+                    parent.Add(new XElement(terminal.Value1, terminal.Value2));
+                }
             }
             return terminal;
+        }
+
+        private Pair<string, string> CompileInUseIdentifier(XElement parent)
+        {
+            Pair<string, string> token = this.classTokens.Pop();
+
+            Identifier identifier = this.symbolTable.GetIdentifierByName(token.Value2);
+
+            if (identifier != null)
+            {
+                identifier.Usage = IdentifierUsage.InUse;                
+                this.CreateIdentifierElementWithAttributes(parent, identifier, token);
+            }
+            else
+            {
+                // ignore - this identifer has not been found in symbol table - has not been declared
+                // hacky way of ignoring method names, and other "identifiers"
+
+            }
+
+            return token;
         }
 
         /// <summary>

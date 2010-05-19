@@ -12,4 +12,9 @@ namespace Compiler
     {
         Static, Field, Arg, Var, None
     }
+
+    public enum IdentifierUsage
+    {
+        InUse, Defined
+    }
 }

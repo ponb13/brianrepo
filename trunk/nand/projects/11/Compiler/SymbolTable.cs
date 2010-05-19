@@ -55,6 +55,8 @@ namespace Compiler
         /// <param name="kind">The kind.</param>
         public Identifier Define(Identifier identifier)
         {
+            // Brian start here - decide how
+            
             this.SetIdentifierIndex(identifier);
 
             if (identifier.Kind == Kind.Static || identifier.Kind == Kind.Field)
@@ -76,6 +78,7 @@ namespace Compiler
         /// <returns></returns>
         public int VarCount(Kind kind)
         {
+            // start here brian -- see page 239
             switch (kind)
             {
                 case Kind.Static:
