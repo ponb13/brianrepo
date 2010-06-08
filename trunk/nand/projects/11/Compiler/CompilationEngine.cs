@@ -9,7 +9,12 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// 
+    /// Brian notes on what next:
+    /// -look at the vm test files for projects 7&8 these will give you an idea of how what vm you need to spit out
+    /// -I have no idea how to handle the "this" keyword, also when calling any method this is always the 1st parm
+    /// i.e. it's a base pointer so all the class vars are just this + n
+    /// But how do you know what this should be set to? Maybe alloc....??
+    /// ch7 p136 has useful example on compilation of jack loop to vm code.
     /// </summary>
     public class CompilationEngine
     {
