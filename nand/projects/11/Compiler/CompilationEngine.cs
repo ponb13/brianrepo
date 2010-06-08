@@ -282,10 +282,13 @@ namespace Compiler
 
         private void CreateIdentifierElementWithAttributes(XElement parent, Identifier identifier, Pair<string, string> identifierToken)
         {
+            // quick hack with the category - if the identifier is not a method or a class name the category will be the same as kind
+            // see page p243's confusing spec.
             parent.Add(new XElement(identifierToken.Value1, identifierToken.Value2,
                               new XAttribute("type", identifier.Type),
-                              new XAttribute("identifierUsage", identifier.Usage),
+                              new XAttribute("usage", identifier.Usage),
                               new XAttribute("kind", identifier.Kind),
+                              new XAttribute("category", identifier.Kind),
                               new XAttribute("index", identifier.Index)));
         }
 
