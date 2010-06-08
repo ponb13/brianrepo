@@ -64,14 +64,14 @@ namespace Compiler
             if (identifier.Kind == Kind.Static || identifier.Kind == Kind.Field)
             {
                 identifier.Index = this.classScopeIdentifierIndex;
-                this.classScopeIdentifierIndex++;
                 this.classScope.Add(identifier.Name, identifier);
+                this.classScopeIdentifierIndex++;
             }
             else if (identifier.Kind == Kind.Var || identifier.Kind == Kind.Arg)
             {
                 identifier.Index = this.subRoutineScopeIdentifierIndex;
-                this.subRoutineScopeIdentifierIndex++;
                 this.subRoutineScope.Add(identifier.Name, identifier);
+                this.subRoutineScopeIdentifierIndex++;
             }
 
             return identifier;
@@ -223,7 +223,6 @@ namespace Compiler
             this.argCount = 0;
             this.varCount = 0;
             this.subRoutineScopeIdentifierIndex = 0;
-            
         }
     }
 }
