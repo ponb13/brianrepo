@@ -10,6 +10,9 @@ namespace Compiler
 {
     /// <summary>
     /// Brian notes on what next:
+    /// make a jack program that outputs a number
+    /// then p
+    /// -p238 underlined explains why no symbol table info is needed for Method names and class names
     /// -look at the vm test files for projects 7&8 these will give you an idea of how what vm you need to spit out
     /// -I have no idea how to handle the "this" keyword, also when calling any method this is always the 1st parm
     /// i.e. it's a base pointer so all the class vars are just this + n

@@ -20,8 +20,6 @@ namespace Compiler
 
         /// <summary>
         /// Static, Field, Arg, Var, keep running index
-        /// Index is zero based, hack start at -1 
-        /// so first increment sets to zero
         /// </summary>
         private int staticCount = 0;
         private int fieldCount = 0;
@@ -84,7 +82,6 @@ namespace Compiler
         /// <returns></returns>
         public int VarCount(Kind kind)
         {
-            // start here brian -- see page 239
             switch (kind)
             {
                 case Kind.Static:

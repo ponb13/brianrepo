@@ -78,6 +78,7 @@
     <Compile Include="SymbolTable.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="Tokenizer.cs" />
+    <Compile Include="VmWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Interfaces\Interfaces.csproj">
