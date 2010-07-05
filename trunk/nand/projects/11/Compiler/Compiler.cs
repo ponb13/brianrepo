@@ -17,7 +17,7 @@ namespace Compiler
             this.inputPath = inputPath;
         }
 
-        public XElement Compile()
+        public void Compile()
         {
             IList<Pair<string, string>> tokens = null;
             
@@ -28,10 +28,17 @@ namespace Compiler
 
             tokens=  tokens.Where(t => t.Value1 != "Comment").ToList();
 
-            CompilationEngine compilationEngine = new CompilationEngine(tokens);
-            XElement xmlCompiledClass = compilationEngine.CompileClass();
-           
-            return xmlCompiledClass;
+            using (VmWriter vmWriter = new VmWriter(GetOutputPath()))
+            {
+                CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter);
+                compilationEngineVm.CompileClass();
+            }
+        }
+
+        string GetOutputPath()
+        {
+            string outputfileName =  Path.GetFileNameWithoutExtension(this.inputPath) + ".vm";
+            return this.inputPath = inputPath.Replace(Path.GetFileName(inputPath), outputfileName);
         }
 
     }
