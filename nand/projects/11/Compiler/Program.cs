@@ -23,10 +23,8 @@ namespace Compiler
                     string inputPath = args[0];
                     foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
                     {
-                        string outputPath = Program.GetOutputFilePath(inputPath, filepath);
                         Compiler compiler = new Compiler(filepath);
-                        Program.WriteOuput(compiler.Compile(), outputPath);
-                        Console.WriteLine("output written to: " + outputPath);
+                        compiler.Compile();
                     }
                 }
                 else
@@ -40,32 +38,6 @@ namespace Compiler
                 Console.WriteLine(ex);
                 Console.ReadKey();
             }
-
         }
-
-        private static string GetOutputFilePath(string inputPath, string filepath)
-        {
-            string outputDir = inputPath + @"/Output";
-
-            if(!Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            return outputDir + @"/" + Path.GetFileNameWithoutExtension(filepath) + ".xml";
-        }
-
-        private static void WriteOuput(XElement compiledClass, string outputPath)
-        {
-            if (File.Exists(outputPath))
-            {
-                File.Delete(outputPath);
-            }
-            using (StreamWriter sw = new StreamWriter(File.Create(outputPath)))
-            {
-                sw.Write(compiledClass.ToString());
-            }
-        }
-
     }
 }

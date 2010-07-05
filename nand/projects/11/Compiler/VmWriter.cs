@@ -6,10 +6,10 @@ using System.Text;
 
 namespace Compiler
 {
-    public class VmWriter : IDisposable 
+    public class VmWriter : IDisposable
     {
         private StreamWriter _streamWriter;
-        
+
         public VmWriter(string outputPath)
         {
             _streamWriter = new StreamWriter(File.Create(outputPath));
@@ -17,7 +17,7 @@ namespace Compiler
 
         public void WritePush(Segment segment, int index)
         {
-            _streamWriter.WriteLine("push " + segment.ToString().ToLower() +" "+ index);
+            _streamWriter.WriteLine("push " + segment.ToString().ToLower() + " " + index);
         }
 
         public void WritePop(Segment segment, int index)
@@ -32,7 +32,7 @@ namespace Compiler
 
         public void WriteLabel(string label)
         {
-            _streamWriter.WriteLine("label " +label);
+            _streamWriter.WriteLine("label " + label);
         }
 
         public void WriteGoto(string label)
@@ -47,7 +47,7 @@ namespace Compiler
 
         public void WriteCall(string name, int numberOfArgs)
         {
-            _streamWriter.WriteLine("call " + name +" "+ numberOfArgs);
+            _streamWriter.WriteLine("call " + name + " " + numberOfArgs);
         }
 
         public void WriteFunction(string name, int numberOfLocals)
@@ -58,6 +58,36 @@ namespace Compiler
         public void WriteReturn()
         {
             _streamWriter.WriteLine("return");
+        }
+
+        public void WritePushIdentifier(Identifier identifier)
+        {
+            if(identifier.Kind == Kind.Var)
+            {
+                this.WritePush(Segment.Local, identifier.Index);
+            }
+            else if(identifier.Kind == Kind.Arg)
+            {
+                this.WritePush(Segment.Arguement, identifier.Index);
+            }
+            else if (identifier.Kind == Kind.Static)
+            {
+                // should the symbol table never be reset
+                // i.e. how to handle static
+                this.WritePush(Segment.Static, identifier.Index);
+            }
+            else if ()
+            {
+                
+                
+                // todo - ithink symbo table is wrong about statics
+                // they shouldn increment class index - keep static separate
+                // but I think statics count should be a global static counter that keeps incrementing with every additions
+                // for fields the index will be this.index
+                this.WritePush(Segment.This, identifier.Index);
+            }
+            
+            
         }
 
         public void Dispose()
