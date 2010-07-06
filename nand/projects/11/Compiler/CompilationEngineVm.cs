@@ -9,11 +9,10 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// Todo - compiling DO statment 
+    /// still trying to get print number to screen to work - see test file - printnumber
+    /// can't gigure out how vm file should start Main.main or main.init
     /// 
-    /// Brian notes on what next:
-    /// make a jack program that outputs a number - still doing this 5/7/10 see line 543 and the VMWriter.WritePushIDentifier todo on this.
-    /// then p
+    ///
     /// -p238 underlined explains why no symbol table info is needed for Method names and class names
     /// -look at the vm test files for projects 7&8 these will give you an idea of how what vm you need to spit out
     /// -I have no idea how to handle the "this" keyword, also when calling any method this is always the 1st parm
@@ -128,44 +127,46 @@ namespace Compiler
             // add closing bracket of params
             this.CompileTerminal(subRoutineElement);
 
-            // compile sub routine body);
-            this.CompileSubroutineBody(subRoutineElement);
+            // add opening curley of methodBody
+            this.CompileTerminal(subRoutineElement);
+
+            // compile sub routine var declarations (they're always first);
+            this.CompileSubRoutineVariableDeclarations();
 
             int numberOfLocals = symbolTable.VarCount(Kind.Var);
             this.vmWiter.WriteFunction(subroutineName, symbolTable.VarCount(Kind.Var));
 
-            this.symbolTable.VarCount(Kind.Arg);
+            this.CompileSubroutineStatments();
+
+            // compile closing curley
+            this.CompileTerminal(subRoutineElement);
+        }
+
+        private void CompileSubRoutineVariableDeclarations()
+        {
+            while (this.IsVariableDeclaration())
+            {
+                this.CompileVariableDeclaration();
+            }
         }
 
         /// <summary>
         /// Compiles the subroutine body.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private void CompileSubroutineBody(XElement parent)
+        private void CompileSubroutineStatments()
         {
-            XElement subRoutineBody = new XElement("subroutineBody");
-            parent.Add(subRoutineBody);
+            XElement fakeBody = new XElement("subroutineBody");
 
-            // add opening curley of methodBody
-            this.CompileTerminal(subRoutineBody);
-
-            this.CompileVariableDeclaration(subRoutineBody);
-
-            while (this.IsStatement() || this.IsVariableDeclaration()) // TODO or is expression or variable declaraiotn
+            while (this.IsStatement()) 
             {
                 if (this.IsStatement())
                 {
                     // add statements to body
-                    this.CompileStatements(subRoutineBody);
-                }
-                else if (this.IsVariableDeclaration())
-                {
-                    this.CompileVariableDeclaration(subRoutineBody);
+                    this.CompileStatements(fakeBody);
                 }
             }
-
             // add closing curely of methodBody
-            this.CompileTerminal(subRoutineBody);
         }
 
         /// <summary>
@@ -189,17 +190,16 @@ namespace Compiler
         /// Compiles the variable declaration.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private void CompileVariableDeclaration(XElement parent)
+        private void CompileVariableDeclaration()
         {
+            XElement classXml = new XElement("fake");
+            
             if (this.classTokens.Peek().Value2 == "var")
             {
-                XElement varDec = new XElement("varDec");
-                parent.Add(varDec);
-
-                this.CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(varDec);
+                this.CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(classXml);
 
                 // recursively call variable declaration
-                this.CompileVariableDeclaration(parent);
+                this.CompileVariableDeclaration();
             }
         }
 
@@ -314,6 +314,7 @@ namespace Compiler
                               new XAttribute("kind", identifier.Kind),
                               new XAttribute("category", identifier.Kind),
                               new XAttribute("index", identifier.Index)));
+
         }
 
         /// <summary>
@@ -493,6 +494,9 @@ namespace Compiler
             // compile return keyword
             this.CompileTerminal(returnElement);
 
+            // vm writer return doesn wite full expression after return yet
+            vmWiter.WriteReturn();
+
             // compile return expression
             if (this.classTokens.Peek().Value2 != ";")
             {
@@ -539,15 +543,11 @@ namespace Compiler
             {
                 identifier.Usage = IdentifierUsage.InUse;
                 this.CreateIdentifierElementWithAttributes(parent, identifier, token);
-
-                // todo 5/7/10 start here brian
-                vmWiter.WritePushIdentifier(identifier);
             }
             else
             {
                 // ignore - this identifer has not been found in symbol table - has not been declared
                 // hacky way of ignoring method names, and other "identifiers"
-
             }
 
             return token;
@@ -669,7 +669,7 @@ namespace Compiler
                     this.CompileTerminal(expressionListElement);
 
                     //compile expression
-                    Pair<string,string> token = this.CompileExpression(expressionListElement);
+                    this.CompileExpression(expressionListElement);
                     expressionCount++;
                 }
             }
@@ -726,7 +726,6 @@ namespace Compiler
 
         private bool IsStatement()
         {
-            // TODO this is probably wrong - variable declarations etc are statments?!
             return (IsLetStatement() || IsIfStatement() || IsDoStatement() || IsReturnStatement() || IsWhileStatement());
         }
 
