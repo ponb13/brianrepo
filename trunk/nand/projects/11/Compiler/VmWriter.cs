@@ -62,6 +62,8 @@ namespace Compiler
 
         public void WritePushIdentifier(Identifier identifier)
         {
+            // dont think this is necessary see page 136
+            // ithink the vm handles local variables - then you just "pop local 1" etc to use them 
             if(identifier.Kind == Kind.Var)
             {
                 this.WritePush(Segment.Local, identifier.Index);
@@ -72,22 +74,13 @@ namespace Compiler
             }
             else if (identifier.Kind == Kind.Static)
             {
-                // should the symbol table never be reset
-                // i.e. how to handle static
+                // p.131 static variables are shared by all functions in the same vm file.
                 this.WritePush(Segment.Static, identifier.Index);
             }
-            else if ()
+            else if (identifier.Kind == Kind.Field)
             {
-                
-                
-                // todo - ithink symbo table is wrong about statics
-                // they shouldn increment class index - keep static separate
-                // but I think statics count should be a global static counter that keeps incrementing with every additions
-                // for fields the index will be this.index
                 this.WritePush(Segment.This, identifier.Index);
             }
-            
-            
         }
 
         public void Dispose()
