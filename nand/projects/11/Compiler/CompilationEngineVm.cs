@@ -11,6 +11,7 @@ namespace Compiler
     /// <summary>
     /// still trying to get print number to screen to work - see test file - printnumber
     /// can't gigure out how vm file should start Main.main or main.init
+    /// in particulat you've compiled a do statement but cant figure out how to complie the expression / method call args
     /// 
     ///
     /// -p238 underlined explains why no symbol table info is needed for Method names and class names
@@ -35,12 +36,13 @@ namespace Compiler
 
         private string className;
 
-        public CompilationEngineVm(IList<Pair<string, string>> classTokensList, VmWriter vmWriter)
+        public CompilationEngineVm(IList<Pair<string, string>> classTokensList, VmWriter vmWriter, string className)
         {
             // reverse tokens before push onto stack (so we Pop them in the correct order!)
             classTokensList = classTokensList.Reverse().ToList();
             this.classTokens = new Stack<Pair<string, string>>();
-            vmWiter = vmWriter; 
+            vmWiter = vmWriter;
+            this.className = className;
 
             foreach (Pair<string, string> token in classTokensList)
             {
@@ -68,11 +70,6 @@ namespace Compiler
             this.CompileTerminal(classXml);
 
             this.CompileClassVarDeclaration(classXml);
-
-
-            int classVariableCount = this.symbolTable.VarCount(Kind.Field) + this.symbolTable.VarCount(Kind.Static);
-            this.vmWiter.WriteFunction(this.className + ".init", classVariableCount);
-
 
             while (this.IsSubRourtineDeclaration())
             {
@@ -134,7 +131,7 @@ namespace Compiler
             this.CompileSubRoutineVariableDeclarations();
 
             int numberOfLocals = symbolTable.VarCount(Kind.Var);
-            this.vmWiter.WriteFunction(subroutineName, symbolTable.VarCount(Kind.Var));
+            this.vmWiter.WriteFunction(this.className+ "." + subroutineName, symbolTable.VarCount(Kind.Var));
 
             this.CompileSubroutineStatments();
 
@@ -360,7 +357,7 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileDoStatement(XElement parent)
         {
-            //'do' subRoutineCall ';'
+            //'do' this.subRoutineCall ';' i.e Main.main == this.Main if we're in main
             // do class.method
             string classNameOfMethodToBeCalled = string.Empty;
             string nameOfMethod = string.Empty;
@@ -627,7 +624,7 @@ namespace Compiler
                 // compile closing bracket
                 this.CompileTerminal(parent);
 
-                this.vmWiter.WriteFunction(classNameOrFunctionName,  numberOfArgsPushed);
+                this.vmWiter.WriteFunction(this.className +"."+classNameOrFunctionName,  numberOfArgsPushed);
             }
             else if (this.classTokens.Peek().Value2 == ".")
             {
@@ -641,6 +638,9 @@ namespace Compiler
                 int numberOfArgsPushed = this.CompileExpressionList(parent);
                 // compile closing bracket
                 this.CompileTerminal(parent);
+
+                // this should translate to className
+                classNameOrFunctionName = (classNameOrFunctionName == "this") ? this.className : classNameOrFunctionName;
 
                 this.vmWiter.WriteCall(classNameOrFunctionName + "." + subRoutineName, numberOfArgsPushed);
             }

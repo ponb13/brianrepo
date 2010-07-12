@@ -30,7 +30,7 @@ namespace Compiler
 
             using (VmWriter vmWriter = new VmWriter(GetOutputPath()))
             {
-                CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter);
+                CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter, Path.GetFileName(inputPath));
                 compilationEngineVm.CompileClass();
             }
         }
