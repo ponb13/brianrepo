@@ -10,8 +10,8 @@ namespace Compiler
 {
     /// <summary>
     /// still trying to get print number to screen to work - see test file - printnumber
-    /// can't gigure out how vm file should start Main.main or main.init
     /// in particulat you've compiled a do statement but cant figure out how to complie the expression / method call args
+    /// also see 236 for explanation of of handling fields and statics (ithink its a full explanation but not sure).
     /// 
     ///
     /// -p238 underlined explains why no symbol table info is needed for Method names and class names
