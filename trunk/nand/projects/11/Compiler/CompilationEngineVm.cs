@@ -9,11 +9,21 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
+    /// you only need to push the value of each expression inside method(exp1, exp2);
+    /// right dumbass - the see page 232 - the evaluation of each expression will leave the top of the stack,
+    /// you already know how many expressions you have from the expression list count++ stuff you wrote 
+    /// so just write the code output vm for expression then output call method call n.
+    /// probably easiest to write a compile expressionTerminal method, maybe?
+    /// 
+    /// 
+    /// 
     /// still trying to get print number to screen to work - see test file - printnumber
-    /// in particulat you've compiled a do statement but cant figure out how to complie the expression / method call args
+    /// in particular you've compiled a do statement but cant figure out how to complie the expression / method call args
     /// also see 236 for explanation of of handling fields and statics (ithink its a full explanation but not sure).
     /// 
     ///
+    /// 
+    /// 
     /// -p238 underlined explains why no symbol table info is needed for Method names and class names
     /// -look at the vm test files for projects 7&8 these will give you an idea of how what vm you need to spit out
     /// -I have no idea how to handle the "this" keyword, also when calling any method this is always the 1st parm
@@ -506,30 +516,6 @@ namespace Compiler
             this.CompileTerminal(returnElement);
         }
 
-        /// <summary>
-        /// Compiles a terminal.
-        /// </summary>
-        /// <param name="parent">The parent.</param>
-        private Pair<string, string> CompileTerminal(XElement parent)
-        {
-            Pair<string, string> terminal = null;
-            if (this.classTokens.Count > 0)
-            {
-                // handle tagging in use identifiers
-                if (this.classTokens.Peek().Value1 == "Identifier" &&
-                    (this.symbolTable.GetIdentifierByName(this.classTokens.Peek().Value2) != null))
-                {
-                    terminal = this.CompileInUseIdentifier(parent);
-                }
-                else
-                {
-                    terminal = this.classTokens.Pop();
-                    parent.Add(new XElement(terminal.Value1, terminal.Value2));
-                }
-            }
-            return terminal;
-        }
-
         private Pair<string, string> CompileInUseIdentifier(XElement parent)
         {
             Pair<string, string> token = this.classTokens.Pop();
@@ -566,6 +552,31 @@ namespace Compiler
                 this.CompileTerminal(expressionElement);
                 this.CompileTerm(expressionElement);
             }
+        }
+
+        /// <summary>
+        /// Compiles a terminal.
+        /// </summary>
+        /// <param name="parent">The parent.</param>
+        private Pair<string, string> CompileTerminal(XElement parent)
+        {
+            Pair<string, string> terminal = null;
+            if (this.classTokens.Count > 0)
+            {
+                // handle tagging in use identifiers
+                if (this.classTokens.Peek().Value1 == "Identifier" &&
+                    (this.symbolTable.GetIdentifierByName(this.classTokens.Peek().Value2) != null))
+                {
+                    
+                    terminal = this.CompileInUseIdentifier(parent);
+                }
+                else
+                {
+                    terminal = this.classTokens.Pop();
+                    parent.Add(new XElement(terminal.Value1, terminal.Value2));
+                }
+            }
+            return terminal;
         }
 
         private void CompileTerm(XElement parent)
