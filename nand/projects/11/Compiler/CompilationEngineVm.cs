@@ -9,12 +9,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// you only need to push the value of each expression inside method(exp1, exp2);
-    /// right dumbass - the see page 232 - the evaluation of each expression will leave the top of the stack,
-    /// you already know how many expressions you have from the expression list count++ stuff you wrote 
-    /// so just write the code output vm for expression then output call method call n.
-    /// probably easiest to write a compile expressionTerminal method, maybe?
-    /// 
+    /// got add and sub working for expressions - what about mult?
     /// 
     /// 
     /// still trying to get print number to screen to work - see test file - printnumber
@@ -549,9 +544,37 @@ namespace Compiler
 
             if (this.IsOperator())
             {
-                this.CompileTerminal(expressionElement);
+                ArithmeticCommand arithmeticCommand = this.CompileArithmeticCommand();
                 this.CompileTerm(expressionElement);
+                vmWiter.WriteArithmetic(arithmeticCommand);
             }
+        }
+
+        private ArithmeticCommand CompileArithmeticCommand()
+        {
+            ArithmeticCommand vmOp = ArithmeticCommand.Add;
+            Pair<string, string> operatorToken = this.CompileExpressionTerminal();
+
+            switch (operatorToken.Value2)
+            {
+                case("+"):
+                    {
+                        vmOp = ArithmeticCommand.Add;
+                        break;
+                    }
+                case ("-"):
+                    {
+                        vmOp = ArithmeticCommand.Sub;
+                        break;
+                    }
+                case ("*"):
+                    {
+                        vmOp = ArithmeticCommand.Mult;
+                        break;
+                    }
+            }
+
+            return vmOp;
         }
 
         /// <summary>
@@ -579,6 +602,39 @@ namespace Compiler
             return terminal;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        private Pair<string,string> CompileExpressionTerminal()
+        {
+            // todo so far can push numbers
+            Pair<string, string> token = this.classTokens.Pop();
+
+            // maybe an identifier 
+            Identifier identifier = this.symbolTable.GetIdentifierByName(token.Value2);
+
+            if(this.TokenIsANumber(token))
+            {
+                this.vmWiter.WritePush(Segment.Constant, int.Parse(token.Value2));
+            }
+            else if (identifier !=null)
+            {
+                // TODO variables
+                //this.vmWiter.WritePush(Segment.);
+            }
+
+            return token;
+
+        }
+
+        private bool TokenIsANumber(Pair<string, string> token)
+        {
+            int number = 0;
+            int.TryParse(token.Value2, out number);
+
+            return number != 0;
+        }
+
         private void CompileTerm(XElement parent)
         {
             XElement termElement = new XElement("term");
@@ -586,7 +642,7 @@ namespace Compiler
 
             // compile the first part no matter what
             Pair<string, string> peekedToken = this.classTokens.Peek();
-            Pair<string, string> compiledToken = this.CompileTerminal(termElement);
+            Pair<string, string> compiledToken = this.CompileExpressionTerminal();
             if (peekedToken.Value2 == "[")
             {
                 // if array accessor
