@@ -52,9 +52,6 @@ namespace Compiler
         /// <summary>
         /// Defines a new identifier
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="type">The type.</param>
-        /// <param name="kind">The kind.</param>
         public Identifier Define(Identifier identifier)
         {
             this.IncrementVarKindCount(identifier);

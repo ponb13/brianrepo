@@ -22,6 +22,6 @@ namespace Compiler
 
     public enum ArithmeticCommand
     {
-        Add, Sub, Neg, Eq, Gt, Lt, And, Or, Not
+        Mult, Add, Sub, Neg, Eq, Gt, Lt, And, Or, Not
     }
 }
