@@ -9,7 +9,8 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// got add and sub working for expressions - what about mult?
+    /// mult and divide are working - but still some wierd output on some variations of expressions
+    /// check that expressions are legal by using real jack compiler and looking at vm code
     /// 
     /// 
     /// still trying to get print number to screen to work - see test file - printnumber
@@ -552,6 +553,7 @@ namespace Compiler
 
         private ArithmeticCommand CompileArithmeticCommand()
         {
+            
             ArithmeticCommand vmOp = ArithmeticCommand.Add;
             Pair<string, string> operatorToken = this.CompileExpressionTerminal();
 
@@ -570,6 +572,11 @@ namespace Compiler
                 case ("*"):
                     {
                         vmOp = ArithmeticCommand.Mult;
+                        break;
+                    }
+                case ("/"):
+                    {
+                        vmOp = ArithmeticCommand.Divide;
                         break;
                     }
             }
@@ -663,6 +670,14 @@ namespace Compiler
             else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
             {
                 this.CompileTerm(termElement);
+                if(peekedToken.Value2 == "-")
+                {
+                    vmWiter.WriteArithmetic(ArithmeticCommand.Neg);
+                }
+                if (peekedToken.Value2 == "~")
+                {
+                    vmWiter.WriteArithmetic(ArithmeticCommand.Not);
+                }
             }
             else if (this.IsSubRoutineCall())
             {

@@ -27,7 +27,18 @@ namespace Compiler
 
         public void WriteArithmetic(ArithmeticCommand arithmeticCommand)
         {
-            _streamWriter.WriteLine(arithmeticCommand.ToString().ToLower());
+            if (arithmeticCommand == ArithmeticCommand.Mult)
+            {
+                this.WriteCall("Math.multiply", 2);
+            }
+            else if (arithmeticCommand == ArithmeticCommand.Divide)
+            {
+                this.WriteCall("Math.divide", 2);
+            }
+            else
+            {
+                _streamWriter.WriteLine(arithmeticCommand.ToString().ToLower());
+            }
         }
 
         public void WriteLabel(string label)
