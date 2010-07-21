@@ -9,23 +9,8 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// mult and divide are working - but still some wierd output on some variations of expressions
-    /// check that expressions are legal by using real jack compiler and looking at vm code
-    /// 
-    /// 
-    /// still trying to get print number to screen to work - see test file - printnumber
-    /// in particular you've compiled a do statement but cant figure out how to complie the expression / method call args
-    /// also see 236 for explanation of of handling fields and statics (ithink its a full explanation but not sure).
-    /// 
+    /// Now on dec to binary conversion - use tst script to run.
     ///
-    /// 
-    /// 
-    /// -p238 underlined explains why no symbol table info is needed for Method names and class names
-    /// -look at the vm test files for projects 7&8 these will give you an idea of how what vm you need to spit out
-    /// -I have no idea how to handle the "this" keyword, also when calling any method this is always the 1st parm
-    /// i.e. it's a base pointer so all the class vars are just this + n
-    /// But how do you know what this should be set to? Maybe alloc....??
-    /// ch7 p136 has useful example on compilation of jack loop to vm code.
     /// </summary>
     public class CompilationEngineVm
     {
@@ -71,7 +56,7 @@ namespace Compiler
                         new XAttribute("category", "Class")));
             this.className = token.Value2;
 
-            
+
             // compile opening curely of class);
             this.CompileTerminal(classXml);
 
@@ -97,7 +82,7 @@ namespace Compiler
         {
             string subroutineName = string.Empty;
             this.symbolTable.StartNewSubroutine();
-            
+
             XElement subRoutineElement = new XElement("subroutineDec");
             parentElement.Add(subRoutineElement);
 
@@ -137,7 +122,7 @@ namespace Compiler
             this.CompileSubRoutineVariableDeclarations();
 
             int numberOfLocals = symbolTable.VarCount(Kind.Var);
-            this.vmWiter.WriteFunction(this.className+ "." + subroutineName, symbolTable.VarCount(Kind.Var));
+            this.vmWiter.WriteFunction(this.className + "." + subroutineName, symbolTable.VarCount(Kind.Var));
 
             this.CompileSubroutineStatments();
 
@@ -161,7 +146,7 @@ namespace Compiler
         {
             XElement fakeBody = new XElement("subroutineBody");
 
-            while (this.IsStatement()) 
+            while (this.IsStatement())
             {
                 if (this.IsStatement())
                 {
@@ -196,7 +181,7 @@ namespace Compiler
         private void CompileVariableDeclaration()
         {
             XElement classXml = new XElement("fake");
-            
+
             if (this.classTokens.Peek().Value2 == "var")
             {
                 this.CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(classXml);
@@ -378,9 +363,12 @@ namespace Compiler
             classNameOfMethodToBeCalled = this.CompileTerminal(doElement).Value2;
 
             // compile the sub routine call
-            this.CompileSubRoutineCall(doElement,classNameOfMethodToBeCalled);
+            this.CompileSubRoutineCall(doElement, classNameOfMethodToBeCalled);
 
-            //compile ;
+            // its a do statement so we know its void -see p.235
+            vmWiter.WritePop(Segment.Temp, 0);
+
+            //compile ;);
             this.CompileTerminal(doElement);
         }
 
@@ -498,15 +486,23 @@ namespace Compiler
             this.CompileTerminal(returnElement);
 
             // vm writer return doesn wite full expression after return yet
-            vmWiter.WriteReturn();
+
+            string nextTokenChar = this.classTokens.Peek().Value2;
 
             // compile return expression
-            if (this.classTokens.Peek().Value2 != ";")
+            if (nextTokenChar != ";")
             {
                 this.CompileTokenIfExists(returnElement, "(");
                 this.CompileExpression(returnElement);
                 this.CompileTokenIfExists(returnElement, ")");
             }
+            else
+            {
+                // no expression after return means this is a void method see p235
+                vmWiter.WritePush(Segment.Constant, 0);
+            }
+
+            vmWiter.WriteReturn();
 
             // compile the ;
             this.CompileTerminal(returnElement);
@@ -553,13 +549,13 @@ namespace Compiler
 
         private ArithmeticCommand CompileArithmeticCommand()
         {
-            
+
             ArithmeticCommand vmOp = ArithmeticCommand.Add;
             Pair<string, string> operatorToken = this.CompileExpressionTerminal();
 
             switch (operatorToken.Value2)
             {
-                case("+"):
+                case ("+"):
                     {
                         vmOp = ArithmeticCommand.Add;
                         break;
@@ -597,7 +593,7 @@ namespace Compiler
                 if (this.classTokens.Peek().Value1 == "Identifier" &&
                     (this.symbolTable.GetIdentifierByName(this.classTokens.Peek().Value2) != null))
                 {
-                    
+
                     terminal = this.CompileInUseIdentifier(parent);
                 }
                 else
@@ -612,7 +608,7 @@ namespace Compiler
         /// <summary>
         /// 
         /// </summary>
-        private Pair<string,string> CompileExpressionTerminal()
+        private Pair<string, string> CompileExpressionTerminal()
         {
             // todo so far can push numbers
             Pair<string, string> token = this.classTokens.Pop();
@@ -620,11 +616,11 @@ namespace Compiler
             // maybe an identifier 
             Identifier identifier = this.symbolTable.GetIdentifierByName(token.Value2);
 
-            if(this.TokenIsANumber(token))
+            if (this.TokenIsANumber(token))
             {
                 this.vmWiter.WritePush(Segment.Constant, int.Parse(token.Value2));
             }
-            else if (identifier !=null)
+            else if (identifier != null)
             {
                 // TODO variables
                 //this.vmWiter.WritePush(Segment.);
@@ -670,7 +666,7 @@ namespace Compiler
             else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
             {
                 this.CompileTerm(termElement);
-                if(peekedToken.Value2 == "-")
+                if (peekedToken.Value2 == "-")
                 {
                     vmWiter.WriteArithmetic(ArithmeticCommand.Neg);
                 }
@@ -689,8 +685,8 @@ namespace Compiler
         {
             // hack on class name - as we can have className.Method
             // or just Method() pass in the className so the VmWriter can use it
-            
-           
+
+
             // subname'('expressionList')' 
             // OR
             // classOrVarName.subname'('expressionList')' 
@@ -706,7 +702,7 @@ namespace Compiler
                 // compile closing bracket
                 this.CompileTerminal(parent);
 
-                this.vmWiter.WriteFunction(this.className +"."+classNameOrFunctionName,  numberOfArgsPushed);
+                this.vmWiter.WriteFunction(this.className + "." + classNameOrFunctionName, numberOfArgsPushed);
             }
             else if (this.classTokens.Peek().Value2 == ".")
             {
