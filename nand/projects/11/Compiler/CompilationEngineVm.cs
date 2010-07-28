@@ -9,7 +9,8 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// Now on dec to binary conversion - use tst script to run.
+    /// Now on dec to binary conversion - see partial in test dir. Got let statments compiling (with local variables)
+    /// Need to work out how to do arrays in let statements e.g. let something[exp] = exp; (multi dimensional arrays!?! hopefully not).
     ///
     /// </summary>
     public class CompilationEngineVm
@@ -386,9 +387,14 @@ namespace Compiler
             // compile let keyword
             this.CompileTerminal(letElement);
             // compile identifier
-            this.CompileTerminal(letElement);
+            //this.CompileTerminal(letElement);
 
-            // compile array accessor [ expression ] (if there is one)
+            // get the identifier on the left side of the = (i.e. let SomeIden = exp);
+            // do the vm write after expression compiles
+            Pair<string,string> token = this.classTokens.Pop();
+            Identifier letIdentifier = this.symbolTable.GetIdentifierByName(token.Value2);
+
+            // compile array accessor [ expression ] (if there is one)));
             if (this.CompileTokenIfExists(letElement, "["))
             {
                 this.CompileExpression(letElement);
@@ -406,6 +412,11 @@ namespace Compiler
 
             // compile expression
             this.CompileExpression(letElement);
+
+            if (letIdentifier.IdentifierScope == Scope.MethodLevel)
+            {
+                vmWiter.WritePop(Segment.Local, letIdentifier.Index);
+            }
 
             // compile closing bracket of expression if there is one
             this.CompileTokenIfExists(parent, ")");
