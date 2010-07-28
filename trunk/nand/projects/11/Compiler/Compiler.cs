@@ -11,10 +11,20 @@ namespace Compiler
     public class Compiler
     {
         private string inputPath;
+        private string outputDirectory;
 
-        public Compiler(string inputPath)
+        public Compiler(string inputPath, string outputDirectory)
         {
             this.inputPath = inputPath;
+            this.outputDirectory = outputDirectory;
+
+            if (!String.IsNullOrWhiteSpace(outputDirectory))
+            {
+                if (!Directory.Exists(outputDirectory))
+                {
+                    Directory.CreateDirectory(outputDirectory);
+                }
+            }
         }
 
         public void Compile()
@@ -30,15 +40,25 @@ namespace Compiler
 
             using (VmWriter vmWriter = new VmWriter(GetOutputPath()))
             {
-                CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter, Path.GetFileName(inputPath));
+                CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter, Path.GetFileNameWithoutExtension(inputPath));
                 compilationEngineVm.CompileClass();
             }
         }
 
         string GetOutputPath()
         {
-            string outputfileName =  Path.GetFileNameWithoutExtension(this.inputPath) + ".vm";
-            return this.inputPath = inputPath.Replace(Path.GetFileName(inputPath), outputfileName);
+            // write to different directory if supplied
+            string outputfileName = Path.GetFileNameWithoutExtension(this.inputPath) + ".vm";
+            if (string.IsNullOrEmpty(outputDirectory))
+            {
+                
+                return this.inputPath = inputPath.Replace(Path.GetFileName(inputPath), outputfileName);
+            }
+            else
+            {
+                return Path.Combine(outputDirectory, outputfileName);
+            }
+            
         }
 
     }

@@ -38,6 +38,21 @@ namespace Compiler
             set;
         }
 
+        public Scope IdentifierScope
+        {
+            get
+            {
+                if(this.Kind == Kind.Field || this.Kind == Kind.Static)
+                {
+                    return Scope.ClassLevel;
+                }
+                else
+                {
+                    return Scope.MethodLevel;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Gets or sets the index.

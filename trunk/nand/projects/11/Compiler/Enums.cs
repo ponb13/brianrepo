@@ -24,4 +24,9 @@ namespace Compiler
     {
         Divide, Mult, Add, Sub, Neg, Eq, Gt, Lt, And, Or, Not
     }
+
+    public enum Scope
+    {
+        ClassLevel, MethodLevel
+    }
 }

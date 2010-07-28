@@ -21,9 +21,24 @@ namespace Compiler
                 if (args != null && args.Length > 0)
                 {
                     string inputPath = args[0];
-                    foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
+                    string outputPathDirectory = null;
+
+                    if(args.Length == 2)
                     {
-                        Compiler compiler = new Compiler(filepath);
+                        outputPathDirectory = args[1];
+                    }
+
+                    if (PathIsDirectory(inputPath))
+                    {
+                        foreach (string filepath in Directory.GetFiles(inputPath, @"*.jack"))
+                        {
+                            Compiler compiler = new Compiler(filepath, outputPathDirectory);
+                            compiler.Compile();
+                        }
+                    }
+                    else
+                    {
+                        Compiler compiler = new Compiler(inputPath, outputPathDirectory);
                         compiler.Compile();
                     }
                 }
@@ -39,5 +54,17 @@ namespace Compiler
                 Console.ReadKey();
             }
         }
+
+       private static bool PathIsDirectory(string filePath)
+       {
+           string extension = Path.GetExtension(filePath);
+
+           return (extension == string.Empty);
+       }
+
+
     }
+
+
+    
 }
