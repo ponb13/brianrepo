@@ -17,7 +17,7 @@ namespace Compiler
 
     public enum Segment
     {
-        Constant, Arguement, Local, Static, This, That, Pointer, Temp
+        None, Constant, Arguement, Local, Static, This, That, Pointer, Temp
     }
 
     public enum ArithmeticCommand
