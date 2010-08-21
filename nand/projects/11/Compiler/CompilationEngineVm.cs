@@ -9,8 +9,10 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
-    /// Now on dec to binary conversion - see partial in test dir. Got let statments compiling (with local variables)
-    /// Need to work out how to do arrays in let statements e.g. let something[exp] = exp; (multi dimensional arrays!?! hopefully not).
+    /// Working on Decimal to binary test file - see partial folder. Last thing you fixed was pushing identifiers CompileExpressionTerminal(), 
+    /// this is called by compile term, so far you are only properly handling arguement and var identifiers. You are working through the test file method by method
+    /// check what you don't need to handle so far! You need to handle all statements let/if/while/do/return so far you have done let,do and return. 
+    /// So next thing to do is handle while and if (which is in the 2nd method of test program!).
     ///
     /// </summary>
     public class CompilationEngineVm
@@ -633,8 +635,7 @@ namespace Compiler
             }
             else if (identifier != null)
             {
-                // TODO variables
-                //this.vmWiter.WritePush(Segment.);
+                this.vmWiter.WritePush(identifier.Segment, identifier.Index);
             }
 
             return token;

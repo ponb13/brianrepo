@@ -72,6 +72,41 @@ namespace Compiler
             get;
             set;
         }
+
+        public Segment Segment
+        {
+            get
+            {
+                Segment segment = Segment.None; // just default to arguement
+
+                if (this.Kind == Kind.Arg)
+                {
+                    segment = Segment.Arguement;
+                }
+                else if (this.Kind == Kind.Var)
+                {
+                    segment = Segment.Local;
+                }
+                else if (this.Kind == Kind.Field)
+                {
+                    // not sure about this!
+                    throw new NotImplementedException("you havent figured ouy how to handle fields yet!");
+                    segment = Segment.This;
+                }
+                else if(this.Kind == Kind.Static)
+                {
+                    throw new NotImplementedException("you havent figured ouy how to handle statics yet!");
+                    segment = Segment.Static;
+                }
+
+                if (segment == Segment.None)
+                {
+                    throw new Exception("Something wrong with the segement code in idenetifier, the segment is not getting set in any of the if conditions");
+                }
+
+                return segment;
+            }
+        }
     }
 
 }
