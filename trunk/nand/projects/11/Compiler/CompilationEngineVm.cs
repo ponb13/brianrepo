@@ -9,10 +9,14 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary>
+    /// in middle of writing if statement code see partial that is generating the vm code you are copying!
+    /// 
     /// Working on Decimal to binary test file - see partial folder. Last thing you fixed was pushing identifiers CompileExpressionTerminal(), 
     /// this is called by compile term, so far you are only properly handling arguement and var identifiers. You are working through the test file method by method
     /// check what you don't need to handle so far! You need to handle all statements let/if/while/do/return so far you have done let,do and return. 
     /// So next thing to do is handle while and if (which is in the 2nd method of test program!).
+    /// 
+    /// P.137 has object handling in vm explanation
     ///
     /// </summary>
     public class CompilationEngineVm
@@ -24,18 +28,20 @@ namespace Compiler
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
-        private VmWriter vmWiter;
+        private VmWriter vmWriter;
 
         private SymbolTable symbolTable = new SymbolTable();
 
         private string className;
+
+        private int ifStatementCount = 0;
 
         public CompilationEngineVm(IList<Pair<string, string>> classTokensList, VmWriter vmWriter, string className)
         {
             // reverse tokens before push onto stack (so we Pop them in the correct order!)
             classTokensList = classTokensList.Reverse().ToList();
             this.classTokens = new Stack<Pair<string, string>>();
-            vmWiter = vmWriter;
+            this.vmWriter = vmWriter;
             this.className = className;
 
             foreach (Pair<string, string> token in classTokensList)
@@ -125,7 +131,7 @@ namespace Compiler
             this.CompileSubRoutineVariableDeclarations();
 
             int numberOfLocals = symbolTable.VarCount(Kind.Var);
-            this.vmWiter.WriteFunction(this.className + "." + subroutineName, symbolTable.VarCount(Kind.Var));
+            this.vmWriter.WriteFunction(this.className + "." + subroutineName, symbolTable.VarCount(Kind.Var));
 
             this.CompileSubroutineStatments();
 
@@ -369,7 +375,7 @@ namespace Compiler
             this.CompileSubRoutineCall(doElement, classNameOfMethodToBeCalled);
 
             // its a do statement so we know its void -see p.235
-            vmWiter.WritePop(Segment.Temp, 0);
+            vmWriter.WritePop(Segment.Temp, 0);
 
             //compile ;);
             this.CompileTerminal(doElement);
@@ -417,7 +423,7 @@ namespace Compiler
 
             if (letIdentifier.IdentifierScope == Scope.MethodLevel)
             {
-                vmWiter.WritePop(Segment.Local, letIdentifier.Index);
+                vmWriter.WritePop(Segment.Local, letIdentifier.Index);
             }
 
             // compile closing bracket of expression if there is one
@@ -436,6 +442,15 @@ namespace Compiler
             XElement ifElement = new XElement("ifStatement");
             parent.Add(ifElement);
 
+            this.ifStatementCount++;
+
+
+            string ifTrueLabel = "IF_TRUE_" + this.className + "_" + this.ifStatementCount;
+            string ifFalseLabel = "IF_FALSE_" + this.className + "_" + this.ifStatementCount;
+            string endIf = "IF_END_" + this.className + "_" + this.ifStatementCount;
+
+            
+
             // compile if keyword
             this.CompileTerminal(ifElement);
             // compile  opening bracket
@@ -448,6 +463,17 @@ namespace Compiler
             this.CompileTerminal(ifElement);
             //compile the statement inside the if
             this.CompileStatements(ifElement);
+
+            this.vmWriter.WriteIf(ifTrueLabel);
+            this.vmWriter.WriteGoto(ifFalseLabel);
+            //write false/else statments
+            this.vmWriter.WriteGoto(endIf);
+            this.vmWriter.WriteLabel(ifTrueLabel);
+            // if true statements
+            this.vmWriter.WriteLabel(ifTrueLabel);
+            this.vmWriter.WriteLabel(endIf);
+
+
             // compile closing curly brace
             this.CompileTerminal(ifElement);
 
@@ -463,6 +489,29 @@ namespace Compiler
                 this.CompileStatements(ifElement);
                 // compile closing curly brace
                 this.CompileTerminal(ifElement);
+            }
+            else
+            {
+                //just vm write an if with no else statement
+
+
+                //function Partial.main 0
+                //push constant 1
+                //neg
+                //if-goto IF_TRUE0
+                //goto IF_FALSE0
+
+                //label IF_TRUE0
+                // true statements
+                //label IF_FALSE0
+               
+                //push constant 0
+                //return
+
+
+
+
+
             }
         }
 
@@ -512,10 +561,10 @@ namespace Compiler
             else
             {
                 // no expression after return means this is a void method see p235
-                vmWiter.WritePush(Segment.Constant, 0);
+                vmWriter.WritePush(Segment.Constant, 0);
             }
 
-            vmWiter.WriteReturn();
+            vmWriter.WriteReturn();
 
             // compile the ;
             this.CompileTerminal(returnElement);
@@ -556,7 +605,7 @@ namespace Compiler
             {
                 ArithmeticCommand arithmeticCommand = this.CompileArithmeticCommand();
                 this.CompileTerm(expressionElement);
-                vmWiter.WriteArithmetic(arithmeticCommand);
+                vmWriter.WriteArithmetic(arithmeticCommand);
             }
         }
 
@@ -631,11 +680,11 @@ namespace Compiler
 
             if (this.TokenIsANumber(token))
             {
-                this.vmWiter.WritePush(Segment.Constant, int.Parse(token.Value2));
+                this.vmWriter.WritePush(Segment.Constant, int.Parse(token.Value2));
             }
             else if (identifier != null)
             {
-                this.vmWiter.WritePush(identifier.Segment, identifier.Index);
+                this.vmWriter.WritePush(identifier.Segment, identifier.Index);
             }
 
             return token;
@@ -680,11 +729,11 @@ namespace Compiler
                 this.CompileTerm(termElement);
                 if (peekedToken.Value2 == "-")
                 {
-                    vmWiter.WriteArithmetic(ArithmeticCommand.Neg);
+                    vmWriter.WriteArithmetic(ArithmeticCommand.Neg);
                 }
                 if (peekedToken.Value2 == "~")
                 {
-                    vmWiter.WriteArithmetic(ArithmeticCommand.Not);
+                    vmWriter.WriteArithmetic(ArithmeticCommand.Not);
                 }
             }
             else if (this.IsSubRoutineCall())
@@ -714,7 +763,7 @@ namespace Compiler
                 // compile closing bracket
                 this.CompileTerminal(parent);
 
-                this.vmWiter.WriteFunction(this.className + "." + classNameOrFunctionName, numberOfArgsPushed);
+                this.vmWriter.WriteFunction(this.className + "." + classNameOrFunctionName, numberOfArgsPushed);
             }
             else if (this.classTokens.Peek().Value2 == ".")
             {
@@ -732,7 +781,7 @@ namespace Compiler
                 // this should translate to className
                 classNameOrFunctionName = (classNameOrFunctionName == "this") ? this.className : classNameOrFunctionName;
 
-                this.vmWiter.WriteCall(classNameOrFunctionName + "." + subRoutineName, numberOfArgsPushed);
+                this.vmWriter.WriteCall(classNameOrFunctionName + "." + subRoutineName, numberOfArgsPushed);
             }
         }
 
