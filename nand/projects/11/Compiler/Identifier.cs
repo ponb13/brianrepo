@@ -54,14 +54,15 @@ namespace Compiler
         }
 
 
+        private int index;
         /// <summary>
         /// Gets or sets the index.
         /// </summary>
         /// <value>The index.</value>
         public int Index
         {
-            get;
-            set;
+            get { return index; }
+            set { this.index = value; }
         }
 
         /// <summary>

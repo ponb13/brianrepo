@@ -8,15 +8,8 @@ using Interfaces;
 
 namespace Compiler
 {
-    /// <summary>
-    /// in middle of writing if statement code see partial that is generating the vm code you are copying!
-    /// 
-    /// Working on Decimal to binary test file - see partial folder. Last thing you fixed was pushing identifiers CompileExpressionTerminal(), 
-    /// this is called by compile term, so far you are only properly handling arguement and var identifiers. You are working through the test file method by method
-    /// check what you don't need to handle so far! You need to handle all statements let/if/while/do/return so far you have done let,do and return. 
-    /// So next thing to do is handle while and if (which is in the 2nd method of test program!).
-    /// 
-    /// P.137 has object handling in vm explanation
+    /// <summary> 
+    //// can't work out why indexing seems to 1 out on some locals...
     ///
     /// </summary>
     public class CompilationEngineVm
@@ -35,6 +28,7 @@ namespace Compiler
         private string className;
 
         private int ifStatementCount = 0;
+        private int whileStatementCount = 0;
 
         public CompilationEngineVm(IList<Pair<string, string>> classTokensList, VmWriter vmWriter, string className)
         {
@@ -399,7 +393,7 @@ namespace Compiler
 
             // get the identifier on the left side of the = (i.e. let SomeIden = exp);
             // do the vm write after expression compiles
-            Pair<string,string> token = this.classTokens.Pop();
+            Pair<string, string> token = this.classTokens.Pop();
             Identifier letIdentifier = this.symbolTable.GetIdentifierByName(token.Value2);
 
             // compile array accessor [ expression ] (if there is one)));
@@ -442,14 +436,9 @@ namespace Compiler
             XElement ifElement = new XElement("ifStatement");
             parent.Add(ifElement);
 
-            this.ifStatementCount++;
-
-
-            string ifTrueLabel = "IF_TRUE_" + this.className + "_" + this.ifStatementCount;
-            string ifFalseLabel = "IF_FALSE_" + this.className + "_" + this.ifStatementCount;
-            string endIf = "IF_END_" + this.className + "_" + this.ifStatementCount;
-
-            
+            string ifTrueLabel = "IF_TRUE" + this.ifStatementCount;
+            string ifFalseLabel = "IF_FALSE" + this.ifStatementCount;
+            string endIf = "IF_END" + this.ifStatementCount;
 
             // compile if keyword
             this.CompileTerminal(ifElement);
@@ -461,18 +450,14 @@ namespace Compiler
             this.CompileTerminal(ifElement);
             // compile opening curly brace
             this.CompileTerminal(ifElement);
-            //compile the statement inside the if
-            this.CompileStatements(ifElement);
 
             this.vmWriter.WriteIf(ifTrueLabel);
             this.vmWriter.WriteGoto(ifFalseLabel);
-            //write false/else statments
+            this.vmWriter.WriteLabel(ifTrueLabel);
+            // true statements
+            // compile the true statements inside the if
+            this.CompileStatements(ifElement);
             this.vmWriter.WriteGoto(endIf);
-            this.vmWriter.WriteLabel(ifTrueLabel);
-            // if true statements
-            this.vmWriter.WriteLabel(ifTrueLabel);
-            this.vmWriter.WriteLabel(endIf);
-
 
             // compile closing curly brace
             this.CompileTerminal(ifElement);
@@ -485,6 +470,8 @@ namespace Compiler
                 this.CompileTerminal(ifElement);
                 // compile opening curly brace
                 this.CompileTerminal(ifElement);
+
+                this.vmWriter.WriteLabel(ifFalseLabel);
                 // compile statments
                 this.CompileStatements(ifElement);
                 // compile closing curly brace
@@ -492,27 +479,13 @@ namespace Compiler
             }
             else
             {
-                //just vm write an if with no else statement
-
-
-                //function Partial.main 0
-                //push constant 1
-                //neg
-                //if-goto IF_TRUE0
-                //goto IF_FALSE0
-
-                //label IF_TRUE0
-                // true statements
-                //label IF_FALSE0
-               
-                //push constant 0
-                //return
-
-
-
-
-
+                // crap hack - don't really handle difference between if and if else very well
+                // need this crap if false label to be output .
+                this.vmWriter.WriteLabel(ifFalseLabel);
             }
+
+            this.vmWriter.WriteLabel(endIf);
+            this.ifStatementCount++;
         }
 
         /// <summary>
@@ -523,13 +496,23 @@ namespace Compiler
             XElement whileElement = new XElement("whileStatement");
             parent.Add(whileElement);
 
-            // compile the while keyword
+            string whileExpressionLabel = "WHILE_EXP" + this.whileStatementCount;
+            string whileEndLabel = "WHILE_END" + this.whileStatementCount;
+
+            vmWriter.WriteLabel(whileExpressionLabel);
+
+            // compile the while keyword);
             this.CompileTerminal(whileElement);
             // compile the opening bracket 
             this.CompileTerminal(whileElement);
             //compile the expression
             this.CompileExpression(whileElement);
-            //compile the closing bracket
+
+            // if not true goto end of while
+            vmWriter.WriteArithmetic(ArithmeticCommand.Not);
+            vmWriter.WriteIf(whileEndLabel);
+
+            //compile the closing bracket);
             this.CompileTerminal(whileElement);
             //compile the opening curly bracket
             this.CompileTerminal(whileElement);
@@ -537,6 +520,12 @@ namespace Compiler
             this.CompileStatements(whileElement);
             //compile the closing curly bracket
             this.CompileTerminal(whileElement);
+
+            this.vmWriter.WriteGoto(whileExpressionLabel);
+
+            this.vmWriter.WriteLabel(whileEndLabel);
+
+            this.whileStatementCount++;
         }
 
         private void CompileReturn(XElement parent)
@@ -735,6 +724,16 @@ namespace Compiler
                 {
                     vmWriter.WriteArithmetic(ArithmeticCommand.Not);
                 }
+            }
+            else if (peekedToken.Value2 == "true")
+            {
+                vmWriter.WritePush(Segment.Constant, 0);
+                vmWriter.WriteArithmetic(ArithmeticCommand.Not);
+
+            }
+            else if(peekedToken.Value2 == "false")
+            {
+                vmWriter.WritePush(Segment.Constant, 0);
             }
             else if (this.IsSubRoutineCall())
             {
