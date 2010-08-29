@@ -524,7 +524,6 @@ namespace Compiler
             this.vmWriter.WriteGoto(whileExpressionLabel);
 
             this.vmWriter.WriteLabel(whileEndLabel);
-
             this.whileStatementCount++;
         }
 
@@ -624,6 +623,16 @@ namespace Compiler
                 case ("/"):
                     {
                         vmOp = ArithmeticCommand.Divide;
+                        break;
+                    }
+                case (">"):
+                    {
+                        vmOp = ArithmeticCommand.Gt;
+                        break;
+                    }
+                case ("<"):
+                    {
+                        vmOp = ArithmeticCommand.Lt;
                         break;
                     }
             }
