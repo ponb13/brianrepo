@@ -26,13 +26,13 @@ namespace Compiler.Tests
             string outputPath = "../../../TestFiles/PrintNumber/UnitTest.vm";
             using(VmWriter vmWriter = new VmWriter(outputPath))
             {
-                vmWriter.WritePush(Segment.Arguement, 1);
+                vmWriter.WritePush(Segment.Argument, 1);
             }
 
             using (StreamReader streamReader = new StreamReader(File.OpenRead("../../../TestFiles/PrintNumber/UnitTest.vm")))
             {
                 string line = streamReader.ReadLine().Trim();
-                Assert.IsTrue(string.Equals(line, "push arguement 1", StringComparison.InvariantCulture));
+                Assert.IsTrue(string.Equals(line, "push Argument 1", StringComparison.InvariantCulture));
             }
         }
 
@@ -42,13 +42,13 @@ namespace Compiler.Tests
             string outputPath = "../../../TestFiles/PrintNumber/UnitTest.vm";
             using (VmWriter vmWriter = new VmWriter(outputPath))
             {
-                vmWriter.WritePop(Segment.Arguement, 1);
+                vmWriter.WritePop(Segment.Argument, 1);
             }
 
             using (StreamReader streamReader = new StreamReader(File.OpenRead("../../../TestFiles/PrintNumber/UnitTest.vm")))
             {
                 string line = streamReader.ReadLine().Trim();
-                Assert.IsTrue(string.Equals(line, "pop arguement 1", StringComparison.InvariantCulture));
+                Assert.IsTrue(string.Equals(line, "pop Argument 1", StringComparison.InvariantCulture));
             }
         }
 
