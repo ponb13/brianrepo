@@ -81,7 +81,7 @@ namespace Compiler
             }
             else if(identifier.Kind == Kind.Arg)
             {
-                this.WritePush(Segment.Arguement, identifier.Index);
+                this.WritePush(Segment.Argument, identifier.Index);
             }
             else if (identifier.Kind == Kind.Static)
             {

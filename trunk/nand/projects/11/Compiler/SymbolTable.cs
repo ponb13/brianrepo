@@ -60,13 +60,18 @@ namespace Compiler
             {
                 identifier.Index = this.classScopeIdentifierIndex;
                 this.classScope.Add(identifier.Name, identifier);
+                // this needs to change I think - you'll want separate index for static and field probably..
                 this.classScopeIdentifierIndex++;
             }
-            else if (identifier.Kind == Kind.Var || identifier.Kind == Kind.Arg)
+            else if (identifier.Kind == Kind.Var)
             {
-                identifier.Index = this.subRoutineScopeIdentifierIndex;
+                identifier.Index = this.varCount -1;
                 this.subRoutineScope.Add(identifier.Name, identifier);
-                this.subRoutineScopeIdentifierIndex++;
+            }
+            else if (identifier.Kind == Kind.Arg)
+            {
+                identifier.Index = this.argCount -1;
+                this.subRoutineScope.Add(identifier.Name, identifier);
             }
 
             return identifier;
@@ -166,12 +171,12 @@ namespace Compiler
             // warning this shouldn't be part of the API, probably should be private
             // TODO - warning should we be searching both scopes here?
             Identifier identifier = null;
-            
+
             if (this.subRoutineScope.ContainsKey(name))
             {
                 identifier = this.subRoutineScope[name];
             }
-            else if(this.classScope.ContainsKey(name))
+            else if (this.classScope.ContainsKey(name))
             {
                 identifier = this.classScope[name];
             }
@@ -190,19 +195,15 @@ namespace Compiler
             {
                 case Kind.Static:
                     this.staticCount++;
-                    identifier.Index = this.staticCount;
                     break;
                 case Kind.Field:
                     this.fieldCount++;
-                    identifier.Index = this.fieldCount;
                     break;
                 case Kind.Arg:
                     this.argCount++;
-                    identifier.Index = this.argCount;
                     break;
                 case Kind.Var:
                     this.varCount++;
-                    identifier.Index = this.varCount;
                     break;
                 default:
                     break;

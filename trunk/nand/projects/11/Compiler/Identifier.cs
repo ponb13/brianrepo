@@ -78,11 +78,11 @@ namespace Compiler
         {
             get
             {
-                Segment segment = Segment.None; // just default to arguement
+                Segment segment = Segment.None; // just default to Argument
 
                 if (this.Kind == Kind.Arg)
                 {
-                    segment = Segment.Arguement;
+                    segment = Segment.Argument;
                 }
                 else if (this.Kind == Kind.Var)
                 {
