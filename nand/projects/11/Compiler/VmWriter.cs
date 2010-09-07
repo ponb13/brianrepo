@@ -94,6 +94,27 @@ namespace Compiler
             }
         }
 
+        public void WritePopIdentifier(Identifier identifier)
+        {
+            if (identifier.Kind == Kind.Var)
+            {
+                this.WritePop(Segment.Local, identifier.Index);
+            }
+            else if (identifier.Kind == Kind.Arg)
+            {
+                this.WritePop(Segment.Argument, identifier.Index);
+            }
+            else if (identifier.Kind == Kind.Static)
+            {
+                // p.131 static variables are shared by all functions in the same vm file.
+                this.WritePop(Segment.Static, identifier.Index);
+            }
+            else if (identifier.Kind == Kind.Field)
+            {
+                this.WritePop(Segment.This, identifier.Index);
+            }
+        }
+
         public void Dispose()
         {
             _streamWriter.Flush();
