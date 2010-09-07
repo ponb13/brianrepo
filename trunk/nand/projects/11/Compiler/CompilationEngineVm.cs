@@ -9,8 +9,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    //// can't work out why indexing seems to 1 out on some locals...
-    ///
+    /// start on line 693
     /// </summary>
     public class CompilationEngineVm
     {
@@ -27,8 +26,8 @@ namespace Compiler
 
         private string className;
 
-        private int ifStatementCount = 0;
-        private int whileStatementCount = 0;
+        private int ifStatementCount = -1;
+        private int whileStatementCount = -1;
 
         public CompilationEngineVm(IList<Pair<string, string>> classTokensList, VmWriter vmWriter, string className)
         {
@@ -52,7 +51,7 @@ namespace Compiler
             XElement classXml = new XElement("class");
 
             // compile class keyword
-            this.CompileTerminal(classXml);
+            this.CompileTerminal();
             // compile class name
             Pair<string, string> token = this.classTokens.Pop();
             classXml.Add(new XElement(token.Value1, token.Value2,
@@ -61,7 +60,7 @@ namespace Compiler
 
 
             // compile opening curely of class);
-            this.CompileTerminal(classXml);
+            this.CompileTerminal();
 
             this.CompileClassVarDeclaration(classXml);
 
@@ -71,7 +70,7 @@ namespace Compiler
             }
 
             // compile class closing curely
-            this.CompileTerminal(classXml);
+            this.CompileTerminal();
 
 
             return classXml;
@@ -83,6 +82,11 @@ namespace Compiler
         /// <param name="parentElement">The parent element.</param>
         private void CompileSubRoutine(XElement parentElement)
         {
+            // seems that labels only need to be unique inside functions / methods
+            this.whileStatementCount = -1;
+            this.ifStatementCount = -1;
+            
+            
             string subroutineName = string.Empty;
             this.symbolTable.StartNewSubroutine();
 
@@ -110,16 +114,16 @@ namespace Compiler
             }
 
             // add the opening braket of param list
-            this.CompileTerminal(subRoutineElement);
+            this.CompileTerminal();
 
             // add the param list
             this.CompileParameterList(subRoutineElement);
 
             // add closing bracket of params
-            this.CompileTerminal(subRoutineElement);
+            this.CompileTerminal();
 
             // add opening curley of methodBody
-            this.CompileTerminal(subRoutineElement);
+            this.CompileTerminal();
 
             // compile sub routine var declarations (they're always first);
             this.CompileSubRoutineVariableDeclarations();
@@ -130,7 +134,7 @@ namespace Compiler
             this.CompileSubroutineStatments();
 
             // compile closing curley
-            this.CompileTerminal(subRoutineElement);
+            this.CompileTerminal();
         }
 
         private void CompileSubRoutineVariableDeclarations()
@@ -147,14 +151,12 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         private void CompileSubroutineStatments()
         {
-            XElement fakeBody = new XElement("subroutineBody");
-
             while (this.IsStatement())
             {
                 if (this.IsStatement())
                 {
                     // add statements to body
-                    this.CompileStatements(fakeBody);
+                    this.CompileStatements();
                 }
             }
             // add closing curely of methodBody
@@ -203,8 +205,8 @@ namespace Compiler
         /// <returns></returns>
         private void CompileClassOrSubRoutineLevelVarDeclarationAndAddToSymbolTable(XElement parent)
         {
-            Pair<string, string> kindToken = this.CompileTerminal(parent);
-            Pair<string, string> typeToken = this.CompileTerminal(parent);
+            Pair<string, string> kindToken = this.CompileTerminal();
+            Pair<string, string> typeToken = this.CompileTerminal();
             Pair<string, string> nameToken = this.classTokens.Pop();
 
             Identifier identifier = new Identifier();
@@ -215,13 +217,11 @@ namespace Compiler
 
             this.symbolTable.Define(identifier);
 
-            this.CreateIdentifierElementWithAttributes(parent, identifier, nameToken);
-
             // check for comma, i.e comma separated list of variables
             if (this.classTokens.Peek().Value2 == ",")
             {
                 // compile the comma
-                this.CompileTerminal(parent);
+                this.CompileTerminal();
 
                 while (this.classTokens.Peek().Value2 != ";")
                 {
@@ -236,18 +236,16 @@ namespace Compiler
 
                     this.symbolTable.Define(commaSeparatedIdentier);
 
-                    this.CreateIdentifierElementWithAttributes(parent, commaSeparatedIdentier, commaSeparatedIdentifierToken);
-
                     if (this.classTokens.Peek().Value2 == ",")
                     {
                         // compile comma
-                        this.CompileTerminal(parent);
+                        this.CompileTerminal();
                     }
                 }
             }
 
             // compile the ending ;
-            this.CompileTerminal(parent);
+            this.CompileTerminal();
         }
 
         /// <summary>
@@ -283,7 +281,6 @@ namespace Compiler
                             identifier.Name = token.Value2;
                             identifier.Usage = IdentifierUsage.Defined;
                             this.symbolTable.Define(identifier);
-                            this.CreateIdentifierElementWithAttributes(parameterList, identifier, token);
                         }
                         else if (i == 2)
                         {
@@ -295,51 +292,37 @@ namespace Compiler
             }
         }
 
-        private void CreateIdentifierElementWithAttributes(XElement parent, Identifier identifier, Pair<string, string> identifierToken)
-        {
-            // quick hack with the category - if the identifier is not a method or a class name the category will be the same as kind
-            // see page p243's confusing spec.
-            parent.Add(new XElement(identifierToken.Value1, identifierToken.Value2,
-                              new XAttribute("type", identifier.Type),
-                              new XAttribute("usage", identifier.Usage),
-                              new XAttribute("kind", identifier.Kind),
-                              new XAttribute("category", identifier.Kind),
-                              new XAttribute("index", identifier.Index)));
-
-        }
 
         /// <summary>
         /// Compiles statments.
         /// </summary>
-        private void CompileStatements(XElement parentElement)
+        private void CompileStatements()
         {
             if (this.IsStatement())
             {
-                XElement statementsElement = new XElement("statements");
-                parentElement.Add(statementsElement);
 
                 // keep adding statements to this statement element
                 while (this.IsStatement())
                 {
                     if (this.IsLetStatement())
                     {
-                        this.CompileLet(statementsElement);
+                        this.CompileLet();
                     }
                     else if (this.IsIfStatement())
                     {
-                        this.CompileIf(statementsElement);
+                        this.CompileIf();
                     }
                     else if (this.IsWhileStatement())
                     {
-                        this.CompileWhile(statementsElement);
+                        this.CompileWhile();
                     }
                     else if (this.IsDoStatement())
                     {
-                        this.CompileDoStatement(statementsElement);
+                        this.CompileDoStatement();
                     }
                     else if (this.IsReturnStatement())
                     {
-                        this.CompileReturn(statementsElement);
+                        this.CompileReturn();
                     }
                 }
             }
@@ -349,45 +332,39 @@ namespace Compiler
         /// Compiles a do statement.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private void CompileDoStatement(XElement parent)
+        private void CompileDoStatement()
         {
             //'do' this.subRoutineCall ';' i.e Main.main == this.Main if we're in main
             // do class.method
             string classNameOfMethodToBeCalled = string.Empty;
             string nameOfMethod = string.Empty;
 
-            XElement doElement = new XElement("doStatement");
-            parent.Add(doElement);
-
             // compile do keyword
-            this.CompileTerminal(doElement);
+            this.CompileTerminal();
 
             // compile identifier
-            classNameOfMethodToBeCalled = this.CompileTerminal(doElement).Value2;
+            classNameOfMethodToBeCalled = this.CompileTerminal().Value2;
 
             // compile the sub routine call
-            this.CompileSubRoutineCall(doElement, classNameOfMethodToBeCalled);
+            this.CompileSubRoutineCall(classNameOfMethodToBeCalled);
 
             // its a do statement so we know its void -see p.235
             vmWriter.WritePop(Segment.Temp, 0);
 
             //compile ;);
-            this.CompileTerminal(doElement);
+            this.CompileTerminal();
         }
 
         /// <summary>
         /// Compiles a let statment.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private void CompileLet(XElement parent)
+        private void CompileLet()
         {
             //'let' varName ('[' expression ']')? '=' expression ';'
 
-            XElement letElement = new XElement("letStatement");
-            parent.Add(letElement);
-
             // compile let keyword
-            this.CompileTerminal(letElement);
+            this.CompileTerminal();
             // compile identifier
             //this.CompileTerminal(letElement);
 
@@ -397,85 +374,80 @@ namespace Compiler
             Identifier letIdentifier = this.symbolTable.GetIdentifierByName(token.Value2);
 
             // compile array accessor [ expression ] (if there is one)));
-            if (this.CompileTokenIfExists(letElement, "["))
+            if (this.CompileTokenIfExists("["))
             {
-                this.CompileExpression(letElement);
+                this.CompileExpression();
                 //compile closing ]
-                this.CompileTerminal(letElement);
+                this.CompileTerminal();
             }
 
             // compile =
-            this.CompileTerminal(letElement);
+            this.CompileTerminal();
 
             // compile opening bracket of expression if there is one
             // in this instance unlike array accessor above we might have an expression even if there
             // isn't any brackets
-            this.CompileTokenIfExists(parent, "(");
+            this.CompileTokenIfExists("(");
 
             // compile expression
-            this.CompileExpression(letElement);
-
-            if (letIdentifier.IdentifierScope == Scope.MethodLevel)
-            {
-                vmWriter.WritePop(Segment.Local, letIdentifier.Index);
-            }
+            this.CompileExpression();
+            
+            vmWriter.WritePopIdentifier(letIdentifier);
 
             // compile closing bracket of expression if there is one
-            this.CompileTokenIfExists(parent, ")");
+            this.CompileTokenIfExists(")");
 
             //compile ;
-            this.CompileTerminal(letElement);
+            this.CompileTerminal();
         }
 
         /// <summary>
         /// Compiles an if statement.
         /// </summary>
-        /// <param name="parent">The parent.</param>
-        private void CompileIf(XElement parent)
+        private void CompileIf()
         {
-            XElement ifElement = new XElement("ifStatement");
-            parent.Add(ifElement);
+            this.ifStatementCount++;
 
             string ifTrueLabel = "IF_TRUE" + this.ifStatementCount;
             string ifFalseLabel = "IF_FALSE" + this.ifStatementCount;
             string endIf = "IF_END" + this.ifStatementCount;
 
             // compile if keyword
-            this.CompileTerminal(ifElement);
+            this.CompileTerminal();
             // compile  opening bracket
-            this.CompileTerminal(ifElement);
+            this.CompileTerminal();
             // compile expression
-            this.CompileExpression(ifElement);
+            this.CompileExpression();
             // compile closing bracket
-            this.CompileTerminal(ifElement);
+            this.CompileTerminal();
             // compile opening curly brace
-            this.CompileTerminal(ifElement);
+            this.CompileTerminal();
 
             this.vmWriter.WriteIf(ifTrueLabel);
             this.vmWriter.WriteGoto(ifFalseLabel);
             this.vmWriter.WriteLabel(ifTrueLabel);
             // true statements
             // compile the true statements inside the if
-            this.CompileStatements(ifElement);
+            this.CompileStatements();
             this.vmWriter.WriteGoto(endIf);
 
             // compile closing curly brace
-            this.CompileTerminal(ifElement);
+            this.CompileTerminal();
 
             // compile else statement if there is one
             if (this.classTokens.Peek().Value2 == "else")
             {
                 // this maybe incorrect, may should create elseStatement and add children??
                 // compile the else keyword
-                this.CompileTerminal(ifElement);
+                this.CompileTerminal();
                 // compile opening curly brace
-                this.CompileTerminal(ifElement);
+                this.CompileTerminal();
 
                 this.vmWriter.WriteLabel(ifFalseLabel);
                 // compile statments
-                this.CompileStatements(ifElement);
+                this.CompileStatements();
                 // compile closing curly brace
-                this.CompileTerminal(ifElement);
+                this.CompileTerminal();
             }
             else
             {
@@ -485,16 +457,14 @@ namespace Compiler
             }
 
             this.vmWriter.WriteLabel(endIf);
-            this.ifStatementCount++;
         }
 
         /// <summary>
         /// Compiles a while loop.
         /// </summary>
-        private void CompileWhile(XElement parent)
+        private void CompileWhile()
         {
-            XElement whileElement = new XElement("whileStatement");
-            parent.Add(whileElement);
+            this.whileStatementCount++;
 
             string whileExpressionLabel = "WHILE_EXP" + this.whileStatementCount;
             string whileEndLabel = "WHILE_END" + this.whileStatementCount;
@@ -502,38 +472,34 @@ namespace Compiler
             vmWriter.WriteLabel(whileExpressionLabel);
 
             // compile the while keyword);
-            this.CompileTerminal(whileElement);
+            this.CompileTerminal();
             // compile the opening bracket 
-            this.CompileTerminal(whileElement);
+            this.CompileTerminal();
             //compile the expression
-            this.CompileExpression(whileElement);
+            this.CompileExpression();
 
             // if not true goto end of while
             vmWriter.WriteArithmetic(ArithmeticCommand.Not);
             vmWriter.WriteIf(whileEndLabel);
 
             //compile the closing bracket);
-            this.CompileTerminal(whileElement);
+            this.CompileTerminal();
             //compile the opening curly bracket
-            this.CompileTerminal(whileElement);
+            this.CompileTerminal();
             //compile statements inside while 
-            this.CompileStatements(whileElement);
+            this.CompileStatements();
             //compile the closing curly bracket
-            this.CompileTerminal(whileElement);
+            this.CompileTerminal();
 
             this.vmWriter.WriteGoto(whileExpressionLabel);
 
             this.vmWriter.WriteLabel(whileEndLabel);
-            this.whileStatementCount++;
         }
 
-        private void CompileReturn(XElement parent)
+        private void CompileReturn()
         {
-            XElement returnElement = new XElement("returnStatement");
-            parent.Add(returnElement);
-
             // compile return keyword
-            this.CompileTerminal(returnElement);
+            this.CompileTerminal();
 
             // vm writer return doesn wite full expression after return yet
 
@@ -542,9 +508,9 @@ namespace Compiler
             // compile return expression
             if (nextTokenChar != ";")
             {
-                this.CompileTokenIfExists(returnElement, "(");
-                this.CompileExpression(returnElement);
-                this.CompileTokenIfExists(returnElement, ")");
+                this.CompileTokenIfExists("(");
+                this.CompileExpression();
+                this.CompileTokenIfExists(")");
             }
             else
             {
@@ -555,10 +521,10 @@ namespace Compiler
             vmWriter.WriteReturn();
 
             // compile the ;
-            this.CompileTerminal(returnElement);
+            this.CompileTerminal();
         }
 
-        private Pair<string, string> CompileInUseIdentifier(XElement parent)
+        private Pair<string, string> CompileInUseIdentifier()
         {
             Pair<string, string> token = this.classTokens.Pop();
 
@@ -567,7 +533,6 @@ namespace Compiler
             if (identifier != null)
             {
                 identifier.Usage = IdentifierUsage.InUse;
-                this.CreateIdentifierElementWithAttributes(parent, identifier, token);
             }
             else
             {
@@ -581,25 +546,29 @@ namespace Compiler
         /// <summary>
         /// Compiles an expression.
         /// </summary>
-        /// <param name="parent">The parent.</param>
-        private void CompileExpression(XElement parent)
+        private void CompileExpression()
         {
-            XElement expressionElement = new XElement("expression");
-            parent.Add(expressionElement);
-
-            this.CompileTerm(expressionElement);
+            // TODO this needs refactored -  see page 209
+            this.CompileTerm();
 
             if (this.IsOperator())
             {
                 ArithmeticCommand arithmeticCommand = this.CompileArithmeticCommand();
-                this.CompileTerm(expressionElement);
+                this.CompileTerm();
                 vmWriter.WriteArithmetic(arithmeticCommand);
+
+                if (this.IsOperator())
+                {
+                    ArithmeticCommand arithmeticCommand2 = this.CompileArithmeticCommand();
+                    this.CompileTerm();
+                    vmWriter.WriteArithmetic(arithmeticCommand2);
+                    this.CompileExpression();
+                }
             }
         }
 
         private ArithmeticCommand CompileArithmeticCommand()
         {
-
             ArithmeticCommand vmOp = ArithmeticCommand.Add;
             Pair<string, string> operatorToken = this.CompileExpressionTerminal();
 
@@ -625,6 +594,16 @@ namespace Compiler
                         vmOp = ArithmeticCommand.Divide;
                         break;
                     }
+                case ("&"):
+                    {
+                        vmOp = ArithmeticCommand.And;
+                        break;
+                    }
+                case ("|"):
+                    {
+                        vmOp = ArithmeticCommand.And;
+                        break;
+                    }
                 case (">"):
                     {
                         vmOp = ArithmeticCommand.Gt;
@@ -635,6 +614,12 @@ namespace Compiler
                         vmOp = ArithmeticCommand.Lt;
                         break;
                     }
+                case ("="):
+                    {
+                        vmOp = ArithmeticCommand.Eq;
+                        break;
+                    }
+                
             }
 
             return vmOp;
@@ -644,7 +629,7 @@ namespace Compiler
         /// Compiles a terminal.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private Pair<string, string> CompileTerminal(XElement parent)
+        private Pair<string, string> CompileTerminal()
         {
             Pair<string, string> terminal = null;
             if (this.classTokens.Count > 0)
@@ -654,15 +639,23 @@ namespace Compiler
                     (this.symbolTable.GetIdentifierByName(this.classTokens.Peek().Value2) != null))
                 {
 
-                    terminal = this.CompileInUseIdentifier(parent);
+                    terminal = this.CompileInUseIdentifier();
                 }
                 else
                 {
                     terminal = this.classTokens.Pop();
-                    parent.Add(new XElement(terminal.Value1, terminal.Value2));
                 }
             }
             return terminal;
+        }
+
+       
+
+        private bool IsIntegerConstant(Pair<string, string> token)
+        {
+            int number = 0;
+            
+            return int.TryParse(token.Value2, out number);
         }
 
         /// <summary>
@@ -676,7 +669,7 @@ namespace Compiler
             // maybe an identifier 
             Identifier identifier = this.symbolTable.GetIdentifierByName(token.Value2);
 
-            if (this.TokenIsANumber(token))
+            if (this.IsIntegerConstant(token))
             {
                 this.vmWriter.WritePush(Segment.Constant, int.Parse(token.Value2));
             }
@@ -689,68 +682,97 @@ namespace Compiler
 
         }
 
-        private bool TokenIsANumber(Pair<string, string> token)
+        private void CompileTerm()
         {
-            int number = 0;
-            int.TryParse(token.Value2, out number);
-
-            return number != 0;
-        }
-
-        private void CompileTerm(XElement parent)
-        {
-            XElement termElement = new XElement("term");
-            parent.Add(termElement);
-
             // compile the first part no matter what
             Pair<string, string> peekedToken = this.classTokens.Peek();
-            Pair<string, string> compiledToken = this.CompileExpressionTerminal();
-            if (peekedToken.Value2 == "[")
-            {
-                // if array accessor
-                // compile the [
-                this.CompileTerminal(termElement);
-                // compile expression inside []
-                this.CompileExpression(termElement);
-                // compile closing ]
-                this.CompileTerminal(termElement);
-            }
-            //check and compile '('expression')'
-            else if (peekedToken.Value2 == "(")
-            {
-                this.CompileExpression(termElement);
-                // compile closing )
-                this.CompileTerminal(termElement);
-            }
-            else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
-            {
-                this.CompileTerm(termElement);
-                if (peekedToken.Value2 == "-")
-                {
-                    vmWriter.WriteArithmetic(ArithmeticCommand.Neg);
-                }
-                if (peekedToken.Value2 == "~")
-                {
-                    vmWriter.WriteArithmetic(ArithmeticCommand.Not);
-                }
-            }
-            else if (peekedToken.Value2 == "true")
-            {
-                vmWriter.WritePush(Segment.Constant, 0);
-                vmWriter.WriteArithmetic(ArithmeticCommand.Not);
 
-            }
-            else if(peekedToken.Value2 == "false")
+            if (TokenIsAnExpressionTerm(peekedToken))
             {
-                vmWriter.WritePush(Segment.Constant, 0);
-            }
-            else if (this.IsSubRoutineCall())
-            {
-                this.CompileSubRoutineCall(termElement, compiledToken.Value2);
+                Pair<string, string> compiledToken = this.CompileExpressionTerminal();
+                if (peekedToken.Value2 == "[")
+                {
+                    // if array accessor
+                    // compile the [
+                    this.CompileTerminal();
+                    // compile expression inside []
+                    this.CompileExpression();
+                    // compile closing ]
+                    this.CompileTerminal();
+                }
+                    //check and compile '('expression')'
+                else if (peekedToken.Value2 == "(")
+                {
+                    this.CompileExpression();
+                    // compile closing )
+                    this.CompileTerminal();
+                }
+                else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
+                {
+                    this.CompileTerm();
+                    if (peekedToken.Value2 == "-")
+                    {
+                        vmWriter.WriteArithmetic(ArithmeticCommand.Neg);
+                    }
+                    if (peekedToken.Value2 == "~")
+                    {
+                        vmWriter.WriteArithmetic(ArithmeticCommand.Not);
+                    }
+                }
+                else if (peekedToken.Value2 == "true")
+                {
+                    vmWriter.WritePush(Segment.Constant, 0);
+                    vmWriter.WriteArithmetic(ArithmeticCommand.Not);
+
+                }
+                else if (peekedToken.Value2 == "false")
+                {
+                    vmWriter.WritePush(Segment.Constant, 0);
+                }
+                else if (this.IsSubRoutineCall(this.classTokens.Peek()))
+                {
+                    this.CompileSubRoutineCall(compiledToken.Value2);
+                }
             }
         }
 
-        private void CompileSubRoutineCall(XElement parent, string classNameOrFunctionName)
+        private bool TokenIsAnExpressionTerm(Pair<string,string> token)
+        {
+            // see page 209
+            // 'stringConstant' 
+            // 'unaryOp Term'
+            
+
+            return (IsIntegerConstant(token) || IsAnExpressionKeyWord(token) || IsVarNameTerm(token) || IsArrayAccessor() ||
+                    IsSubRoutineCall(this.PeekTwoTokensDeep()) || this.classTokens.Peek().Value2 == ("(") || this.IsUnaryOp(token));
+        }
+
+        private bool IsVarNameTerm(Pair<string, string> token)
+        {
+            Identifier identifier = this.symbolTable.GetIdentifierByName(token.Value2);
+            return identifier != null;
+        }
+
+        private bool IsAnExpressionKeyWord(Pair<string,string> token)
+        {
+            // see p 209 in expression box KeyWordConstant
+            return (token.Value2 == "true" || token.Value2 == "false" || token.Value2 == "null" ||
+                    token.Value2 == "this");
+        }
+
+        private bool IsUnaryOp(Pair<string,string> token)
+        {
+            return token.Value2 == "-" || token.Value2 == "~";
+        }
+
+        private bool IsArrayAccessor()
+        {
+            
+            
+            return this.classTokens.Peek().Value2 == "[";
+        }
+
+        private void CompileSubRoutineCall(string classNameOrFunctionName)
         {
             // hack on class name - as we can have className.Method
             // or just Method() pass in the className so the VmWriter can use it
@@ -765,26 +787,26 @@ namespace Compiler
             if (this.classTokens.Peek().Value2 == "(")
             {
                 // compile opening bracket
-                this.CompileTerminal(parent);
+                this.CompileTerminal();
                 // compile the expression list
-                int numberOfArgsPushed = this.CompileExpressionList(parent);
+                int numberOfArgsPushed = this.CompileExpressionList();
                 // compile closing bracket
-                this.CompileTerminal(parent);
+                this.CompileTerminal();
 
                 this.vmWriter.WriteFunction(this.className + "." + classNameOrFunctionName, numberOfArgsPushed);
             }
             else if (this.classTokens.Peek().Value2 == ".")
             {
                 // compile the dot
-                this.CompileTerminal(parent);
+                this.CompileTerminal();
                 // compile subName
-                string subRoutineName = this.CompileTerminal(parent).Value2;
+                string subRoutineName = this.CompileTerminal().Value2;
                 // compile opening bracket
-                this.CompileTerminal(parent);
+                this.CompileTerminal();
                 // compile the expression list                    
-                int numberOfArgsPushed = this.CompileExpressionList(parent);
+                int numberOfArgsPushed = this.CompileExpressionList();
                 // compile closing bracket
-                this.CompileTerminal(parent);
+                this.CompileTerminal();
 
                 // this should translate to className
                 classNameOrFunctionName = (classNameOrFunctionName == "this") ? this.className : classNameOrFunctionName;
@@ -797,26 +819,24 @@ namespace Compiler
         /// Compiles an expression list.
         /// </summary>
         /// <param name="parent">The parent.</param>
-        private int CompileExpressionList(XElement parent)
+        private int CompileExpressionList()
         {
             // vmWriter - compiling a method call needs number of args pushed
             int expressionCount = 0;
-            XElement expressionListElement = new XElement("expressionList");
-            parent.Add(expressionListElement);
 
             // check for empty brackets
             if (this.classTokens.Peek().Value2 != ")")
             {
-                this.CompileExpression(expressionListElement);
+                this.CompileExpression();
 
                 expressionCount++;
                 while (this.classTokens.Peek().Value2 == ",")
                 {
                     // comile comma
-                    this.CompileTerminal(expressionListElement);
+                    this.CompileTerminal();
 
                     //compile expression
-                    this.CompileExpression(expressionListElement);
+                    this.CompileExpression();
                     expressionCount++;
                 }
             }
@@ -835,18 +855,26 @@ namespace Compiler
             return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "field" || peekedToken.Value2 == "static");
         }
 
-        private bool IsSubRoutineCall()
+        private bool IsSubRoutineCall(Pair<string,string> token)
         {
             bool result = false;
 
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-
-            if (peekedToken.Value2 == "." || peekedToken.Value2 == "(")
+            if (token.Value2 == "." || token.Value2 == "(")
             {
                 result = true;
             }
 
             return result;
+        }
+
+        private Pair<string,string> PeekTwoTokensDeep()
+        {
+            Pair<string,string> topToken = this.classTokens.Pop();
+            Pair<string, string> secondTopToken = this.classTokens.Peek();
+
+            this.classTokens.Push(topToken);
+
+            return secondTopToken;
         }
 
         private bool IsSubRourtineDeclaration()
@@ -909,7 +937,7 @@ namespace Compiler
         private bool IsOperator()
         {
             Pair<string, string> peekedToken = this.classTokens.Peek();
-            Match match = Regex.Match(peekedToken.Value2, @"[+|\-|*|/|&|<|>|=|~]", RegexOptions.Compiled);
+            Match match = Regex.Match(peekedToken.Value2, @"[+|\-|*|/|&|<|>|=]", RegexOptions.Compiled);
 
             return match.Success;
         }
@@ -921,12 +949,12 @@ namespace Compiler
         /// <param name="parent">The parent.</param>
         /// <param name="characterToLookFor">The character to look for.</param>
         /// <returns></returns>
-        private bool CompileTokenIfExists(XElement parent, string characterToLookFor)
+        private bool CompileTokenIfExists(string characterToLookFor)
         {
             bool result = false;
             if (this.classTokens.Peek().Value2 == characterToLookFor)
             {
-                this.CompileTerminal(parent);
+                this.CompileTerminal();
                 result = true;
             }
             return result;
