@@ -9,7 +9,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    /// start on line 693
+    /// just started looking at square dance , for some reason even main.jack is compiling wrong.
     /// </summary>
     public class CompilationEngineVm
     {
