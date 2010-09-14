@@ -9,7 +9,9 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    /// just started looking at square dance , for some reason even main.jack is compiling wrong.
+    /// just discover subroutines can be either method  or function (think instance and static ??) p 188 to 190
+    /// talks about this and alsoobject construction and disposal, however I am confused about constructors being allowed arbitary names
+    /// does the compile know it is a constructor then??
     /// </summary>
     public class CompilationEngineVm
     {
