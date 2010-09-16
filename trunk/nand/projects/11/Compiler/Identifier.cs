@@ -91,12 +91,12 @@ namespace Compiler
                 else if (this.Kind == Kind.Field)
                 {
                     // not sure about this!
-                    throw new NotImplementedException("you havent figured ouy how to handle fields yet!");
+                    //throw new NotImplementedException("you havent figured ouy how to handle fields yet!");
                     segment = Segment.This;
                 }
                 else if(this.Kind == Kind.Static)
                 {
-                    throw new NotImplementedException("you havent figured ouy how to handle statics yet!");
+                    //throw new NotImplementedException("you havent figured ouy how to handle statics yet!");
                     segment = Segment.Static;
                 }
 

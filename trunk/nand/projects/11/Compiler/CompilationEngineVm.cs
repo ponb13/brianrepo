@@ -9,9 +9,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    /// just discover subroutines can be either method  or function (think instance and static ??) p 188 to 190
-    /// talks about this and alsoobject construction and disposal, however I am confused about constructors being allowed arbitary names
-    /// does the compile know it is a constructor then??
+    /// on square dance, just got instance methods calls working, now to get constructors working.
     /// </summary>
     public class CompilationEngineVm
     {
@@ -776,9 +774,11 @@ namespace Compiler
 
         private void CompileSubRoutineCall(string classNameOrFunctionName)
         {
+            // this should translate to className
+            classNameOrFunctionName = (classNameOrFunctionName == "this") ? this.className : classNameOrFunctionName;
+            
             // hack on class name - as we can have className.Method
             // or just Method() pass in the className so the VmWriter can use it
-
 
             // subname'('expressionList')' 
             // OR
@@ -799,6 +799,11 @@ namespace Compiler
             }
             else if (this.classTokens.Peek().Value2 == ".")
             {
+                // constructors & functions are called called className.FunctionName
+                // instance methods are called identifierName.MethodName
+                // need to distinguish between them so that we can push a reference to the instance see p.189
+                Identifier instanceIdentifier = this.symbolTable.GetIdentifierByName(classNameOrFunctionName);
+
                 // compile the dot
                 this.CompileTerminal();
                 // compile subName
@@ -807,13 +812,24 @@ namespace Compiler
                 this.CompileTerminal();
                 // compile the expression list                    
                 int numberOfArgsPushed = this.CompileExpressionList();
+
                 // compile closing bracket
                 this.CompileTerminal();
-
-                // this should translate to className
-                classNameOrFunctionName = (classNameOrFunctionName == "this") ? this.className : classNameOrFunctionName;
-
-                this.vmWriter.WriteCall(classNameOrFunctionName + "." + subRoutineName, numberOfArgsPushed);
+                
+                if (instanceIdentifier != null)
+                {
+                    // instanceMethod call
+                    // this must be pushed
+                    numberOfArgsPushed++;
+                    this.vmWriter.WritePush(instanceIdentifier.Segment, instanceIdentifier.Index);
+                    this.vmWriter.WriteCall(instanceIdentifier.Type + "." + subRoutineName, numberOfArgsPushed);
+                }
+                else
+                {
+                    // static or constructor call
+                    this.vmWriter.WriteCall(classNameOrFunctionName + "." + subRoutineName, numberOfArgsPushed);
+                }
+                
             }
         }
 
