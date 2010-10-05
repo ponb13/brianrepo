@@ -10,6 +10,9 @@ namespace Compiler
 {
     /// <summary> 
     /// on square dance, just got instance methods calls working, now to get constructors working.
+    /// Constructors see bottom of p234 & P235 constructors allocate space for new objects using OS function Memory.alloc(size)
+    /// Partial jack is setup to have a single constructor - you need to know how many fields you have (object size), 
+    /// you get this from the symbol table (though you havent handled them or have you??
     /// </summary>
     public class CompilationEngineVm
     {
@@ -800,7 +803,7 @@ namespace Compiler
             else if (this.classTokens.Peek().Value2 == ".")
             {
                 // constructors & functions are called called className.FunctionName
-                // instance methods are called identifierName.MethodName
+                // instance methods are called identifierName.MethodName OR just MethodName
                 // need to distinguish between them so that we can push a reference to the instance see p.189
                 Identifier instanceIdentifier = this.symbolTable.GetIdentifierByName(classNameOrFunctionName);
 
