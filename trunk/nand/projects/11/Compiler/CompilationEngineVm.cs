@@ -9,10 +9,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    /// on square dance, just got instance methods calls working, now to get constructors working.
-    /// Constructors see bottom of p234 & P235 constructors allocate space for new objects using OS function Memory.alloc(size)
-    /// Partial jack is setup to have a single constructor - you need to know how many fields you have (object size), 
-    /// you get this from the symbol table (though you havent handled them or have you??
+    /// on square dance, you can handle construtors and methods now you need to handle fields and and exp that include method calls...
     /// </summary>
     public class CompilationEngineVm
     {
@@ -96,10 +93,22 @@ namespace Compiler
             XElement subRoutineElement = new XElement("subroutineDec");
             parentElement.Add(subRoutineElement);
 
+            bool isConstructor =  false;
+            bool isMethod = false;
             // while not the opening bracked of the method/constructor/function params
             while (this.classTokens.Peek().Value2 != "(")
             {
                 Pair<string, string> token = this.classTokens.Pop();
+
+                if (isConstructor == false)
+                {
+                    isConstructor = token.Value2 == "constructor";
+                }
+
+                if (isMethod == false)
+                {
+                    isMethod = token.Value2 == "method";
+                }
 
                 // finds method name i.e. if the next token is an opening bracket
                 // we must be on the method name
@@ -133,6 +142,18 @@ namespace Compiler
 
             int numberOfLocals = symbolTable.VarCount(Kind.Var);
             this.vmWriter.WriteFunction(this.className + "." + subroutineName, symbolTable.VarCount(Kind.Var));
+
+            if(isConstructor)
+            {
+                this.vmWriter.WritePush(Segment.Constant, this.symbolTable.VarCount(Kind.Field));
+                this.vmWriter.WriteCall("Memory.alloc", 1);
+                this.vmWriter.WritePop(Segment.Pointer, 0);
+            }
+            else if(isMethod)
+            {
+                this.vmWriter.WritePush(Segment.Argument, 0);
+                this.vmWriter.WritePop(Segment.Pointer, 0);
+            }
 
             this.CompileSubroutineStatments();
 
@@ -735,6 +756,10 @@ namespace Compiler
                 else if (this.IsSubRoutineCall(this.classTokens.Peek()))
                 {
                     this.CompileSubRoutineCall(compiledToken.Value2);
+                }
+                else if(peekedToken.Value2 == "this")
+                {
+                    vmWriter.WritePush(Segment.Pointer, 0);
                 }
             }
         }
