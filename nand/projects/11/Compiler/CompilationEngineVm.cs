@@ -85,15 +85,14 @@ namespace Compiler
             // seems that labels only need to be unique inside functions / methods
             this.whileStatementCount = -1;
             this.ifStatementCount = -1;
-            
-            
+
             string subroutineName = string.Empty;
             this.symbolTable.StartNewSubroutine();
 
             XElement subRoutineElement = new XElement("subroutineDec");
             parentElement.Add(subRoutineElement);
 
-            bool isConstructor =  false;
+            bool isConstructor = false;
             bool isMethod = false;
             // while not the opening bracked of the method/constructor/function params
             while (this.classTokens.Peek().Value2 != "(")
@@ -129,7 +128,7 @@ namespace Compiler
             this.CompileTerminal();
 
             // add the param list
-            this.CompileParameterList(subRoutineElement);
+            this.CompileParameterList(isMethod);
 
             // add closing bracket of params
             this.CompileTerminal();
@@ -143,13 +142,13 @@ namespace Compiler
             int numberOfLocals = symbolTable.VarCount(Kind.Var);
             this.vmWriter.WriteFunction(this.className + "." + subroutineName, symbolTable.VarCount(Kind.Var));
 
-            if(isConstructor)
+            if (isConstructor)
             {
                 this.vmWriter.WritePush(Segment.Constant, this.symbolTable.VarCount(Kind.Field));
                 this.vmWriter.WriteCall("Memory.alloc", 1);
                 this.vmWriter.WritePop(Segment.Pointer, 0);
             }
-            else if(isMethod)
+            else if (isMethod)
             {
                 this.vmWriter.WritePush(Segment.Argument, 0);
                 this.vmWriter.WritePop(Segment.Pointer, 0);
@@ -276,13 +275,19 @@ namespace Compiler
         /// Compiles the parameter list of a method/function/constructor
         /// </summary>
         /// <param name="parentElement">The parent element.</param>
-        private void CompileParameterList(XElement parentElement)
+        private void CompileParameterList(bool isInstanceMethod)
         {
-            // add param list as child
-            XElement parameterList = new XElement("parameterList");
-            parentElement.Add(parameterList);
-
             // add the params
+
+            if (isInstanceMethod)
+            {
+                Identifier hiddenThisArg = new Identifier();
+                hiddenThisArg.Type = "this";
+                hiddenThisArg.Name = "this";
+                hiddenThisArg.Usage = IdentifierUsage.Defined;
+                hiddenThisArg.Kind = Kind.Arg;
+                this.symbolTable.Define(hiddenThisArg);
+            }
 
             while (this.classTokens.Peek().Value2 != ")")
             {
@@ -298,7 +303,6 @@ namespace Compiler
                         if (i == 0)
                         {
                             identifier.Type = token.Value2;
-                            parameterList.Add(new XElement(token.Value1, token.Value2));
                         }
                         else if (i == 1)
                         {
@@ -308,8 +312,8 @@ namespace Compiler
                         }
                         else if (i == 2)
                         {
-                            //add the comma
-                            parameterList.Add(new XElement(token.Value1, token.Value2));
+                            //add the comma - relic from xml output
+                            //parameterList.Add(new XElement(token.Value1, token.Value2));
                         }
                     }
                 }
@@ -401,25 +405,42 @@ namespace Compiler
             if (this.CompileTokenIfExists("["))
             {
                 this.CompileExpression();
+
+                // the value of the expression will have already been pushed
+                // add the array pointer (the value of the identifier) to the value of the array expression 
+                this.vmWriter.WritePush(letIdentifier.Segment, letIdentifier.Index);
+                this.vmWriter.WriteArithmetic(ArithmeticCommand.Add);
+
                 //compile closing ]
                 this.CompileTerminal();
+
+                // compile =
+                this.CompileTerminal();
+
+                // compile expression
+                this.CompileExpression();
+
+                vmWriter.WritePop(Segment.Temp, 0);
+                vmWriter.WritePop(Segment.Pointer, 1);
+                vmWriter.WritePush(Segment.Temp, 0);
+                vmWriter.WritePop(Segment.That, 0);
             }
+            else
+            {
+                // compile =
+                this.CompileTerminal();
 
-            // compile =
-            this.CompileTerminal();
+                // compile opening bracket of expression if there is one
+                this.CompileTokenIfExists("(");
 
-            // compile opening bracket of expression if there is one
-            // in this instance unlike array accessor above we might have an expression even if there
-            // isn't any brackets
-            this.CompileTokenIfExists("(");
+                // compile expression
+                this.CompileExpression();
 
-            // compile expression
-            this.CompileExpression();
-            
-            vmWriter.WritePopIdentifier(letIdentifier);
+                vmWriter.WritePopIdentifier(letIdentifier);
 
-            // compile closing bracket of expression if there is one
-            this.CompileTokenIfExists(")");
+                // compile closing bracket of expression if there is one
+                this.CompileTokenIfExists(")");
+            }
 
             //compile ;
             this.CompileTerminal();
@@ -643,7 +664,7 @@ namespace Compiler
                         vmOp = ArithmeticCommand.Eq;
                         break;
                     }
-                
+
             }
 
             return vmOp;
@@ -673,12 +694,12 @@ namespace Compiler
             return terminal;
         }
 
-       
+
 
         private bool IsIntegerConstant(Pair<string, string> token)
         {
             int number = 0;
-            
+
             return int.TryParse(token.Value2, out number);
         }
 
@@ -710,21 +731,33 @@ namespace Compiler
         {
             // compile the first part no matter what
             Pair<string, string> peekedToken = this.classTokens.Peek();
+            Pair<string, string> peekedTwoDeep = this.PeekTwoTokensDeep();
 
             if (TokenIsAnExpressionTerm(peekedToken))
             {
                 Pair<string, string> compiledToken = this.CompileExpressionTerminal();
-                if (peekedToken.Value2 == "[")
+
+                if (peekedTwoDeep.Value2 == "[")
                 {
+                    Identifier arrayAccessorIdentifier = symbolTable.GetIdentifierByName(compiledToken.Value2);
                     // if array accessor
                     // compile the [
                     this.CompileTerminal();
                     // compile expression inside []
                     this.CompileExpression();
+
+                    //this.vmWriter.WritePush(arrayAccessorIdentifier.Segment, arrayAccessorIdentifier.Index);
+                    this.vmWriter.WriteArithmetic(ArithmeticCommand.Add);
+
+                    //vmWriter.WritePop(Segment.Temp, 0);
+                    //vmWriter.WritePop(Segment.Pointer, 1);
+                    //vmWriter.WritePush(Segment.Temp, 0);
+                    //vmWriter.WritePop(Segment.That, 0);
+
                     // compile closing ]
                     this.CompileTerminal();
                 }
-                    //check and compile '('expression')'
+                //check and compile '('expression')'
                 else if (peekedToken.Value2 == "(")
                 {
                     this.CompileExpression();
@@ -747,7 +780,6 @@ namespace Compiler
                 {
                     vmWriter.WritePush(Segment.Constant, 0);
                     vmWriter.WriteArithmetic(ArithmeticCommand.Not);
-
                 }
                 else if (peekedToken.Value2 == "false")
                 {
@@ -757,19 +789,19 @@ namespace Compiler
                 {
                     this.CompileSubRoutineCall(compiledToken.Value2);
                 }
-                else if(peekedToken.Value2 == "this")
+                else if (peekedToken.Value2 == "this")
                 {
                     vmWriter.WritePush(Segment.Pointer, 0);
                 }
             }
         }
 
-        private bool TokenIsAnExpressionTerm(Pair<string,string> token)
+        private bool TokenIsAnExpressionTerm(Pair<string, string> token)
         {
             // see page 209
             // 'stringConstant' 
             // 'unaryOp Term'
-            
+
 
             return (IsIntegerConstant(token) || IsAnExpressionKeyWord(token) || IsVarNameTerm(token) || IsArrayAccessor() ||
                     IsSubRoutineCall(this.PeekTwoTokensDeep()) || this.classTokens.Peek().Value2 == ("(") || this.IsUnaryOp(token));
@@ -781,30 +813,29 @@ namespace Compiler
             return identifier != null;
         }
 
-        private bool IsAnExpressionKeyWord(Pair<string,string> token)
+        private bool IsAnExpressionKeyWord(Pair<string, string> token)
         {
             // see p 209 in expression box KeyWordConstant
             return (token.Value2 == "true" || token.Value2 == "false" || token.Value2 == "null" ||
                     token.Value2 == "this");
         }
 
-        private bool IsUnaryOp(Pair<string,string> token)
+        private bool IsUnaryOp(Pair<string, string> token)
         {
             return token.Value2 == "-" || token.Value2 == "~";
         }
 
         private bool IsArrayAccessor()
         {
-            
-            
             return this.classTokens.Peek().Value2 == "[";
         }
 
         private void CompileSubRoutineCall(string classNameOrFunctionName)
         {
+            // this is not necessary spec doesnt allow calls in this.Mthodname format.
             // this should translate to className
-            classNameOrFunctionName = (classNameOrFunctionName == "this") ? this.className : classNameOrFunctionName;
-            
+            //classNameOrFunctionName = (classNameOrFunctionName == "this") ? this.className : classNameOrFunctionName;
+
             // hack on class name - as we can have className.Method
             // or just Method() pass in the className so the VmWriter can use it
 
@@ -816,14 +847,18 @@ namespace Compiler
 
             if (this.classTokens.Peek().Value2 == "(")
             {
+                // must be an instance call as static calls have to be ClassName.Method name, this is just methodName.
                 // compile opening bracket
                 this.CompileTerminal();
+                //push this as first arg
+                this.vmWriter.WritePush(Segment.Pointer, 0);
                 // compile the expression list
                 int numberOfArgsPushed = this.CompileExpressionList();
                 // compile closing bracket
                 this.CompileTerminal();
 
-                this.vmWriter.WriteFunction(this.className + "." + classNameOrFunctionName, numberOfArgsPushed);
+                numberOfArgsPushed++; // increment as we're pushing this as first arg.
+                this.vmWriter.WriteCall(this.className + "." + classNameOrFunctionName, numberOfArgsPushed);
             }
             else if (this.classTokens.Peek().Value2 == ".")
             {
@@ -832,32 +867,35 @@ namespace Compiler
                 // need to distinguish between them so that we can push a reference to the instance see p.189
                 Identifier instanceIdentifier = this.symbolTable.GetIdentifierByName(classNameOrFunctionName);
 
+                bool isInstanceMethodCall = (instanceIdentifier != null);
+
                 // compile the dot
                 this.CompileTerminal();
                 // compile subName
                 string subRoutineName = this.CompileTerminal().Value2;
                 // compile opening bracket
                 this.CompileTerminal();
-                // compile the expression list                    
-                int numberOfArgsPushed = this.CompileExpressionList();
 
-                // compile closing bracket
-                this.CompileTerminal();
-                
-                if (instanceIdentifier != null)
+                int numberOfArgsPushed = 0;
+                if (isInstanceMethodCall)
                 {
-                    // instanceMethod call
-                    // this must be pushed
-                    numberOfArgsPushed++;
                     this.vmWriter.WritePush(instanceIdentifier.Segment, instanceIdentifier.Index);
+                    numberOfArgsPushed = this.CompileExpressionList();
+                    numberOfArgsPushed++;
+                    // compile closing bracket
+                    this.CompileTerminal();
                     this.vmWriter.WriteCall(instanceIdentifier.Type + "." + subRoutineName, numberOfArgsPushed);
+
                 }
                 else
                 {
-                    // static or constructor call
+                    numberOfArgsPushed = this.CompileExpressionList();
+                    // compile closing bracket
+                    this.CompileTerminal();
                     this.vmWriter.WriteCall(classNameOrFunctionName + "." + subRoutineName, numberOfArgsPushed);
+
                 }
-                
+
             }
         }
 
@@ -901,7 +939,7 @@ namespace Compiler
             return peekedToken.Value1 == StringConstants.keyword && (peekedToken.Value2 == "field" || peekedToken.Value2 == "static");
         }
 
-        private bool IsSubRoutineCall(Pair<string,string> token)
+        private bool IsSubRoutineCall(Pair<string, string> token)
         {
             bool result = false;
 
@@ -913,9 +951,9 @@ namespace Compiler
             return result;
         }
 
-        private Pair<string,string> PeekTwoTokensDeep()
+        private Pair<string, string> PeekTwoTokensDeep()
         {
-            Pair<string,string> topToken = this.classTokens.Pop();
+            Pair<string, string> topToken = this.classTokens.Pop();
             Pair<string, string> secondTopToken = this.classTokens.Peek();
 
             this.classTokens.Push(topToken);
