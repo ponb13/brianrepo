@@ -10,6 +10,7 @@ namespace Compiler
 {
     /// <summary> 
     /// on square dance, you can handle construtors and methods now you need to handle fields and and exp that include method calls...
+    /// currently trying to handle arrays in expressions
     /// </summary>
     public class CompilationEngineVm
     {
