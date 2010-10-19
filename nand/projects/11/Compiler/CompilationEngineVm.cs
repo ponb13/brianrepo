@@ -750,8 +750,8 @@ namespace Compiler
                     //this.vmWriter.WritePush(arrayAccessorIdentifier.Segment, arrayAccessorIdentifier.Index);
                     this.vmWriter.WriteArithmetic(ArithmeticCommand.Add);
 
-                    //vmWriter.WritePop(Segment.Temp, 0);
-                    //vmWriter.WritePop(Segment.Pointer, 1);
+                    vmWriter.WritePop(Segment.Pointer, 1);
+                    vmWriter.WritePush(Segment.That, 0);
                     //vmWriter.WritePush(Segment.Temp, 0);
                     //vmWriter.WritePop(Segment.That, 0);
 
