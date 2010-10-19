@@ -9,8 +9,8 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    /// on square dance, you can handle construtors and methods now you need to handle fields and and exp that include method calls...
-    /// currently trying to handle arrays in expressions
+    /// completed Average test prog
+    /// next up Pong
     /// </summary>
     public class CompilationEngineVm
     {
@@ -794,6 +794,17 @@ namespace Compiler
                 {
                     vmWriter.WritePush(Segment.Pointer, 0);
                 }
+                else if (peekedToken.Value1 == "StringConstant")
+                {
+                    vmWriter.WritePush(Segment.Constant, peekedToken.Value2.Length);
+                    vmWriter.WriteCall("String.new", 1);
+
+                    foreach (char character in peekedToken.Value2.ToCharArray())
+                    {
+                        vmWriter.WritePush(Segment.Constant, (int)character);
+                        vmWriter.WriteCall("String.appendChar", 2);
+                    }
+                }
             }
         }
 
@@ -804,8 +815,13 @@ namespace Compiler
             // 'unaryOp Term'
 
 
-            return (IsIntegerConstant(token) || IsAnExpressionKeyWord(token) || IsVarNameTerm(token) || IsArrayAccessor() ||
+            return (IsStringConstant(token) || IsIntegerConstant(token) || IsAnExpressionKeyWord(token) || IsVarNameTerm(token) || IsArrayAccessor() ||
                     IsSubRoutineCall(this.PeekTwoTokensDeep()) || this.classTokens.Peek().Value2 == ("(") || this.IsUnaryOp(token));
+        }
+
+        private bool IsStringConstant(Pair<string, string> token)
+        {
+            return token.Value1 == "StringConstant";
         }
 
         private bool IsVarNameTerm(Pair<string, string> token)
