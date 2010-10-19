@@ -10,7 +10,7 @@ namespace Compiler
 {
     /// <summary> 
     /// completed Average test prog
-    /// next up Pong
+    /// next up Pong -
     /// </summary>
     public class CompilationEngineVm
     {
