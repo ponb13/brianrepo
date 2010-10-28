@@ -11,6 +11,7 @@ namespace Compiler
     /// <summary> 
     /// completed Average test prog
     /// next up Pong -
+    /// line 484 - having problems compiling if statement without an else - see PeekSafely Extension
     /// </summary>
     public class CompilationEngineVm
     {
@@ -481,7 +482,7 @@ namespace Compiler
             this.CompileTerminal();
 
             // compile else statement if there is one
-            if (this.classTokens.Peek().Value2 == "else")
+            if (this.classTokens.PeekSafely().Value2 == "else")
             {
                 // this maybe incorrect, may should create elseStatement and add children??
                 // compile the else keyword

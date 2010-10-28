@@ -25,5 +25,22 @@ namespace Compiler
 
             return strBuilder.ToString();
         }
+
+        public static Pair<string, string> PeekSafely(this Stack<Pair<string,string>> stack)
+        {
+            Pair<string, string> result = null;
+            if (stack != null && stack.Count > 0)
+            {
+                result = stack.Peek();
+            }
+            else
+            {
+                result = new Pair<string, string>();
+                result.Value1 = "ERROR WHEN PEEKING";
+                result.Value2 = "ERROR WHEN PEEKING";
+            }
+
+            return result;
+        }
     }
 }
