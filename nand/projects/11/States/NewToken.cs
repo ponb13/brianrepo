@@ -112,7 +112,7 @@ namespace States
         {
             string peekedStr = peekedChar.ToString();
             Match match = Regex.Match(peekedStr, @"[.{}()[\]\|\,\;\+\-\*\/\&""\|\<\>\=\~]");
-            return match.Success;
+            return match.Success || peekedChar == '|';
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace States
             //first letter of all keywords
             Match match = Regex.Match(peekedChar.ToString(), "[c|f|m|s|v|i|b|v|t|l|d|i|e|w|r]", RegexOptions.Compiled);
 
-            return match.Success;
+            return match.Success && peekedChar != '|';
         }
 
         /// <summary>

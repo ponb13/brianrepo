@@ -9,9 +9,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    /// completed Average test prog
-    /// next up Pong -
-    /// line 484 - having problems compiling if statement without an else - see PeekSafely Extension
+    /// stack overflow in ball for pong
     /// </summary>
     public class CompilationEngineVm
     {
@@ -648,7 +646,7 @@ namespace Compiler
                     }
                 case ("|"):
                     {
-                        vmOp = ArithmeticCommand.And;
+                        vmOp = ArithmeticCommand.Or;
                         break;
                     }
                 case (">"):
