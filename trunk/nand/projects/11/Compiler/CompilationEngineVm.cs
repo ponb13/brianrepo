@@ -14,7 +14,7 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// use stack to store tokens 
+        /// Still on pong fixed - fixed stackoverflow in tokenizer (see new token) however there seems to be more problems
         /// simplier than a list for the 
         /// operations that this class carries out.
         /// </summary>
@@ -1039,7 +1039,7 @@ namespace Compiler
             Pair<string, string> peekedToken = this.classTokens.Peek();
             Match match = Regex.Match(peekedToken.Value2, @"[+|\-|*|/|&|<|>|=]", RegexOptions.Compiled);
 
-            return match.Success;
+            return match.Success || peekedToken.Value2 == "|";
         }
 
         /// <summary>

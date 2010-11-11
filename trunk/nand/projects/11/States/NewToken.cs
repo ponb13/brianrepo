@@ -5,6 +5,7 @@ using System.Text;
 using Interfaces;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace States
 {
@@ -48,11 +49,13 @@ namespace States
         /// <param name="tokenizer">The tokenizer.</param>
         private void ChangeState(ITokenizer tokenizer)
         {
+            //if (new StackTrace().FrameCount > 1700)
+            //    throw new Exception("sdfgdfgdgdfgdfgdfgdfg");
             StreamReader streamReader = tokenizer.StrmReader;
 
             IState nextState = null;
 
-            if (!streamReader.EndOfStream)
+            while (!streamReader.EndOfStream)
             {
                 char peekedChar = (char)streamReader.Peek();
 
@@ -80,7 +83,8 @@ namespace States
                     nextState = Identifier.Instance();
                 }
 
-                if (nextState != null)
+                // nasty hack to get over stackoverflow - don't call recusive on each new token
+                if (nextState != null && nextState.GetType() != typeof(NewToken))
                 {
                     nextState.Read(tokenizer);
                 }
