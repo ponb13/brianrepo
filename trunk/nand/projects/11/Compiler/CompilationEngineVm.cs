@@ -14,9 +14,7 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// Still on pong fixed - fixed stackoverflow in tokenizer (see new token) however there seems to be more problems
-        /// simplier than a list for the 
-        /// operations that this class carries out.
+        /// on pong - some of classes don't compile properly - see partial.
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
