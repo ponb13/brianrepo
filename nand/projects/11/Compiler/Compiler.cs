@@ -38,11 +38,11 @@ namespace Compiler
 
             tokens=  tokens.Where(t => t.Value1 != "Comment").ToList();
 
-            //using (VmWriter vmWriter = new VmWriter(GetOutputPath()))
-            //{
-            //    CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter, Path.GetFileNameWithoutExtension(inputPath));
-            //    compilationEngineVm.CompileClass();
-            //}
+            using (VmWriter vmWriter = new VmWriter(GetOutputPath()))
+            {
+                CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter, Path.GetFileNameWithoutExtension(inputPath));
+                compilationEngineVm.CompileClass();
+            }
         }
 
         string GetOutputPath()
