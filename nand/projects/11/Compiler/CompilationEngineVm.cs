@@ -14,7 +14,8 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// on pong - some of classes don't compile properly - see partial.
+        /// on pong - see partial - found wierdness with compiling nested expressions
+        /// see conditional break point you left on the CompileExpression & end up written out for some reason.
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
@@ -428,16 +429,10 @@ namespace Compiler
                 // compile =
                 this.CompileTerminal();
 
-                // compile opening bracket of expression if there is one
-                this.CompileTokenIfExists("(");
-
                 // compile expression
                 this.CompileExpression();
 
                 vmWriter.WritePopIdentifier(letIdentifier);
-
-                // compile closing bracket of expression if there is one
-                this.CompileTokenIfExists(")");
             }
 
             //compile ;
@@ -551,9 +546,7 @@ namespace Compiler
             // compile return expression
             if (nextTokenChar != ";")
             {
-                this.CompileTokenIfExists("(");
                 this.CompileExpression();
-                this.CompileTokenIfExists(")");
             }
             else
             {
@@ -600,14 +593,9 @@ namespace Compiler
                 this.CompileTerm();
                 vmWriter.WriteArithmetic(arithmeticCommand);
 
-                if (this.IsOperator())
-                {
-                    ArithmeticCommand arithmeticCommand2 = this.CompileArithmeticCommand();
-                    this.CompileTerm();
-                    vmWriter.WriteArithmetic(arithmeticCommand2);
-                    this.CompileExpression();
-                }
+                CompileExpression();
             }
+
         }
 
         private ArithmeticCommand CompileArithmeticCommand()
@@ -727,6 +715,13 @@ namespace Compiler
 
         private void CompileTerm()
         {
+            // compile opening bracket of expression if there is one see page 208 for what a term is
+            if (this.CompileTokenIfExists("("))
+            {
+                CompileExpression();
+                this.CompileTokenIfExists(")");
+                return;
+            }
             // compile the first part no matter what
             Pair<string, string> peekedToken = this.classTokens.Peek();
             Pair<string, string> peekedTwoDeep = this.PeekTwoTokensDeep();
@@ -755,13 +750,7 @@ namespace Compiler
                     // compile closing ]
                     this.CompileTerminal();
                 }
-                //check and compile '('expression')'
-                else if (peekedToken.Value2 == "(")
-                {
-                    this.CompileExpression();
-                    // compile closing )
-                    this.CompileTerminal();
-                }
+                
                 else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
                 {
                     this.CompileTerm();
