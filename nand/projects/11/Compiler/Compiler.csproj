@@ -73,6 +73,7 @@
     <Compile Include="CompilationEngineVm.cs" />
     <Compile Include="Compiler.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="ExpressionCompiler.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

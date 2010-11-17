@@ -14,6 +14,7 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
+        /// Have decide to try and create an expression compiler class. Expressions have got way out of hand an a separate class will be much cleaner.
         /// on pong - see partial - found wierdness with compiling nested expressions
         /// see conditional break point you left on the CompileExpression & end up written out for some reason.
         /// </summary>
@@ -800,9 +801,10 @@ namespace Compiler
             // 'stringConstant' 
             // 'unaryOp Term'
 
+            //IsSubRoutineCall(this.PeekTwoTokensDeep()) ||
 
             return (IsStringConstant(token) || IsIntegerConstant(token) || IsAnExpressionKeyWord(token) || IsVarNameTerm(token) || IsArrayAccessor() ||
-                    IsSubRoutineCall(this.PeekTwoTokensDeep()) || this.classTokens.Peek().Value2 == ("(") || this.IsUnaryOp(token));
+                     this.IsUnaryOp(token));
         }
 
         private bool IsStringConstant(Pair<string, string> token)
