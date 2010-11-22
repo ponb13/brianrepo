@@ -54,10 +54,8 @@ namespace Compiler
         {
             IState startState = NewToken.Instance();
 
-
             startState.Read(this);
             
-
             return this.Tokens;
         }
 

@@ -42,5 +42,29 @@ namespace Compiler
 
             return result;
         }
+
+        public static bool PopIfExists(this Stack<Pair<string, string>> stack, string target)
+        {
+            bool result = false;
+            if (stack.PeekSafely().Value2 == target)
+            {
+                stack.Pop();
+                result = true;
+            }
+            return result;
+        }
+
+        private static bool IsIntegerConstant(this Stack<Pair<string, string>> stack)
+        {
+            Pair<string, string> token = stack.PeekSafely();
+
+            if (token != null)
+            {
+                int number = 0;
+                return int.TryParse(token.Value2, out number);
+            }
+
+            return false;
+        }
     }
 }
