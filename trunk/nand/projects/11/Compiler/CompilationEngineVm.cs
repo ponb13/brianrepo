@@ -29,18 +29,11 @@ namespace Compiler
         private int ifStatementCount = -1;
         private int whileStatementCount = -1;
 
-        public CompilationEngineVm(IList<Pair<string, string>> classTokensList, VmWriter vmWriter, string className)
+        public CompilationEngineVm(Stack<Pair<string, string>> classTokensStack, VmWriter vmWriter, string className)
         {
-            // reverse tokens before push onto stack (so we Pop them in the correct order!)
-            classTokensList = classTokensList.Reverse().ToList();
             this.classTokens = new Stack<Pair<string, string>>();
             this.vmWriter = vmWriter;
             this.className = className;
-
-            foreach (Pair<string, string> token in classTokensList)
-            {
-                this.classTokens.Push(token);
-            }
         }
 
         /// <summary>
