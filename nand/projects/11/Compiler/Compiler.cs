@@ -36,8 +36,6 @@ namespace Compiler
                 tokens = tokenizer.GetTokens();
             }
 
-            tokens=  tokens.Where(t => t.Value1 != "Comment").ToList();
-
             using (VmWriter vmWriter = new VmWriter(GetOutputPath()))
             {
                 CompilationEngineVm compilationEngineVm = new CompilationEngineVm(tokens, vmWriter, Path.GetFileNameWithoutExtension(inputPath));

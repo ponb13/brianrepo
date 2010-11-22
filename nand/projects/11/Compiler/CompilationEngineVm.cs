@@ -9,7 +9,7 @@ using Interfaces;
 namespace Compiler
 {
     /// <summary> 
-    /// stack overflow in ball for pong
+    /// in middle of big re factor of expression compiling, trying to write with units tests.
     /// </summary>
     public class CompilationEngineVm
     {
@@ -599,6 +599,88 @@ namespace Compiler
 
         }
 
+        private void CompileTerm()
+        {
+            // compile opening bracket of expression if there is one see page 208 for what a term is
+            if (this.CompileTokenIfExists("("))
+            {
+                CompileExpression();
+                this.CompileTokenIfExists(")");
+                return;
+            }
+
+            // compile the first part no matter what
+            Pair<string, string> peekedToken = this.classTokens.Peek();
+            Pair<string, string> peekedTwoDeep = this.PeekTwoTokensDeep();
+
+            if (TokenIsAnExpressionTerm(peekedToken))
+            {
+                Pair<string, string> compiledToken = this.CompileExpressionTerminal();
+
+                if (peekedTwoDeep.Value2 == "[")
+                {
+                    Identifier arrayAccessorIdentifier = symbolTable.GetIdentifierByName(compiledToken.Value2);
+                    // if array accessor
+                    // compile the [
+                    this.CompileTerminal();
+                    // compile expression inside []
+                    this.CompileExpression();
+
+                    //this.vmWriter.WritePush(arrayAccessorIdentifier.Segment, arrayAccessorIdentifier.Index);
+                    this.vmWriter.WriteArithmetic(ArithmeticCommand.Add);
+
+                    vmWriter.WritePop(Segment.Pointer, 1);
+                    vmWriter.WritePush(Segment.That, 0);
+                    //vmWriter.WritePush(Segment.Temp, 0);
+                    //vmWriter.WritePop(Segment.That, 0);
+
+                    // compile closing ]
+                    this.CompileTerminal();
+                }
+
+                else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
+                {
+                    this.CompileTerm();
+                    if (peekedToken.Value2 == "-")
+                    {
+                        vmWriter.WriteArithmetic(ArithmeticCommand.Neg);
+                    }
+                    if (peekedToken.Value2 == "~")
+                    {
+                        vmWriter.WriteArithmetic(ArithmeticCommand.Not);
+                    }
+                }
+                else if (peekedToken.Value2 == "true")
+                {
+                    vmWriter.WritePush(Segment.Constant, 0);
+                    vmWriter.WriteArithmetic(ArithmeticCommand.Not);
+                }
+                else if (peekedToken.Value2 == "false")
+                {
+                    vmWriter.WritePush(Segment.Constant, 0);
+                }
+                else if (this.IsSubRoutineCall(this.classTokens.Peek()))
+                {
+                    this.CompileSubRoutineCall(compiledToken.Value2);
+                }
+                else if (peekedToken.Value2 == "this")
+                {
+                    vmWriter.WritePush(Segment.Pointer, 0);
+                }
+                else if (peekedToken.Value1 == "StringConstant")
+                {
+                    vmWriter.WritePush(Segment.Constant, peekedToken.Value2.Length);
+                    vmWriter.WriteCall("String.new", 1);
+
+                    foreach (char character in peekedToken.Value2.ToCharArray())
+                    {
+                        vmWriter.WritePush(Segment.Constant, (int)character);
+                        vmWriter.WriteCall("String.appendChar", 2);
+                    }
+                }
+            }
+        }
+
         private ArithmeticCommand CompileArithmeticCommand()
         {
             ArithmeticCommand vmOp = ArithmeticCommand.Add;
@@ -714,86 +796,7 @@ namespace Compiler
 
         }
 
-        private void CompileTerm()
-        {
-            // compile opening bracket of expression if there is one see page 208 for what a term is
-            if (this.CompileTokenIfExists("("))
-            {
-                CompileExpression();
-                this.CompileTokenIfExists(")");
-                return;
-            }
-            // compile the first part no matter what
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-            Pair<string, string> peekedTwoDeep = this.PeekTwoTokensDeep();
-
-            if (TokenIsAnExpressionTerm(peekedToken))
-            {
-                Pair<string, string> compiledToken = this.CompileExpressionTerminal();
-
-                if (peekedTwoDeep.Value2 == "[")
-                {
-                    Identifier arrayAccessorIdentifier = symbolTable.GetIdentifierByName(compiledToken.Value2);
-                    // if array accessor
-                    // compile the [
-                    this.CompileTerminal();
-                    // compile expression inside []
-                    this.CompileExpression();
-
-                    //this.vmWriter.WritePush(arrayAccessorIdentifier.Segment, arrayAccessorIdentifier.Index);
-                    this.vmWriter.WriteArithmetic(ArithmeticCommand.Add);
-
-                    vmWriter.WritePop(Segment.Pointer, 1);
-                    vmWriter.WritePush(Segment.That, 0);
-                    //vmWriter.WritePush(Segment.Temp, 0);
-                    //vmWriter.WritePop(Segment.That, 0);
-
-                    // compile closing ]
-                    this.CompileTerminal();
-                }
-                
-                else if (peekedToken.Value2 == "-" || peekedToken.Value2 == "~")
-                {
-                    this.CompileTerm();
-                    if (peekedToken.Value2 == "-")
-                    {
-                        vmWriter.WriteArithmetic(ArithmeticCommand.Neg);
-                    }
-                    if (peekedToken.Value2 == "~")
-                    {
-                        vmWriter.WriteArithmetic(ArithmeticCommand.Not);
-                    }
-                }
-                else if (peekedToken.Value2 == "true")
-                {
-                    vmWriter.WritePush(Segment.Constant, 0);
-                    vmWriter.WriteArithmetic(ArithmeticCommand.Not);
-                }
-                else if (peekedToken.Value2 == "false")
-                {
-                    vmWriter.WritePush(Segment.Constant, 0);
-                }
-                else if (this.IsSubRoutineCall(this.classTokens.Peek()))
-                {
-                    this.CompileSubRoutineCall(compiledToken.Value2);
-                }
-                else if (peekedToken.Value2 == "this")
-                {
-                    vmWriter.WritePush(Segment.Pointer, 0);
-                }
-                else if (peekedToken.Value1 == "StringConstant")
-                {
-                    vmWriter.WritePush(Segment.Constant, peekedToken.Value2.Length);
-                    vmWriter.WriteCall("String.new", 1);
-
-                    foreach (char character in peekedToken.Value2.ToCharArray())
-                    {
-                        vmWriter.WritePush(Segment.Constant, (int)character);
-                        vmWriter.WriteCall("String.appendChar", 2);
-                    }
-                }
-            }
-        }
+       
 
         private bool TokenIsAnExpressionTerm(Pair<string, string> token)
         {
