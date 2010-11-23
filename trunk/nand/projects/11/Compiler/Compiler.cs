@@ -29,12 +29,14 @@ namespace Compiler
 
         public void Compile()
         {
-            Stack<Pair<string, string>> tokens = null;
+            IList<Pair<string, string>> tokens = null;
             
             using (Tokenizer tokenizer = new Tokenizer(this.inputPath))
             {
-                tokens = tokenizer.GetTokensAsStack();
+                tokens = tokenizer.GetTokens();
             }
+
+            tokens=  tokens.Where(t => t.Value1 != "Comment").ToList();
 
             using (VmWriter vmWriter = new VmWriter(GetOutputPath()))
             {
