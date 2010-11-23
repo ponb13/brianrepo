@@ -54,20 +54,11 @@ namespace Compiler
         {
             IState startState = NewToken.Instance();
 
+
             startState.Read(this);
+            
 
-            return this.Tokens.Where(t => t.Value1 != "Comment").ToList();
-        }
-
-        public Stack<Pair<string,string>> GetTokensAsStack()
-        {
-            Stack<Pair<string, string>> tokensAsStack = new Stack<Pair<string, string>>();
-            foreach (Pair<string,string> token in GetTokens().Reverse())
-            {
-                tokensAsStack.Push(token);
-            }
-
-            return tokensAsStack;
+            return this.Tokens;
         }
 
         
