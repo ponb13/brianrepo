@@ -14,7 +14,7 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// on pong - see partial - found wierdness with compiling nested expressions
+        /// on pong - see partial - found wierdness with compiling nested expressions - go and build a expressionhandler and use unit tests!
         /// see conditional break point you left on the CompileExpression & end up written out for some reason.
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
