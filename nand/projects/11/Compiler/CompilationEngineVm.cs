@@ -14,8 +14,9 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// on pong - see partial - found wierdness with compiling nested expressions - go and build a expressionhandler and use unit tests!
-        /// see conditional break point you left on the CompileExpression & end up written out for some reason.
+        /// pong game has massive probs think this is unimplemented features
+        /// functions calls are maybe pushing this for (arg 0) for no reason.
+        /// Can differentiate between neg and sub.
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
@@ -585,7 +586,10 @@ namespace Compiler
         private void CompileExpression()
         {
             // TODO this needs refactored -  see page 209
-            this.CompileTerm();
+            if (!this.IsOperator())
+            {
+                this.CompileTerm();
+            }
 
             if (this.IsOperator())
             {
@@ -595,7 +599,6 @@ namespace Compiler
 
                 CompileExpression();
             }
-
         }
 
         private ArithmeticCommand CompileArithmeticCommand()
@@ -612,7 +615,7 @@ namespace Compiler
                     }
                 case ("-"):
                     {
-                        vmOp = ArithmeticCommand.Sub;
+                        vmOp = ArithmeticCommand.Neg;
                         break;
                     }
                 case ("*"):
