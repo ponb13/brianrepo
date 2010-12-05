@@ -586,7 +586,7 @@ namespace Compiler
         private void CompileExpression()
         {
             // TODO this needs refactored -  see page 209
-            if (!this.IsOperator())
+            if (!this.IsOperator() || this.classTokens.Peek().Value2 == "-")
             {
                 this.CompileTerm();
             }
@@ -696,7 +696,7 @@ namespace Compiler
                     }
                 case ("-"):
                     {
-                        vmOp = ArithmeticCommand.Neg;
+                        vmOp = ArithmeticCommand.Sub;
                         break;
                     }
                 case ("*"):
