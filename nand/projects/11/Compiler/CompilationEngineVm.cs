@@ -14,9 +14,8 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// pong game has massive probs think this is unimplemented features
+        /// pong game compiles but doesnt run properly - you have not sorted out statics properly also
         /// functions calls are maybe pushing this for (arg 0) for no reason.
-        /// Can differentiate between neg and sub.
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 

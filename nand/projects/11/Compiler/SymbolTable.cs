@@ -26,9 +26,6 @@ namespace Compiler
         private int argCount = 0;
         private int varCount = 0;
 
-        private int classScopeIdentifierIndex = 0;
-        private int subRoutineScopeIdentifierIndex = 0;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolTable"/> class.
         /// </summary>
@@ -56,12 +53,15 @@ namespace Compiler
         {
             this.IncrementVarKindCount(identifier);
 
-            if (identifier.Kind == Kind.Static || identifier.Kind == Kind.Field)
+            if (identifier.Kind == Kind.Field)
             {
-                identifier.Index = this.classScopeIdentifierIndex;
+                identifier.Index = this.fieldCount -1;
                 this.classScope.Add(identifier.Name, identifier);
-                // this needs to change I think - you'll want separate index for static and field probably..
-                this.classScopeIdentifierIndex++;
+            }
+            else if (identifier.Kind == Kind.Static)
+            {
+                identifier.Index = this.staticCount - 1;
+                this.classScope.Add(identifier.Name, identifier);
             }
             else if (identifier.Kind == Kind.Var)
             {
@@ -217,7 +217,6 @@ namespace Compiler
         {
             this.argCount = 0;
             this.varCount = 0;
-            this.subRoutineScopeIdentifierIndex = 0;
         }
     }
 }
