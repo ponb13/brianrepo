@@ -14,8 +14,8 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// pong game compiles but doesnt run properly - you have not sorted out statics properly also
-        /// functions calls are maybe pushing this for (arg 0) for no reason.
+        /// pong still runs a funny - push argument 0 cropping up for no reason
+        /// don't think statics are being handled correctly
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
@@ -373,7 +373,7 @@ namespace Compiler
             classNameOfMethodToBeCalled = this.CompileTerminal().Value2;
 
             // compile the sub routine call
-            this.CompileSubRoutineCall(classNameOfMethodToBeCalled);
+            this.CompileSubRoutineCall(classNameOfMethodToBeCalled, true);
 
             // its a do statement so we know its void -see p.235
             vmWriter.WritePop(Segment.Temp, 0);
@@ -661,7 +661,7 @@ namespace Compiler
                 }
                 else if (this.IsSubRoutineCall(this.classTokens.Peek()))
                 {
-                    this.CompileSubRoutineCall(compiledToken.Value2);
+                    this.CompileSubRoutineCall(compiledToken.Value2, false);
                 }
                 else if (peekedToken.Value2 == "this")
                 {
@@ -835,7 +835,7 @@ namespace Compiler
             return this.classTokens.Peek().Value2 == "[";
         }
 
-        private void CompileSubRoutineCall(string classNameOrFunctionName)
+        private void CompileSubRoutineCall(string classNameOrFunctionName, bool writePushForInstanceMethod)
         {
             // this is not necessary spec doesnt allow calls in this.Mthodname format.
             // this should translate to className
@@ -884,13 +884,16 @@ namespace Compiler
                 int numberOfArgsPushed = 0;
                 if (isInstanceMethodCall)
                 {
-                    this.vmWriter.WritePush(instanceIdentifier.Segment, instanceIdentifier.Index);
+                    // see compile expression terminal - you'll have already writtne the push
+                    if (writePushForInstanceMethod)
+                    {
+                        this.vmWriter.WritePush(instanceIdentifier.Segment, instanceIdentifier.Index);
+                    }
                     numberOfArgsPushed = this.CompileExpressionList();
                     numberOfArgsPushed++;
                     // compile closing bracket
                     this.CompileTerminal();
                     this.vmWriter.WriteCall(instanceIdentifier.Type + "." + subRoutineName, numberOfArgsPushed);
-
                 }
                 else
                 {
