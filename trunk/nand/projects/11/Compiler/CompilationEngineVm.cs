@@ -14,8 +14,7 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// pong still runs a funny - push argument 0 cropping up for no reason
-        /// don't think statics are being handled correctly
+        /// complex arrays
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
