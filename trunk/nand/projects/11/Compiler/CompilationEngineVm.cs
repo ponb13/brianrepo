@@ -14,7 +14,7 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// complex arrays
+        /// complex arrays - see partial - 
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
