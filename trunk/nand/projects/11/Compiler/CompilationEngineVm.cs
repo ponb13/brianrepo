@@ -14,7 +14,10 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// complex arrays - see partial - 
+        /// complex array - complex arrays working. Some reason string handling is broken
+        /// Also neg/sub problems.
+        /// let a[b[a[3]]] = a[a[5]] * b[7 - a[3] - Main.double(2) + 1];
+        /// the neg symbo in above expression
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
@@ -614,18 +617,22 @@ namespace Compiler
 
             if (TokenIsAnExpressionTerm(peekedToken))
             {
-                Pair<string, string> compiledToken = this.CompileExpressionTerminal();
+                Pair<string, string> compiledToken = null;
+                if (peekedTwoDeep.Value2 != "[")
+                {
+                    compiledToken = this.CompileExpressionTerminal();
+                }
 
                 if (peekedTwoDeep.Value2 == "[")
                 {
-                    Identifier arrayAccessorIdentifier = symbolTable.GetIdentifierByName(compiledToken.Value2);
+                    Identifier arrayAccessorIdentifier = this.symbolTable.GetIdentifierByName(this.classTokens.Pop().Value2);
                     // if array accessor
                     // compile the [
                     this.CompileTerminal();
                     // compile expression inside []
                     this.CompileExpression();
 
-                    //this.vmWriter.WritePush(arrayAccessorIdentifier.Segment, arrayAccessorIdentifier.Index);
+                    this.vmWriter.WritePush(arrayAccessorIdentifier.Segment, arrayAccessorIdentifier.Index);
                     this.vmWriter.WriteArithmetic(ArithmeticCommand.Add);
 
                     vmWriter.WritePop(Segment.Pointer, 1);
@@ -676,6 +683,10 @@ namespace Compiler
                         vmWriter.WritePush(Segment.Constant, (int)character);
                         vmWriter.WriteCall("String.appendChar", 2);
                     }
+                }
+                else if (peekedToken.Value2 == "null")
+                {
+                    vmWriter.WritePush(Segment.Constant, 0);
                 }
             }
         }

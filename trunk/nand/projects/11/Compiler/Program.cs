@@ -61,10 +61,5 @@ namespace Compiler
 
            return (extension == string.Empty);
        }
-
-
     }
-
-
-    
 }
