@@ -1039,9 +1039,14 @@ namespace Compiler
         private bool IsOperator()
         {
             Pair<string, string> peekedToken = this.classTokens.Peek();
-            Match match = Regex.Match(peekedToken.Value2, @"[+|\-|*|/|&|<|>|=]", RegexOptions.Compiled);
 
-            return match.Success || peekedToken.Value2 == "|";
+            Match match = null;
+            if (peekedToken.Value1 != "StringConstant")
+            {
+                match = Regex.Match(peekedToken.Value2, @"[+|\-|*|/|&|<|>|=]", RegexOptions.Compiled);
+                return match.Success || peekedToken.Value2 == "|";
+            }
+            return false;
         }
 
         /// <summary>
