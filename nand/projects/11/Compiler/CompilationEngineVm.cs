@@ -14,10 +14,8 @@ namespace Compiler
     public class CompilationEngineVm
     {
         /// <summary>
-        /// complex array - complex arrays working. Some reason string handling is broken
-        /// Also neg/sub problems.
-        /// let a[b[a[3]]] = a[a[5]] * b[7 - a[3] - Main.double(2) + 1];
-        /// the neg symbo in above expression
+        /// complex arrays complete apart from sub neg bug
+        /// also seeing push argument 0 in Pong Ball.vm
         /// </summary>
         private Stack<Pair<string, string>> classTokens;
 
@@ -587,7 +585,7 @@ namespace Compiler
         private void CompileExpression()
         {
             // TODO this needs refactored -  see page 209
-            if (!this.IsOperator() || this.classTokens.Peek().Value2 == "-")
+            if (!this.IsOperator())
             {
                 this.CompileTerm();
             }
