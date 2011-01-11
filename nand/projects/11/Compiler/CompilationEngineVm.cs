@@ -585,10 +585,7 @@ namespace Compiler
         private void CompileExpression()
         {
             // TODO this needs refactored -  see page 209
-            if (this.IsUnaryOp())
-            {
-                this.CompileUnaryOp();
-            }
+
             if (!this.IsOperator())
             {
                 this.CompileTerm();
@@ -600,28 +597,6 @@ namespace Compiler
                 vmWriter.WriteArithmetic(arithmeticCommand);
 
                 CompileExpression();
-            }
-        }
-
-        bool IsUnaryOp()
-        {
-            Pair<string, string> peekedToken = this.classTokens.Peek();
-            return peekedToken.Value2 == "~" || peekedToken.Value2 == "-";
-        }
-
-        private void CompileUnaryOp()
-        {
-            Pair<string, string> token = this.classTokens.Pop();
-
-            this.CompileTerm();
-
-            if (token.Value2 == "-")
-            {
-                vmWriter.WriteArithmetic(ArithmeticCommand.Neg);
-            }
-            else if (token.Value2 == "~")
-            {
-                vmWriter.WriteArithmetic(ArithmeticCommand.Not);
             }
         }
 
@@ -697,6 +672,17 @@ namespace Compiler
                 else if (peekedToken.Value2 == "null")
                 {
                     vmWriter.WritePush(Segment.Constant, 0);
+                }
+                else if (peekedToken.Value1 == "~" || peekedToken.Value1 == "-")
+                {
+                    if (peekedToken.Value2 == "-")
+                    {
+                        vmWriter.WriteArithmetic(ArithmeticCommand.Neg);
+                    }
+                    else if (peekedToken.Value2 == "~")
+                    {
+                        vmWriter.WriteArithmetic(ArithmeticCommand.Not);
+                    }
                 }
             }
         }
